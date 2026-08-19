@@ -2,7 +2,7 @@
 const axios = require('axios')
 
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions'
-const MODEL          = 'openrouter/auto'
+const MODEL          = 'openrouter/free'
 
 const STEP_TONE = {
   1: 'This is the very first contact. Be warm, human, zero pressure. Introduce yourself naturally. Never sound like a sales pitch.',
