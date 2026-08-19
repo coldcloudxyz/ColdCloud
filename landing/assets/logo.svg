@@ -1,0 +1,5 @@
+<svg width="120" height="32" viewBox="0 0 120 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="28" height="28" x="0" y="2" rx="7" fill="#2563EB"/>
+  <text x="6" y="20" font-family="Inter, system-ui, sans-serif" font-size="13" font-weight="700" fill="white">CC</text>
+  <text x="36" y="21" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="700" fill="#111827">ColdCloud</text>
+</svg>

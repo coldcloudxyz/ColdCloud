@@ -1,0 +1,2726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ColdCloud — Follow-Up Automation</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f5f4;
+  --white:#ffffff;
+  --s1:#f0efed;
+  --s2:#e8e6e3;
+  --s3:#d6d3d0;
+  --border:#e2dfd9;
+  --border-focus:#1d4ed8;
+  --text:#18181b;
+  --text2:#52525b;
+  --text3:#a1a1aa;
+  --blue:#1d4ed8;
+  --blue-light:#eff6ff;
+  --blue-mid:#dbeafe;
+  --green:#15803d;
+  --green-light:#f0fdf4;
+  --green-mid:#bbf7d0;
+  --orange:#c2410c;
+  --orange-light:#fff7ed;
+  --red:#b91c1c;
+  --red-light:#fef2f2;
+  --red-mid:#fecaca;
+  --purple:#6d28d9;
+  --purple-light:#f5f3ff;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.04),0 1px 1px rgba(0,0,0,.03);
+  --shadow:0 2px 4px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:0 4px 8px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.04);
+  --shadow-lg:0 8px 20px rgba(0,0,0,.1),0 4px 6px rgba(0,0,0,.04);
+  --radius:6px;
+  --radius-lg:10px;
+}
+*{-webkit-tap-highlight-color:transparent}
+html{font-size:14px}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+input,button,select,textarea{font-family:inherit}
+button{cursor:pointer;border:none;background:none}
+a{color:var(--blue);text-decoration:none}
+a:hover{text-decoration:underline}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:99px}
+
+/* ── PAGES ── */
+.page{display:none;min-height:100vh}
+.page.active{display:flex;flex-direction:column}
+#page-app{flex-direction:row}
+
+/* ══════════════════ AUTH ══════════════════ */
+#page-login,#page-signup,#page-forgot{
+  align-items:center;justify-content:center;
+  background:var(--bg);
+  padding:24px;
+}
+.auth-card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:36px 32px;
+  width:100%;max-width:400px;
+  box-shadow:var(--shadow-md);
+  animation:fadeIn .2s ease;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.auth-brand{display:flex;align-items:center;gap:8px;margin-bottom:28px}
+.auth-brand-mark{width:32px;height:32px;background:var(--blue);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;letter-spacing:-0.5px;flex-shrink:0}
+.auth-brand-name{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.auth-h{font-size:20px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-.3px}
+.auth-sub{font-size:13px;color:var(--text2);margin-bottom:22px}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.fl{font-size:12px;font-weight:500;color:var(--text2)}
+.fi{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);padding:9px 12px;
+  color:var(--text);font-size:13px;outline:none;
+  transition:border-color .15s,box-shadow .15s;width:100%;
+}
+.fi:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.fi::placeholder{color:var(--text3)}
+.fi.err{border-color:var(--red)}
+.btn-auth{
+  width:100%;background:var(--blue);color:#fff;
+  font-weight:600;font-size:14px;padding:10px;
+  border-radius:var(--radius);transition:background .15s;margin-top:4px;
+}
+.btn-auth:hover{background:#1d4ed8}
+.btn-auth:disabled{opacity:.5;cursor:not-allowed}
+.auth-alt{text-align:center;margin-top:16px;font-size:13px;color:var(--text2)}
+.auth-alt span{color:var(--blue);font-weight:500;cursor:pointer}
+.auth-err{
+  background:var(--red-light);border:1px solid #fecaca;
+  border-radius:var(--radius);padding:9px 12px;
+  font-size:13px;color:var(--red);margin-bottom:14px;display:none;
+}
+.auth-err.on{display:block}
+.auth-ok{background:var(--green-light);border:1px solid #bbf7d0;border-radius:var(--r);padding:9px 12px;font-size:13px;color:var(--green);margin-bottom:14px;display:none}
+.auth-ok.on{display:block}
+.auth-divider{display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text3);font-size:12px}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ══════════════════ SIDEBAR ══════════════════ */
+.sidebar{
+  width:216px;flex-shrink:0;
+  background:var(--white);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;height:100vh;z-index:60;
+  transition:transform .25s ease;
+}
+.sidebar-logo{
+  padding:16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+}
+.logo-wrap{display:flex;align-items:center;gap:9px}
+.logo-mark{width:28px;height:28px;background:var(--blue);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700;flex-shrink:0}
+.logo-name{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.3px}
+.sb-close{display:none;color:var(--text3);font-size:18px;padding:4px;cursor:pointer;line-height:1}
+.sb-close:hover{color:var(--text)}
+.sb-nav{flex:1;padding:8px 0;overflow-y:auto}
+.sb-sec{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:12px 16px 4px}
+.ni{
+  display:flex;align-items:center;gap:8px;
+  padding:8px 16px;font-size:13px;font-weight:500;color:var(--text2);
+  border-radius:0;transition:all .1s;cursor:pointer;user-select:none;
+  margin:1px 8px;border-radius:6px;
+}
+.ni:hover{color:var(--text);background:var(--s1)}
+.ni.on{color:var(--blue);background:var(--blue-light);font-weight:600}
+.ni-icon{font-size:14px;width:16px;text-align:center;flex-shrink:0;opacity:.8}
+.ni.on .ni-icon{opacity:1}
+.ni-badge{
+  margin-left:auto;background:var(--blue);color:#fff;
+  font-size:10px;font-weight:600;padding:1px 6px;
+  border-radius:99px;font-family:'DM Mono',monospace;
+}
+.ni-warn{
+  margin-left:auto;background:var(--orange-light);color:var(--orange);
+  font-size:10px;font-weight:600;padding:1px 6px;
+  border-radius:99px;border:1px solid #fde68a;
+}
+.sb-footer{padding:12px;border-top:1px solid var(--border)}
+.user-pill{
+  display:flex;align-items:center;gap:9px;
+  padding:8px;border-radius:var(--radius);cursor:pointer;
+  transition:background .1s;
+}
+.user-pill:hover{background:var(--s1)}
+.uavatar{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--blue);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;color:#fff;flex-shrink:0;
+}
+.uname{font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px;line-height:1.3}
+.uemail{font-size:11px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px}
+
+/* ══════════════════ MAIN ══════════════════ */
+.main{margin-left:216px;flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin-left .25s}
+.topbar{
+  height:52px;background:var(--white);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;position:sticky;top:0;z-index:40;
+}
+.topbar-left{display:flex;align-items:center;gap:10px}
+.hamburger{display:none;color:var(--text2);font-size:18px;padding:4px;cursor:pointer;line-height:1}
+.topbar-title{font-size:14px;font-weight:600;color:var(--text)}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.status-ind{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--green);font-weight:500}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:statusPulse 2.5s ease-in-out infinite}
+@keyframes statusPulse{0%,100%{opacity:1}50%{opacity:.4}}
+.btn-primary{
+  background:var(--blue);color:#fff;
+  font-weight:600;font-size:13px;padding:7px 14px;
+  border-radius:var(--radius);transition:background .15s;
+  display:flex;align-items:center;gap:5px;white-space:nowrap;
+}
+.btn-primary:hover{background:#1d4ed8}
+.content{flex:1;padding:20px;overflow-y:auto;max-width:1200px;width:100%}
+
+/* ══════════════════ VIEWS ══════════════════ */
+.view{display:none}
+.view.on{display:block;animation:fadeIn .2s ease}
+.vh{margin-bottom:20px}
+.vt{font-size:20px;font-weight:700;color:var(--text);letter-spacing:-.4px;margin-bottom:3px}
+.vs{font-size:13px;color:var(--text2)}
+
+/* ══════════════════ METRICS ══════════════════ */
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.mc{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius-lg);padding:16px 18px;
+  box-shadow:var(--shadow-sm);
+}
+.mc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.mc-lbl{font-size:12px;font-weight:500;color:var(--text2)}
+.mc-ico{font-size:16px;opacity:.5}
+.mc-val{font-size:28px;font-weight:700;color:var(--text);letter-spacing:-1px;line-height:1;margin-bottom:4px}
+.mc-ch{font-size:11px;font-weight:500}
+.ch-up{color:var(--green)}.ch-neu{color:var(--text3)}.ch-warn{color:var(--orange)}
+
+/* ══════════════════ CARDS ══════════════════ */
+.two-col{display:grid;grid-template-columns:1fr 300px;gap:12px;margin-bottom:16px}
+.card{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+.card-h{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border)}
+.card-title{font-size:13px;font-weight:600;color:var(--text)}
+.card-meta{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+
+/* Bar chart */
+.mini-chart{padding:12px 16px;display:flex;align-items:flex-end;gap:5px;height:100px}
+.bg{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bw{flex:1;display:flex;align-items:flex-end;width:100%}
+.bar{width:100%;border-radius:3px 3px 0 0;min-height:2px;background:var(--blue);opacity:.75;transition:height .5s ease}
+.bar:hover{opacity:1}
+.bl{font-size:9px;color:var(--text3);font-family:'DM Mono',monospace}
+
+/* Channel breakdown */
+.ch-list{padding:12px 16px;display:flex;flex-direction:column;gap:10px}
+.ch-row{display:flex;flex-direction:column;gap:4px}
+.ch-row-top{display:flex;align-items:center;justify-content:space-between;font-size:12px;font-weight:500;color:var(--text2)}
+.ch-track{height:4px;background:var(--s2);border-radius:99px;overflow:hidden}
+.ch-fill{height:100%;border-radius:99px;transition:width .6s ease}
+
+/* ══════════════════ TABLE ══════════════════ */
+.tctrl{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.tsearch{
+  flex:1;min-width:200px;max-width:280px;
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);padding:7px 12px;
+  color:var(--text);font-size:13px;outline:none;transition:border-color .15s;
+}
+.tsearch:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.tsearch::placeholder{color:var(--text3)}
+.fbtn{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);padding:6px 12px;
+  font-size:12px;font-weight:500;color:var(--text2);
+  transition:all .1s;white-space:nowrap;
+}
+.fbtn:hover{border-color:var(--blue);color:var(--blue)}
+.fbtn.on{background:var(--blue-light);border-color:var(--blue);color:var(--blue);font-weight:600}
+.twrap{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius-lg);overflow:hidden;overflow-x:auto;
+  box-shadow:var(--shadow-sm);
+}
+table{width:100%;border-collapse:collapse;min-width:700px}
+thead th{
+  font-size:11px;font-weight:600;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.5px;
+  padding:10px 14px;text-align:left;
+  background:var(--bg);border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;cursor:pointer}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--blue-light)}
+td{padding:11px 14px;font-size:13px;vertical-align:middle}
+.tdn{font-weight:600;color:var(--text)}
+.tdp{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2)}
+.tdc{color:var(--text2);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tdd{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace}
+
+/* Status pills */
+.pill{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px;border-radius:99px;
+  font-size:11px;font-weight:600;white-space:nowrap;
+}
+.pill::before{content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.p-active{background:var(--green-mid);color:var(--green)}.p-active::before{background:var(--green)}
+.p-replied{background:var(--blue-mid);color:var(--blue)}.p-replied::before{background:var(--blue)}
+.p-converted{background:#fef3c7;color:#92400e}.p-converted::before{background:var(--orange)}
+.p-completed{background:var(--s1);color:var(--text3)}.p-completed::before{background:var(--text3)}
+.p-unsubscribed{background:var(--red-mid);color:var(--red)}.p-unsubscribed::before{background:var(--red)}
+.p-paused{background:var(--purple-light);color:var(--purple)}.p-paused::before{background:var(--purple)}
+
+.sbadge{
+  font-size:11px;color:var(--blue);
+  background:var(--blue-light);
+  padding:2px 7px;border-radius:4px;
+  font-family:'DM Mono',monospace;
+  white-space:nowrap;
+}
+.ch-icons{display:flex;gap:3px}
+.ch-ic{width:20px;height:20px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;background:var(--s1)}
+
+/* ══════════════════ LEAD DETAIL PANEL ══════════════════ */
+.detail-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.4);
+  z-index:150;display:none;justify-content:flex-end;
+}
+.detail-overlay.on{display:flex}
+.detail-panel{
+  width:500px;max-width:100%;background:var(--white);
+  border-left:1px solid var(--border);height:100%;overflow-y:auto;
+  animation:slideIn .25s ease;box-shadow:var(--shadow-lg);
+}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:translateX(0)}}
+.dp-head{
+  padding:16px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  position:sticky;top:0;background:var(--white);z-index:1;
+}
+.dp-name{font-size:17px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:2px}
+.dp-phone{font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)}
+.dp-close{font-size:18px;color:var(--text3);cursor:pointer;padding:2px;flex-shrink:0;line-height:1;transition:color .1s}
+.dp-close:hover{color:var(--text)}
+.dp-body{padding:16px 18px}
+.dp-section{margin-bottom:20px;padding-bottom:20px;border-bottom:1px solid var(--border)}
+.dp-section:last-child{border-bottom:none;padding-bottom:0}
+.dp-sec-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.dp-field{margin-bottom:10px}
+.dp-fl{font-size:11px;font-weight:500;color:var(--text2);margin-bottom:4px}
+.dp-fi{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);padding:8px 10px;
+  color:var(--text);font-size:13px;outline:none;width:100%;
+  transition:border-color .15s;
+}
+.dp-fi:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+textarea.dp-fi{resize:vertical;min-height:60px;font-size:12px}
+.dp-actions{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.dp-btn{
+  font-size:12px;font-weight:500;padding:6px 12px;
+  border-radius:var(--radius);transition:all .1s;
+  border:1px solid var(--border);color:var(--text2);background:var(--white);
+}
+.dp-btn:hover{background:var(--s1);color:var(--text)}
+.dp-btn-green{border-color:#bbf7d0;color:var(--green);background:var(--green-light)}
+.dp-btn-green:hover{background:var(--green-mid)!important;color:var(--green)!important}
+.dp-btn-red{border-color:#fecaca;color:var(--red);background:var(--red-light)}
+.dp-btn-red:hover{background:var(--red-mid)!important;color:var(--red)!important}
+.dp-btn-orange{border-color:#fde68a;color:var(--orange);background:var(--orange-light)}
+.dp-btn-orange:hover{background:#fef3c7!important}
+.dp-save{
+  background:var(--blue);color:#fff;
+  font-weight:600;font-size:13px;padding:7px 16px;
+  border-radius:var(--radius);border:none;transition:background .15s;
+}
+.dp-save:hover{background:#1d4ed8}
+
+/* Timeline */
+.dp-timeline{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:10px;position:relative;padding-bottom:14px}
+.tl-item:last-child{padding-bottom:0}
+.tl-item:not(:last-child)::before{content:'';position:absolute;left:13px;top:28px;width:1px;bottom:0;background:var(--border)}
+.tl-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;border:1px solid var(--border)}
+.tl-body{flex:1;min-width:0}
+.tl-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px;gap:8px}
+.tl-label{font-size:12px;font-weight:600;color:var(--text)}
+.tl-time{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace;flex-shrink:0}
+.tl-msg{font-size:12px;color:var(--text2);background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:6px 9px;line-height:1.5}
+.tl-stat{font-size:10px;margin-top:3px;font-family:'DM Mono',monospace;font-weight:500}
+.tl-stat-sent{color:var(--blue)}.tl-stat-fail{color:var(--red)}.tl-stat-recv{color:var(--green)}
+
+/* Sequence progress */
+.seq-progress{display:flex;gap:4px;margin-top:8px}
+.sp-step{flex:1;height:3px;border-radius:99px;background:var(--s2)}
+.sp-step.done{background:var(--green)}
+.sp-step.current{background:var(--blue)}
+
+/* ══════════════════ ADD LEAD ══════════════════ */
+.add-wrap{max-width:660px}
+.acard{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px 24px;box-shadow:var(--shadow-sm)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.ffull{grid-column:1/-1}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-lbl{font-size:12px;font-weight:500;color:var(--text2)}
+.form-lbl span{color:var(--red)}
+.form-inp{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);padding:9px 12px;
+  color:var(--text);font-size:13px;outline:none;
+  transition:border-color .15s,box-shadow .15s;width:100%;
+}
+.form-inp:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.form-inp::placeholder{color:var(--text3)}
+.form-inp.err{border-color:var(--red)}
+.form-hint{font-size:11px;color:var(--text3);margin-top:3px}
+.form-hint.err{color:var(--red)}
+textarea.form-inp{resize:vertical;min-height:72px;font-size:13px}
+
+/* Channel picker */
+.ch-picker{display:flex;gap:6px;flex-wrap:wrap}
+.chp{
+  display:flex;align-items:center;gap:6px;padding:7px 13px;
+  border:1px solid var(--border);border-radius:var(--radius);
+  background:var(--white);color:var(--text2);
+  font-size:13px;font-weight:500;cursor:pointer;
+  transition:all .1s;user-select:none;
+}
+.chp:hover{border-color:var(--blue);color:var(--text)}
+.chp.on{border-color:var(--blue);color:var(--blue);background:var(--blue-light);font-weight:600}
+.chp-em{font-size:15px}
+
+/* Sequence preview */
+.preview-box{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius);padding:12px 14px;margin-top:12px;
+}
+.pb-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+.pb-steps{display:flex;flex-direction:column;gap:4px}
+.pb-step{display:flex;align-items:center;gap:8px;font-size:12px}
+.pb-dot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;flex-shrink:0;background:var(--blue-light);color:var(--blue);border:1px solid var(--blue-mid)}
+.pb-day{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);min-width:50px}
+.pb-ch{font-weight:600;color:var(--text)}
+.pb-conn{width:1px;height:6px;background:var(--border);margin-left:8px}
+
+.form-submit{
+  width:100%;background:var(--blue);color:#fff;
+  font-weight:600;font-size:14px;padding:11px;
+  border-radius:var(--radius);transition:background .15s;
+  margin-top:12px;
+}
+.form-submit:hover{background:#1d4ed8}
+.form-submit:disabled{opacity:.5;cursor:not-allowed}
+
+/* CSV */
+.section-divider{font-size:13px;font-weight:600;color:var(--text);margin:20px 0 10px}
+.csv-zone{
+  border:2px dashed var(--border);border-radius:var(--radius);
+  padding:20px;text-align:center;cursor:pointer;
+  transition:all .15s;font-size:13px;color:var(--text2);background:var(--white);
+}
+.csv-zone:hover,.csv-zone.drag{border-color:var(--blue);background:var(--blue-light);color:var(--blue)}
+.csv-zone-icon{font-size:24px;margin-bottom:6px;display:block}
+.csv-preview{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:10px;display:none}
+.csv-preview.on{display:block}
+.csv-table{width:100%;border-collapse:collapse;font-size:12px}
+.csv-table th{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;padding:7px 12px;background:var(--bg);border-bottom:1px solid var(--border);text-align:left}
+.csv-table td{padding:7px 12px;border-bottom:1px solid var(--border);color:var(--text2)}
+.csv-table tr:last-child td{border-bottom:none}
+.btn-import{background:var(--green);color:#fff;font-weight:600;font-size:12px;padding:7px 16px;border-radius:var(--radius);transition:background .15s}
+.btn-import:hover{background:#15803d}
+
+/* ══════════════════ ACTIVITY ══════════════════ */
+.alist{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+.ai{padding:12px 16px;display:flex;align-items:flex-start;gap:11px;transition:background .1s;cursor:pointer;border-bottom:1px solid var(--border)}
+.ai:last-child{border-bottom:none}
+.ai:hover{background:var(--bg)}
+.ai-ico{width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;margin-top:1px;border:1px solid var(--border)}
+.ai-wa{background:var(--green-light)}.ai-sms{background:var(--blue-light)}.ai-call{background:var(--orange-light)}.ai-reply{background:var(--red-light)}.ai-sched{background:var(--purple-light)}
+.ai-body{flex:1;min-width:0}
+.ai-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:1px}
+.ai-detail{font-size:12px;color:var(--text2)}
+.ai-msg{
+  font-size:12px;color:var(--text2);margin-top:4px;
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:5px;padding:5px 9px;line-height:1.5;
+  overflow:hidden;text-overflow:ellipsis;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+}
+.ai-time{font-size:11px;color:var(--text3);flex-shrink:0;padding-top:2px;font-family:'DM Mono',monospace}
+.ai-status{
+  display:inline-flex;align-items:center;gap:3px;
+  font-size:10px;padding:1px 6px;border-radius:99px;
+  margin-top:3px;font-weight:600;font-family:'DM Mono',monospace;
+}
+.as-sent{background:var(--blue-light);color:var(--blue)}
+.as-fail{background:var(--red-light);color:var(--red)}
+.as-recv{background:var(--green-light);color:var(--green)}
+.as-sched{background:var(--purple-light);color:var(--purple)}
+
+
+/* ══════════════════ SEQUENCE MESSAGE EDITOR ══════════════════ */
+.seq-step{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius-lg);overflow:hidden;
+  box-shadow:var(--shadow-sm);transition:border-color .15s;
+  display:flex;flex-direction:column;
+  align-items:stretch;gap:0;padding:0;
+}
+.seq-step:hover{border-color:var(--blue)}
+.seq-step-header{
+  display:flex;align-items:center;gap:12px;
+  padding:14px 16px;cursor:pointer;
+}
+.seq-step-header:hover{background:var(--bg);border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.seq-step-body{
+  border-top:1px solid var(--border);
+  padding:16px;
+  display:none;
+  flex-direction:column;
+  gap:12px;
+}
+.seq-step-body.open{display:flex}
+.seq-msg-tab-row{
+  display:flex;gap:4px;margin-bottom:4px;
+}
+.seq-msg-tab{
+  font-size:11px;font-weight:600;padding:4px 10px;
+  border-radius:6px 6px 0 0;border:1px solid var(--border);
+  border-bottom:none;background:var(--bg);color:var(--text2);
+  cursor:pointer;transition:all .12s;
+}
+.seq-msg-tab.active{background:var(--white);color:var(--blue);border-color:var(--blue-mid)}
+.seq-msg-panel{display:none}
+.seq-msg-panel.active{display:block}
+.seq-msg-area{
+  width:100%;min-height:80px;resize:vertical;
+  border:1px solid var(--border);border-radius:0 var(--radius) var(--radius) var(--radius);
+  padding:10px 12px;font-size:13px;color:var(--text);
+  font-family:inherit;line-height:1.6;outline:none;
+  background:var(--white);transition:border-color .15s;
+}
+.seq-msg-area:focus{border-color:var(--border-focus)}
+.seq-msg-actions{
+  display:flex;align-items:center;gap:8px;margin-top:6px;
+}
+.seq-msg-hint{
+  font-size:11px;color:var(--text3);flex:1;line-height:1.4;
+}
+.btn-ai-gen{
+  font-size:12px;font-weight:600;color:var(--blue);
+  background:var(--blue-light);border:1px solid var(--blue-mid);
+  border-radius:6px;padding:5px 12px;cursor:pointer;
+  transition:all .15s;white-space:nowrap;
+}
+.btn-ai-gen:hover{background:var(--blue-mid)}
+.btn-ai-gen:disabled{opacity:.5;cursor:not-allowed}
+.btn-reset-msg{
+  font-size:12px;color:var(--text3);background:none;
+  border:1px solid var(--border);border-radius:6px;
+  padding:5px 10px;cursor:pointer;transition:all .15s;
+}
+.btn-reset-msg:hover{color:var(--red);border-color:var(--red)}
+.seq-expand-icon{
+  font-size:11px;color:var(--text3);margin-left:auto;
+  transition:transform .2s;
+}
+.seq-step-body.open ~ .seq-expand-icon,
+.seq-step-header.open .seq-expand-icon{transform:rotate(180deg)}
+/* ══════════════════ SEQUENCE ══════════════════ */
+.seq-wrap{max-width:700px}
+.seq-intro{font-size:13px;color:var(--text2);margin-bottom:18px;line-height:1.6}
+.seq-list{display:flex;flex-direction:column;gap:8px}
+.ss-num{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:12px;flex-shrink:0;
+  border:2px solid;
+}
+.ss-icon{font-size:20px;flex-shrink:0}
+.ss-body{flex:1}
+.ss-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.ss-meta{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text2)}
+.ss-delay{
+  background:var(--bg);border:1px solid var(--border);
+  border-radius:5px;padding:3px 8px;
+  font-size:12px;color:var(--text);width:52px;outline:none;text-align:center;
+  font-family:'DM Mono',monospace;
+  transition:border-color .15s;
+}
+.ss-delay:focus{border-color:var(--border-focus)}
+.toggle{
+  width:36px;height:20px;border-radius:99px;
+  background:var(--s3);position:relative;cursor:pointer;
+  transition:background .2s;flex-shrink:0;border:none;
+}
+.toggle.on{background:var(--blue)}
+.toggle::after{
+  content:'';position:absolute;width:14px;height:14px;
+  background:#fff;border-radius:50%;top:3px;left:3px;
+  transition:transform .2s ease;box-shadow:var(--shadow-sm);
+}
+.toggle.on::after{transform:translateX(16px)}
+.btn-save-seq{
+  background:var(--blue);color:#fff;
+  font-weight:600;font-size:13px;padding:9px 22px;
+  border-radius:var(--radius);margin-top:16px;transition:background .15s;
+}
+.btn-save-seq:hover{background:#1d4ed8}
+
+/* ══════════════════ SETTINGS ══════════════════ */
+.settings-wrap{max-width:640px;display:flex;flex-direction:column;gap:16px}
+.scard{background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow-sm)}
+.scard-head{
+  padding:14px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;
+}
+.scard-icon{font-size:16px;width:20px;text-align:center}
+.scard-info{flex:1}
+.scard-title{font-size:13px;font-weight:600;color:var(--text)}
+.scard-sub{font-size:12px;color:var(--text2)}
+.scard-body{padding:18px}
+.sfg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px}
+.sfg:last-child{margin-bottom:0}
+.sfl{font-size:12px;font-weight:500;color:var(--text2)}
+.sfi{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:var(--radius);padding:9px 12px;
+  color:var(--text);font-size:13px;outline:none;
+  transition:border-color .15s;width:100%;
+}
+.sfi:focus{border-color:var(--border-focus);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.sfi::placeholder{color:var(--text3)}
+.sfi-mono{font-family:'DM Mono',monospace;font-size:12px}
+.btn-save-s{
+  background:var(--blue);color:#fff;
+  font-weight:600;font-size:13px;padding:8px 18px;
+  border-radius:var(--radius);transition:background .15s;
+}
+.btn-save-s:hover{background:#1d4ed8}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.api-status{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;font-weight:600;padding:3px 9px;
+  border-radius:99px;margin-left:auto;flex-shrink:0;
+}
+.api-ok{background:var(--green-light);color:var(--green);border:1px solid #bbf7d0}
+.api-missing{background:var(--orange-light);color:var(--orange);border:1px solid #fde68a}
+.api-hint{font-size:12px;color:var(--text3);margin-top:6px;line-height:1.5}
+.api-hint a{color:var(--blue)}
+.danger-zone{
+  background:var(--red-light);border:1px solid #fecaca;
+  border-radius:var(--radius);padding:14px 16px;
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.dz-title{font-size:13px;font-weight:600;color:var(--red);margin-bottom:2px}
+.dz-text{font-size:12px;color:var(--text2)}
+.btn-danger{
+  background:var(--white);border:1px solid #fecaca;
+  color:var(--red);font-size:12px;font-weight:600;
+  padding:6px 14px;border-radius:var(--radius);transition:all .15s;flex-shrink:0;
+}
+.btn-danger:hover{background:var(--red);color:#fff;border-color:var(--red)}
+
+/* ══════════════════ TOAST ══════════════════ */
+.toast-stack{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:12px 14px;display:flex;align-items:flex-start;gap:10px;
+  min-width:260px;max-width:340px;pointer-events:all;
+  transform:translateX(110%);opacity:0;
+  transition:transform .3s ease,opacity .3s;
+  box-shadow:var(--shadow-lg);
+}
+.toast.show{transform:translateX(0);opacity:1}
+.t-ok{border-left:3px solid var(--green)}
+.t-err{border-left:3px solid var(--red)}
+.t-info{border-left:3px solid var(--blue)}
+.t-warn{border-left:3px solid var(--orange)}
+.t-ico{font-size:16px;margin-top:1px;flex-shrink:0}
+.t-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.t-msg{font-size:12px;color:var(--text2)}
+
+/* ══════════════════ MODAL ══════════════════ */
+.modal-bg{
+  position:fixed;inset:0;background:rgba(0,0,0,.3);
+  z-index:200;display:none;align-items:center;justify-content:center;padding:16px;
+}
+.modal-bg.on{display:flex}
+.modal{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--radius-lg);
+  padding:24px;max-width:420px;width:100%;
+  box-shadow:var(--shadow-lg);animation:fadeIn .2s ease;
+}
+.mod-title{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.3px;margin-bottom:6px}
+.mod-body{font-size:13px;color:var(--text2);margin-bottom:20px;line-height:1.55}
+.mod-acts{display:flex;gap:8px;justify-content:flex-end}
+.btn-mod-cancel{
+  background:var(--white);border:1px solid var(--border);
+  color:var(--text2);font-weight:500;font-size:13px;
+  padding:8px 16px;border-radius:var(--radius);transition:all .1s;
+}
+.btn-mod-cancel:hover{background:var(--s1);color:var(--text)}
+.btn-mod-ok{background:var(--blue);color:#fff;font-weight:600;font-size:13px;padding:8px 16px;border-radius:var(--radius);transition:background .15s}
+.btn-mod-ok:hover{background:#1d4ed8}
+.btn-mod-danger{background:var(--red);color:#fff;font-weight:600;font-size:13px;padding:8px 16px;border-radius:var(--radius);transition:background .15s}
+.btn-mod-danger:hover{background:#b91c1c}
+
+/* ══════════════════ EMPTY STATE ══════════════════ */
+.empty{padding:48px 20px;text-align:center;color:var(--text3)}
+.empty-ico{font-size:32px;margin-bottom:10px;opacity:.5}
+.empty-title{font-size:14px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.empty-sub{font-size:12px}
+
+/* ══════════════════ MOBILE ══════════════════ */
+.mob-overlay{position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:55;display:none}
+.mob-overlay.on{display:block}
+
+/* ══════════════════ RESPONSIVE ══════════════════ */
+@media(max-width:1100px){
+  .mgrid{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}
+}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .main{margin-left:0}
+  .hamburger{display:block}
+  .sb-close{display:block}
+  .detail-panel{width:100%}
+  .fgrid{grid-template-columns:1fr}
+  .settings-grid{grid-template-columns:1fr}
+  .mgrid{grid-template-columns:1fr 1fr}
+  .content{padding:14px}
+  .two-col{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .mgrid{grid-template-columns:1fr}
+  .auth-card{padding:24px 20px}
+  .frow{grid-template-columns:1fr}
+  .mod-acts{flex-direction:column-reverse}
+  .btn-mod-cancel,.btn-mod-ok,.btn-mod-danger{width:100%;text-align:center}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════ LOGIN ══════════ -->
+<div id="page-login" class="page active">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-brand-mark">CC</div>
+      <div class="auth-brand-name">ColdCloud</div>
+    </div>
+    <div class="auth-h">Sign in to your account</div>
+    <div class="auth-sub">Enter your email and password to continue</div>
+    <div class="auth-err" id="login-err"></div>
+    <div class="fg"><label class="fl">Email address</label><input class="fi" id="l-email" type="email" placeholder="you@company.com" value="demo@coldcloud.io" autocomplete="email"></div>
+    <div class="fg"><label class="fl">Password</label><input class="fi" id="l-pw" type="password" placeholder="••••••••" value="demo1234" autocomplete="current-password"></div>
+    <button class="btn-auth" id="btn-login" onclick="doLogin()">Sign in</button>
+    <div style="text-align:right;margin-top:-2px;margin-bottom:6px"><span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="showPage('forgot')">Forgot password?</span></div>
+    <div style="font-size:11px;color:var(--text3);text-align:center;margin:-4px 0 8px">Demo: demo@coldcloud.io / demo1234</div>
+    <div class="auth-divider">or</div>
+    <div class="auth-alt">Don't have an account? <span onclick="showPage('signup')">Create one free</span></div>
+  </div>
+</div>
+
+<!-- ══════════ SIGNUP ══════════ -->
+<div id="page-signup" class="page">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-brand-mark">CC</div>
+      <div class="auth-brand-name">ColdCloud</div>
+    </div>
+    <div class="auth-h">Create your account</div>
+    <div class="auth-sub">Free to use. No credit card required.</div>
+    <div class="auth-err" id="signup-err"></div>
+    <div class="frow">
+      <div class="fg"><label class="fl">First name</label><input class="fi" id="s-fn" type="text" placeholder="Alex" autocomplete="given-name"></div>
+      <div class="fg"><label class="fl">Last name</label><input class="fi" id="s-ln" type="text" placeholder="Rivera" autocomplete="family-name"></div>
+    </div>
+    <div class="fg"><label class="fl">Work email</label><input class="fi" id="s-email" type="email" placeholder="you@company.com" autocomplete="email"></div>
+    <div class="fg"><label class="fl">Company <span style="color:var(--text3);font-weight:400">(optional)</span></label><input class="fi" id="s-co" type="text" placeholder="Acme Corp" autocomplete="organization"></div>
+    <div class="fg"><label class="fl">Password</label><input class="fi" id="s-pw" type="password" placeholder="At least 8 characters" autocomplete="new-password"></div>
+    <button class="btn-auth" onclick="doSignup()">Create account</button>
+    <div class="auth-alt">Already have an account? <span onclick="showPage('login')">Sign in</span></div>
+  </div>
+</div>
+
+<!-- ══════════ FORGOT PASSWORD ══════════ -->
+<div id="page-forgot" class="page">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-brand-mark">CC</div>
+      <div class="auth-brand-name">ColdCloud</div>
+    </div>
+    <div class="auth-h">Reset your password</div>
+    <div class="auth-sub">Enter your email and we'll send you a reset link.</div>
+    <div class="auth-err" id="forgot-err"></div>
+    <div class="auth-ok" id="forgot-ok"></div>
+    <div class="fg"><label class="fl">Email address</label><input class="fi" id="forgot-email" type="email" placeholder="you@company.com" autocomplete="email"></div>
+    <button class="btn-auth" onclick="doForgotPassword()">Send reset link</button>
+    <div class="auth-alt"><span onclick="showPage('login')" style="color:var(--blue);font-weight:500;cursor:pointer">Back to sign in</span></div>
+  </div>
+</div>
+
+<!-- ══════════ APP ══════════ -->
+<div id="page-app" class="page">
+
+  <div class="mob-overlay" id="mob-overlay" onclick="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-wrap">
+        <div class="logo-mark">CC</div>
+        <div class="logo-name">ColdCloud</div>
+      </div>
+      <div class="sb-close" onclick="closeSidebar()">✕</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Overview</div>
+      <div class="ni on" data-v="dashboard" onclick="sv('dashboard',this)"><span class="ni-icon">▦</span>Dashboard</div>
+      <div class="ni" data-v="leads" onclick="sv('leads',this)"><span class="ni-icon">⊞</span>Leads<span class="ni-badge" id="nb-leads">0</span></div>
+      <div class="ni" data-v="add" onclick="sv('add',this)"><span class="ni-icon">＋</span>Add Lead</div>
+      <div class="sb-sec">Tools</div>
+      <div class="ni" data-v="activity" onclick="sv('activity',this)"><span class="ni-icon">◈</span>Activity</div>
+      <div class="ni" data-v="sequence" onclick="sv('sequence',this)"><span class="ni-icon">⇒</span>Sequences</div>
+      <div class="ni" data-v="settings" onclick="sv('settings',this)"><span class="ni-icon">⚙</span>Settings<span class="ni-warn" id="settings-warn" style="display:none">Setup</span></div>
+    </nav>
+    <div class="sb-footer">
+      <div class="user-pill" onclick="doLogout()">
+        <div class="uavatar" id="u-avatar">?</div>
+        <div><div class="uname" id="u-name">Loading…</div><div class="uemail" id="u-email">Sign out</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main" id="main">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="hamburger" onclick="openSidebar()">☰</div>
+        <div class="topbar-title" id="topbar-title">Dashboard</div>
+      </div>
+      <div class="topbar-right">
+        <div class="status-ind"><div class="status-dot"></div>Running</div>
+        <button class="btn-primary" onclick="sv('add',document.querySelector('[data-v=add]'))">+ Add Lead</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="view on" id="view-dashboard">
+        <div class="vh">
+          <div class="vt">Dashboard</div>
+          <div class="vs">An overview of your leads and follow-up activity</div>
+        </div>
+        <div class="mgrid">
+          <div class="mc"><div class="mc-top"><div class="mc-lbl">Total Leads</div><div class="mc-ico">👥</div></div><div class="mc-val" id="m-total">0</div><div class="mc-ch ch-neu" id="m-total-c">Get started by adding a lead</div></div>
+          <div class="mc"><div class="mc-top"><div class="mc-lbl">Messages Sent</div><div class="mc-ico">📤</div></div><div class="mc-val" id="m-sent">0</div><div class="mc-ch ch-neu">across all channels</div></div>
+          <div class="mc"><div class="mc-top"><div class="mc-lbl">Replies</div><div class="mc-ico">↩️</div></div><div class="mc-val" id="m-replies">0</div><div class="mc-ch ch-neu" id="m-replies-c">from leads</div></div>
+          <div class="mc"><div class="mc-top"><div class="mc-lbl">Reply Rate</div><div class="mc-ico">📈</div></div><div class="mc-val" id="m-rate">—</div><div class="mc-ch ch-neu">of leads responded</div></div>
+        </div>
+        <div class="two-col">
+          <div class="card"><div class="card-h"><div class="card-title">New Leads — Last 7 Days</div><div class="card-meta" id="chart-lbl">0 total</div></div><div class="mini-chart" id="mini-chart"></div></div>
+          <div class="card"><div class="card-h"><div class="card-title">By Channel</div><div class="card-meta" id="ch-lbl">0 sent</div></div><div class="ch-list" id="ch-breakdown"></div></div>
+        </div>
+        <div class="card"><div class="card-h"><div class="card-title">Recent Activity</div><div class="card-meta">Last 10 events</div></div><div id="recent-activity"></div></div>
+      </div>
+
+      <!-- ── LEADS ── -->
+      <div class="view" id="view-leads">
+        <div class="vh"><div class="vt">Leads</div><div class="vs">Click a lead to view details, edit notes, or manage their follow-up sequence</div></div>
+        <div class="tctrl">
+          <input class="tsearch" id="lead-search" placeholder="Search by name or phone…" oninput="renderLeadsTable()">
+          <button class="fbtn on" onclick="setFilter('all',this)">All</button>
+          <button class="fbtn" onclick="setFilter('active',this)">Active</button>
+          <button class="fbtn" onclick="setFilter('replied',this)">Replied</button>
+          <button class="fbtn" onclick="setFilter('converted',this)">Converted</button>
+          <button class="fbtn" onclick="setFilter('completed',this)">Done</button>
+          <button class="fbtn" onclick="setFilter('unsubscribed',this)">Opted out</button>
+        </div>
+        <div class="twrap"><table><thead><tr><th>Name</th><th>Phone</th><th>Context</th><th>Channels</th><th>Step</th><th>Status</th><th>Next follow-up</th><th>Added</th></tr></thead><tbody id="leads-tbody"></tbody></table></div>
+      </div>
+
+      <!-- ── ADD LEAD ── -->
+      <div class="view" id="view-add">
+        <div class="vh"><div class="vt">Add Lead</div><div class="vs">Enter the lead's details. The follow-up sequence will begin immediately.</div></div>
+        <div class="add-wrap">
+          <div class="acard">
+            <div class="fgrid">
+              <div class="form-group">
+                <label class="form-lbl">First name <span>*</span></label>
+                <input class="form-inp" id="f-fn" type="text" placeholder="Sarah" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label class="form-lbl">Last name</label>
+                <input class="form-inp" id="f-ln" type="text" placeholder="Johnson" autocomplete="off">
+              </div>
+              <div class="form-group">
+                <label class="form-lbl">Phone number <span>*</span></label>
+                <input class="form-inp" id="f-phone" type="tel" placeholder="+1 555 000 0000" autocomplete="off" oninput="validatePhone(this)">
+                <div class="form-hint" id="f-phone-hint"></div>
+              </div>
+              <div class="form-group">
+                <label class="form-lbl">Source / Business type</label>
+                <input class="form-inp" id="f-biz" type="text" placeholder="e.g. Real estate agent" autocomplete="off">
+              </div>
+              <div class="form-group ffull">
+                <label class="form-lbl">What are they interested in? <span>*</span></label>
+                <textarea class="form-inp" id="f-ctx" placeholder="e.g. Enquired about gym membership after seeing our Instagram post. Said they're comparing a few options on pricing."></textarea>
+                <div class="form-hint">This is used to personalise every follow-up message.</div>
+              </div>
+              <div class="form-group ffull">
+                <label class="form-lbl">Notes <span style="color:var(--text3);font-weight:400">(optional)</span></label>
+                <input class="form-inp" id="f-notes" type="text" placeholder="e.g. Prefers morning calls. Budget around $200/month." autocomplete="off">
+              </div>
+              <div class="form-group ffull">
+                <label class="form-lbl">Channels to use</label>
+                <div class="ch-picker">
+                  <div class="chp on" data-ch="whatsapp" onclick="toggleCh(this)"><span class="chp-em">💬</span>WhatsApp</div>
+                  <div class="chp on" data-ch="sms" onclick="toggleCh(this)"><span class="chp-em">📱</span>SMS</div>
+                  <div class="chp on" data-ch="call" onclick="toggleCh(this)"><span class="chp-em">📞</span>Phone call</div>
+                </div>
+              </div>
+            </div>
+            <div class="preview-box"><div class="pb-title">Sequence preview</div><div class="pb-steps" id="pb-steps"></div></div>
+            <button class="form-submit" id="submit-btn" onclick="submitLead()">Start follow-up sequence</button>
+          </div>
+
+          <div class="section-divider">Import from CSV</div>
+          <div class="acard">
+            <div class="csv-zone" id="csv-zone" onclick="document.getElementById('csv-file').click()" ondragover="csvDrag(event)" ondragleave="csvDragLeave(event)" ondrop="csvDrop(event)">
+              <span class="csv-zone-icon">📂</span>
+              <div style="font-weight:600;margin-bottom:3px">Click to upload or drag and drop</div>
+              <div style="font-size:12px;color:var(--text3)">CSV columns: name, phone, context — one lead per row</div>
+            </div>
+            <input type="file" id="csv-file" accept=".csv" style="display:none" onchange="handleCSV(this)">
+            <div class="csv-preview" id="csv-preview">
+              <table class="csv-table"><thead><tr><th>Name</th><th>Phone</th><th>Context</th></tr></thead><tbody id="csv-tbody"></tbody></table>
+              <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+                <div style="font-size:12px;color:var(--text2)" id="csv-count">0 leads ready</div>
+                <button class="btn-import" onclick="importCSV()">Import leads</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ACTIVITY ── -->
+      <div class="view" id="view-activity">
+        <div class="vh"><div class="vt">Activity</div><div class="vs">Every message sent and reply received, in order</div></div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <input class="tsearch" id="activity-search" placeholder="🔍  Search by lead name…" oninput="renderActivityLog()" style="max-width:260px">
+          <button class="fbtn on" onclick="setActivityFilter('all',this)">All</button>
+          <button class="fbtn" onclick="setActivityFilter('outbound',this)">Sent</button>
+          <button class="fbtn" onclick="setActivityFilter('inbound',this)">Replies</button>
+          <button class="fbtn" onclick="exportLeadsCSV()" style="margin-left:auto">⬇ Export CSV</button>
+        </div>
+        <div id="activity-wrap"></div>
+      </div>
+
+      <!-- ── SEQUENCE ── -->
+      <div class="view" id="view-sequence">
+        <div class="vh"><div class="vt">Follow-Up Sequence</div><div class="vs">Configure timing and channels for each step. Messages are <strong>AI-generated uniquely for each lead</strong> using their name and context — or write your own template below.</div></div>
+        <div style="background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:10px;padding:14px 16px;margin:0 18px 16px;font-size:13px;color:var(--blue);line-height:1.6">
+          <strong>How it works:</strong> When a sequence step runs for a lead, AI generates a unique personalised message using that lead's name, context and your sender profile. You can also write a custom template below — use <code>{name}</code> and <code>{context}</code> as placeholders.
+        </div>
+        <div class="seq-wrap" style="max-width:700px">
+          <p class="seq-intro">
+            Set when each message sends and write your own message text.
+            Use <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-size:11px">{name}</code> for the lead's first name,
+            <code style="background:var(--bg);padding:1px 5px;border-radius:4px;font-size:11px">{context}</code> for their interest.
+            Click <strong>✦ AI Write</strong> to generate a message automatically.
+          </p>
+          <div class="seq-list" id="seq-list"></div>
+          <div style="display:flex;gap:10px;margin-top:4px;align-items:center">
+            <button class="btn-save-seq" onclick="saveSeq()">Save changes</button>
+            <span style="font-size:12px;color:var(--text3)">Changes apply to new leads only</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="view" id="view-settings">
+        <div class="vh"><div class="vt">Settings</div><div class="vs">Configure your account and connect messaging services</div></div>
+        <div class="settings-wrap">
+
+          <div class="scard">
+            <div class="scard-head">
+              <div class="scard-icon">👤</div>
+              <div class="scard-info">
+                <div class="scard-title">Your sender profile</div>
+                <div class="scard-sub">This is who your leads hear from — fill this in before adding any leads</div>
+              </div>
+            </div>
+            <div class="scard-body">
+
+              <div style="background:var(--blue-light);border:1px solid var(--blue-mid);border-radius:8px;padding:11px 14px;font-size:13px;color:var(--blue);margin-bottom:18px;line-height:1.5">
+                ℹ️ These details appear in every follow-up message your leads receive. Fill them in so leads know exactly who is contacting them and how to reach you back.
+              </div>
+
+              <div class="settings-grid" style="margin-bottom:12px">
+                <div class="sfg">
+                  <label class="sfl">Your full name</label>
+                  <input class="sfi" id="set-name" type="text" placeholder="e.g. James Rivera" autocomplete="name">
+                </div>
+                <div class="sfg">
+                  <label class="sfl">Company name</label>
+                  <input class="sfi" id="set-co" type="text" placeholder="e.g. Apex Fitness" autocomplete="organization">
+                </div>
+              </div>
+
+              <div class="settings-grid" style="margin-bottom:12px">
+                <div class="sfg">
+                  <label class="sfl">First name for messages <span style="color:var(--red)">*</span></label>
+                  <input class="sfi" id="set-sender-name" type="text" placeholder="e.g. James" oninput="updateMessagePreview()">
+                  <div style="font-size:11px;color:var(--text3);margin-top:4px">Used in every message: "Hi Sarah, James here…"</div>
+                </div>
+                <div class="sfg">
+                  <label class="sfl">Full sign-off</label>
+                  <input class="sfi" id="set-sign-off" type="text" placeholder="e.g. James from Apex Fitness" oninput="updateMessagePreview()">
+                  <div style="font-size:11px;color:var(--text3);margin-top:4px">Used in first message intro: "this is James from Apex Fitness"</div>
+                </div>
+              </div>
+
+              <div class="settings-grid" style="margin-bottom:12px">
+                <div class="sfg">
+                  <label class="sfl">Your callback number <span style="color:var(--text3);font-weight:400">(optional)</span></label>
+                  <input class="sfi sfi-mono" id="set-sender-phone" type="tel" placeholder="e.g. +1 555 123 4567" oninput="updateMessagePreview()">
+                  <div style="font-size:11px;color:var(--text3);margin-top:4px">Added to SMS and call scripts so leads can call you back directly</div>
+                </div>
+                <div class="sfg">
+                  <label class="sfl">Reply-to email <span style="color:var(--text3);font-weight:400">(optional)</span></label>
+                  <input class="sfi" id="set-sender-email" type="email" placeholder="e.g. james@apexfitness.com">
+                  <div style="font-size:11px;color:var(--text3);margin-top:4px">Can be mentioned in messages as an alternative contact</div>
+                </div>
+              </div>
+
+              <div class="sfg" style="margin-bottom:18px">
+                <label class="sfl">What your business does <span style="color:var(--red)">*</span></label>
+                <input class="sfi" id="set-biz-desc" type="text" placeholder="e.g. Premium gym offering personal training and group fitness classes in downtown">
+                <div style="font-size:11px;color:var(--text3);margin-top:4px">Helps AI write relevant, personalised messages for each lead</div>
+              </div>
+
+              <button class="btn-save-s" onclick="saveAccountSettings()">Save profile</button>
+
+              <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+                <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px">Live preview — how your messages will look to leads</div>
+                <div id="msg-preview"><div style="font-size:12px;color:var(--text3);font-style:italic">Enter your name above to see a preview</div></div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-head">
+              <div class="scard-icon">📱</div>
+              <div class="scard-info">
+                <div class="scard-title">Messaging — SMS, WhatsApp &amp; Calls</div>
+                <div class="scard-sub">Choose how your messages are sent</div>
+              </div>
+              <div class="api-status" id="twilio-status">Not connected</div>
+            </div>
+            <div class="scard-body">
+
+              <!-- Own Twilio fields -->
+              <div id="twilio-own-fields" style="display:block">
+                <div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 14px;font-size:13px;color:var(--text2);margin-bottom:16px;line-height:1.6">
+                  Get your credentials from <a href="https://twilio.com/console" target="_blank" style="color:var(--blue)">twilio.com/console</a>.
+                  Free trial accounts work fine for testing.
+                </div>
+                <div class="settings-grid" style="margin-bottom:12px">
+                  <div class="sfg">
+                    <label class="sfl">Account SID <span style="color:var(--red)">*</span></label>
+                    <input class="sfi sfi-mono" id="set-twilio-sid" type="text" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" spellcheck="false">
+                    <div style="font-size:11px;color:var(--text3);margin-top:4px">Starts with AC — on your Twilio console homepage</div>
+                  </div>
+                  <div class="sfg">
+                    <label class="sfl">Auth Token <span style="color:var(--red)">*</span></label>
+                    <input class="sfi sfi-mono" id="set-twilio-token" type="password" placeholder="Your auth token" autocomplete="off">
+                    <div style="font-size:11px;color:var(--text3);margin-top:4px">Keep this private — never share it</div>
+                  </div>
+                </div>
+                <div class="settings-grid" style="margin-bottom:18px">
+                  <div class="sfg">
+                    <label class="sfl">Phone number (SMS &amp; calls) <span style="color:var(--red)">*</span></label>
+                    <input class="sfi sfi-mono" id="set-twilio-phone" type="tel" placeholder="+1xxxxxxxxxx">
+                    <div style="font-size:11px;color:var(--text3);margin-top:4px">Your Twilio number with country code</div>
+                  </div>
+                  <div class="sfg">
+                    <label class="sfl">WhatsApp number <span style="color:var(--text3);font-weight:400">(optional)</span></label>
+                    <input class="sfi sfi-mono" id="set-twilio-wa" type="tel" placeholder="whatsapp:+14155238886">
+                    <div style="font-size:11px;color:var(--text3);margin-top:4px">Leave blank to use your phone number above</div>
+                  </div>
+                </div>
+                <button class="btn-save-s" onclick="saveTwilioSettings()" id="btn-save-twilio">Save &amp; connect</button>
+                <div id="twilio-save-status" style="font-size:12px;color:var(--text3);margin-top:8px;display:none"></div>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="scard">
+            <div class="scard-head">
+              <div class="scard-icon">⚠️</div>
+              <div class="scard-info"><div class="scard-title">Danger zone</div><div class="scard-sub">Irreversible — proceed carefully</div></div>
+            </div>
+            <div class="scard-body">
+              <div class="danger-zone">
+                <div><div class="dz-title">Delete all data</div><div class="dz-text">Removes all leads, messages, and activity from your account.</div></div>
+                <button class="btn-danger" onclick="clearAllData()">Delete all data</button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- LEAD DETAIL PANEL -->
+<div class="detail-overlay" id="detail-overlay" onclick="closeDetail(event)">
+  <div class="detail-panel" id="detail-panel">
+    <div class="dp-head">
+      <div>
+        <div class="dp-name" id="dp-name">—</div>
+        <div class="dp-phone" id="dp-phone">—</div>
+      </div>
+      <div class="dp-close" onclick="closeDetailPanel()">✕</div>
+    </div>
+    <div class="dp-body" id="dp-body"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="mod-title" id="mod-title">Confirm</div>
+    <div class="mod-body" id="mod-body">Are you sure?</div>
+    <div class="mod-acts">
+      <button class="btn-mod-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-mod-ok" id="mod-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+// BACKEND CONFIG
+// Change this to your deployed backend URL once deployed.
+// Leave as empty string '' to run in offline/demo mode.
+// ═══════════════════════════════════════════════════════════
+// ─────────────────────────────────────────────────────────────
+// BACKEND URL — set this to your deployed backend before use
+// Leave empty to run in offline/demo mode (no real messages sent)
+// ─────────────────────────────────────────────────────────────
+const BACKEND_URL = 'https://coldcloud-1.onrender.com' // ← CHANGE THIS: e.g. 'https://your-backend.railway.app'
+
+async function api(method, path, body, token) {
+  if (!BACKEND_URL) return null // offline mode — skip silently
+  try {
+    const res = await fetch(BACKEND_URL + path, {
+      method,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: 'Bearer ' + token } : {}),
+      },
+      body: body ? JSON.stringify(body) : undefined,
+    })
+    return await res.json()
+  } catch (err) {
+    console.warn('[API]', path, err.message)
+    return null
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// STATE & PERSISTENCE (per-user isolated)
+// ═══════════════════════════════════════════════════════════
+let S = {
+  user: null,
+  token: null,
+  leads: [],
+  activity: [],
+  seq: [
+    {step:1,enabled:true,delayDays:0, channel:'whatsapp',label:'WhatsApp',icon:'💬'},
+    {step:2,enabled:true,delayDays:3, channel:'sms',     label:'SMS',     icon:'📱'},
+    {step:3,enabled:true,delayDays:5, channel:'call',    label:'Phone call',icon:'📞'},
+    {step:4,enabled:true,delayDays:7, channel:'whatsapp',label:'Final WhatsApp',icon:'💬'},
+  ],
+  settings:{
+    name:'', company:'', bizDesc:'',
+    senderName:'', senderPhone:'', senderEmail:'', signOff:'',
+    twilioSid:'', twilioToken:'', twilioPhone:'', twilioWa:'', twilioMode:'own',
+    // Per-step custom messages: { 'step1_whatsapp': 'text...', 'step2_sms': '...' }
+    customMessages:{}
+  }
+  // NOTE: Twilio and AI keys live on the backend only — never stored in the browser
+}
+
+function dbKey(k){ return `cc_${S.user?.id||'anon'}_${k}` }
+
+function saveDB(){
+  if(!S.user) return
+  try{
+    localStorage.setItem(dbKey('leads'), JSON.stringify(S.leads))
+    localStorage.setItem(dbKey('activity'), JSON.stringify(S.activity))
+    localStorage.setItem(dbKey('seq'), JSON.stringify(S.seq))
+    localStorage.setItem(dbKey('settings'), JSON.stringify(S.settings))
+  }catch(e){}
+}
+
+function loadDB(){
+  if(!S.user) return
+  try{
+    S.leads = JSON.parse(localStorage.getItem(dbKey('leads'))||'[]')
+    S.activity = JSON.parse(localStorage.getItem(dbKey('activity'))||'[]')
+    const seq = JSON.parse(localStorage.getItem(dbKey('seq'))||'null')
+    if(seq) S.seq = seq
+    const settings = JSON.parse(localStorage.getItem(dbKey('settings'))||'null')
+    if(settings) S.settings = {...S.settings,...settings}
+  }catch(e){}
+}
+
+function getUsers(){ try{ return JSON.parse(localStorage.getItem('cc_users')||'[]') }catch(e){ return [] } }
+function saveUsers(u){ try{ localStorage.setItem('cc_users', JSON.stringify(u)) }catch(e){} }
+
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
+async function hashPw(pw){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw+'cc_salt_2024'))
+  return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')
+}
+
+async function doLogin(){
+  const email = g('l-email').value.trim().toLowerCase()
+  const pw    = g('l-pw').value
+  const err   = g('login-err')
+  const btn   = g('btn-login')
+  err.classList.remove('on')
+
+  if(!email || !pw){
+    err.textContent = 'Please enter your email and password'
+    err.classList.add('on')
+    return
+  }
+
+  btn.disabled = true
+  btn.textContent = 'Signing in…'
+
+  try {
+    // Try real backend if configured
+    if(BACKEND_URL){
+      const data = await api('POST', '/auth/login', { email, password: pw })
+      if(data === null){
+        // Network error — backend unreachable
+        err.textContent = 'Cannot reach server — check your connection or try demo mode'
+        err.classList.add('on')
+        btn.disabled = false; btn.textContent = 'Sign in'
+        return
+      }
+      if(data.ok){
+        await loginSuccess(data.user, data.token)
+        return
+      }
+      err.textContent = data.error || 'Incorrect email or password'
+      err.classList.add('on')
+      btn.disabled = false; btn.textContent = 'Sign in'
+      return
+    }
+
+    // Offline / demo mode
+    const users = getUsers()
+    if(email === 'demo@coldcloud.io' && pw === 'demo1234'){
+      let demo = users.find(u => u.id === 'demo')
+      if(!demo){
+        demo = { id:'demo', email:'demo@coldcloud.io', pwHash:'demo', name:'Demo User', company:'Demo Co' }
+        users.push(demo); saveUsers(users)
+      }
+      await loginSuccess(demo)
+      return
+    }
+    const hash = await hashPw(pw)
+    const user = users.find(u => u.email === email && u.pwHash === hash)
+    if(!user){
+      err.textContent = 'Incorrect email or password'
+      err.classList.add('on')
+      return
+    }
+    await loginSuccess(user)
+
+  } catch(e) {
+    console.error('[doLogin]', e)
+    err.textContent = 'Something went wrong. Please try again.'
+    err.classList.add('on')
+  } finally {
+    btn.disabled = false
+    btn.textContent = 'Sign in'
+  }
+}
+
+async function doSignup(){
+  const fn    = g('s-fn').value.trim()
+  const ln    = g('s-ln').value.trim()
+  const email = g('s-email').value.trim().toLowerCase()
+  const co    = g('s-co').value.trim()
+  const pw    = g('s-pw').value
+  const err   = g('signup-err')
+  const btn   = document.querySelector('#page-signup .btn-auth')
+  err.classList.remove('on')
+
+  if(!fn || !email || !pw){
+    err.textContent = 'Please fill in all required fields'
+    err.classList.add('on'); return
+  }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    err.textContent = 'Please enter a valid email address'
+    err.classList.add('on'); return
+  }
+  if(pw.length < 8){
+    err.textContent = 'Password must be at least 8 characters'
+    err.classList.add('on'); return
+  }
+
+  if(btn){ btn.disabled = true; btn.textContent = 'Creating account…' }
+
+  try {
+    if(BACKEND_URL){
+      const data = await api('POST', '/auth/signup', { email, password: pw, name: fn+(ln?' '+ln:''), company: co })
+      if(data === null){
+        err.textContent = 'Cannot reach server — check your connection or try demo mode'
+        err.classList.add('on'); return
+      }
+      if(data.ok){
+        await loginSuccess(data.user, data.token)
+        return
+      }
+      err.textContent = data.error || 'Could not create account'
+      err.classList.add('on'); return
+    }
+
+    // Offline mode
+    const users = getUsers()
+    if(users.find(u => u.email === email)){
+      err.textContent = 'An account with this email already exists'
+      err.classList.add('on'); return
+    }
+    const hash = await hashPw(pw)
+    const user = { id:'u_'+Date.now(), email, pwHash:hash, name:fn+(ln?' '+ln:''), company:co }
+    users.push(user); saveUsers(users)
+    await loginSuccess(user)
+
+  } catch(e) {
+    console.error('[doSignup]', e)
+    err.textContent = 'Something went wrong. Please try again.'
+    err.classList.add('on')
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = 'Create account' }
+  }
+}
+
+async function loginSuccess(user, token){
+  try{
+    S.user  = user
+    if(token) S.token = token
+
+    try{
+      sessionStorage.setItem('cc_session', JSON.stringify(user))
+      if(token) sessionStorage.setItem('cc_token', token)
+    }catch(e){}
+
+    // Fetch full profile — senderName, signOff, etc.
+    if(token && BACKEND_URL){
+      try{
+        const data = await api('GET', '/auth/me', null, token)
+        if(data && data.ok && data.user){
+          const u = data.user
+          S.user = { ...S.user, ...u }
+          S.settings.name        = u.name        || S.settings.name
+          S.settings.company     = u.company     || S.settings.company
+          S.settings.bizDesc     = u.bizDesc     || S.settings.bizDesc
+          S.settings.senderName  = u.senderName  || S.settings.senderName
+          S.settings.senderPhone = u.senderPhone || S.settings.senderPhone
+          S.settings.senderEmail = u.senderEmail || S.settings.senderEmail
+          S.settings.signOff     = u.signOff     || S.settings.signOff
+          S.settings.twilioSid   = u.twilioSid   || S.settings.twilioSid
+          S.settings.twilioPhone = u.twilioPhone || S.settings.twilioPhone
+          S.settings.twilioWa    = u.twilioWa    || S.settings.twilioWa
+          // Note: twilioToken is never returned from backend for security
+          try{ sessionStorage.setItem('cc_session', JSON.stringify(S.user)) }catch(e){}
+        }
+      }catch(e){ console.warn('[loginSuccess] Could not fetch user profile:', e.message) }
+    }
+
+    loadDB()
+    await showApp()
+
+  }catch(e){
+    console.error('[loginSuccess] Error:', e)
+    // Even if something fails, try to show the app
+    try{ showPage('app'); startScheduler() }catch(_){}
+  }
+}
+
+function doLogout(){
+  openModal('Sign out?','You will be returned to the sign-in page.',null,()=>{
+    saveDB(); S.user=null; S.leads=[]; S.activity=[]
+    try{ sessionStorage.removeItem('cc_session') }catch(e){}
+    showPage('login')
+  })
+}
+
+function checkSession(){
+  try{
+    const u=sessionStorage.getItem('cc_session')
+    const t=sessionStorage.getItem('cc_token')
+    if(u){ S.user=JSON.parse(u); if(t) S.token=t; return true }
+  }catch(e){}
+  return false
+}
+
+// ═══════════════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════════════
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
+  g('page-'+name).classList.add('active')
+}
+
+async function showApp(){
+  try{
+    showPage('app'); updateUserUI(); loadSettingsUI(); checkSettingsWarning()
+    if(BACKEND_URL){
+      ;['m-total','m-sent','m-replies'].forEach(id=>{ const el=g(id); if(el) el.textContent='—' })
+      try{
+        await Promise.all([
+          loadLeadsFromBackend(),
+          loadActivityFromBackend(),
+          loadSeqFromBackend(),
+        ])
+      }catch(e){
+        console.warn('[showApp] Backend load error:', e.message)
+        // Continue — app works with local data
+      }
+    }
+    renderAll(); renderSeqBuilder(); renderSeqPreview(); startScheduler()
+  }catch(e){
+    // Last resort — if something totally breaks, at least show the app shell
+    console.error('[showApp] Critical error:', e)
+    showPage('app')
+    startScheduler()
+  }
+}
+
+async function loadLeadsFromBackend(){
+  const data = await api('GET','/leads',null,S.token)
+  if(data&&data.ok) S.leads = data.leads
+}
+
+async function loadActivityFromBackend(){
+  const data = await api('GET','/messages?limit=100',null,S.token)
+  if(data&&data.ok) S.activity = data.messages
+}
+
+async function loadSeqFromBackend(){
+  const data = await api('GET','/sequence',null,S.token)
+  if(data&&data.ok&&data.config){
+    const cfg = data.config
+    S.seq.forEach(s=>{
+      const k = 'step'+s.step
+      if(cfg[k]){
+        s.enabled   = cfg[k].enabled   !== undefined ? cfg[k].enabled   : s.enabled
+        s.delayDays = cfg[k].delayDays !== undefined ? cfg[k].delayDays : s.delayDays
+        s.channel   = cfg[k].channel   || s.channel
+      }
+    })
+    // Load saved custom messages
+    if(data.customMessages && typeof data.customMessages === 'object'){
+      S.settings.customMessages = data.customMessages
+    }
+  }
+}
+
+let curView='dashboard'
+function sv(name,el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'))
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'))
+  g('view-'+name).classList.add('on')
+  if(el) el.classList.add('on')
+  curView=name
+  const titles={dashboard:'Dashboard',leads:'Leads',add:'Add Lead',activity:'Activity',sequence:'Sequences',settings:'Settings'}
+  g('topbar-title').textContent=titles[name]||name
+  if(name==='dashboard') renderDashboard()
+  if(name==='leads') renderLeadsTable()
+  if(name==='activity') renderActivityLog()
+  if(name==='sequence') renderSeqBuilder()
+  if(name==='add'){ renderSeqPreview(); resetAddForm() }
+  if(name==='settings') loadSettingsUI()
+  closeSidebar()
+}
+
+function openSidebar(){ g('sidebar').classList.add('open'); g('mob-overlay').classList.add('on') }
+function closeSidebar(){ g('sidebar').classList.remove('open'); g('mob-overlay').classList.remove('on') }
+
+// ═══════════════════════════════════════════════════════════
+// SETTINGS
+// ═══════════════════════════════════════════════════════════
+function loadSettingsUI(){
+  const s = S.settings
+  const u = S.user || {}
+  setVal('set-name',         s.name         || u.name   || '')
+  setVal('set-co',           s.company      || u.company|| '')
+  setVal('set-biz-desc',     s.bizDesc      || '')
+  setVal('set-sender-name',  s.senderName   || s.name   || (u.name||'').split(' ')[0] || '')
+  setVal('set-sender-phone', s.senderPhone  || '')
+  setVal('set-sender-email', s.senderEmail  || u.email  || '')
+  setVal('set-sign-off',     s.signOff      || '')
+  // Twilio
+  setVal('set-twilio-sid',   s.twilioSid   || u.twilioSid   || '')
+  setVal('set-twilio-token', (s.twilioToken||u.twilioToken) ? '••••••••••••••••' : '')
+  setVal('set-twilio-phone', s.twilioPhone || u.twilioPhone || '')
+  setVal('set-twilio-wa',    s.twilioWa    || u.twilioWa    || '')
+  // Init plan selector
+  const mode = s.twilioMode || u.twilioMode || 'own'
+  S.settings.twilioMode = mode
+  setTimeout(()=>selectTwilioPlan(mode), 0)
+  updateMessagePreview()
+  updateAPIStatus()
+}
+
+async function updateAPIStatus(){
+  const ts   = g('twilio-status')
+  if(!ts) return
+  const mode = S.settings.twilioMode || 'own'
+  if(!BACKEND_URL){
+    ts.className = 'api-status api-missing'
+    ts.textContent = 'Backend not connected'
+    return
+  }
+  if(mode === 'shared'){
+    ts.className = 'api-status api-ok'
+    ts.textContent = 'Connected (shared)'
+  } else {
+    const hasCreds = !!(S.settings.twilioSid || S.user?.twilioSid || S.user?.twilioConfigured)
+    ts.className = hasCreds ? 'api-status api-ok' : 'api-status api-missing'
+    ts.textContent = hasCreds ? 'Connected (own)' : 'Credentials needed'
+  }
+}
+
+function checkSettingsWarning(){
+  const needsBackend = !BACKEND_URL
+  const needsProfile = !(S.settings.senderName || S.settings.name)
+  const needsTwilio  = !(S.settings.twilioSid  || S.user?.twilioSid || S.user?.twilioConfigured)
+  const el = g('settings-warn')
+  if(!el) return
+  if(needsBackend){
+    el.style.display = 'inline'
+    el.title = 'Backend not connected — set BACKEND_URL in app/index.html'
+  } else if(needsTwilio){
+    el.style.display = 'inline'
+    el.title = 'Add your Twilio credentials in Settings to start sending messages'
+  } else if(needsProfile){
+    el.style.display = 'inline'
+    el.title = 'Add your name in Settings so leads know who is contacting them'
+  } else {
+    el.style.display = 'none'
+  }
+}
+
+async function saveAccountSettings(){
+  S.settings.name        = g('set-name').value.trim()
+  S.settings.company     = g('set-co').value.trim()
+  S.settings.bizDesc     = g('set-biz-desc').value.trim()
+  S.settings.senderName  = g('set-sender-name')?.value.trim()||''
+  S.settings.senderPhone = g('set-sender-phone')?.value.trim()||''
+  S.settings.senderEmail = g('set-sender-email')?.value.trim()||''
+  S.settings.signOff     = g('set-sign-off')?.value.trim()||''
+  saveDB()
+  if(BACKEND_URL){
+    const payload = {
+      name:S.settings.name, company:S.settings.company, bizDesc:S.settings.bizDesc,
+      senderName:S.settings.senderName, senderPhone:S.settings.senderPhone,
+      senderEmail:S.settings.senderEmail, signOff:S.settings.signOff
+    }
+    const data = await api('PATCH','/settings', payload, S.token)
+    if(data&&data.ok&&data.user){ S.user={...S.user,...data.user}; updateUserUI() }
+  }
+  updateMessagePreview()
+  toast('✓','Profile saved','Your messages will now use these details','ok')
+}
+
+function selectTwilioPlan(plan){
+  plan = 'own' // Always use own Twilio
+  S.settings.twilioMode = plan
+  saveDB()
+
+  const sharedCard = g('plan-shared')
+  const ownCard    = g('plan-own')
+  const sharedInfo = g('twilio-shared-info')
+  const ownFields  = g('twilio-own-fields')
+  const tsStatus   = g('twilio-status')
+
+  if(plan === 'shared'){
+    // Highlight shared card
+    sharedCard.style.border = '2px solid var(--blue)'
+    sharedCard.style.background = 'var(--blue-light)'
+    sharedCard.querySelector('div > div').style.background = 'var(--blue)'
+    ownCard.style.border = '2px solid var(--border)'
+    ownCard.style.background = 'var(--white)'
+    ownCard.querySelector('div > div').style.background = ''
+    ownCard.querySelector('div > div').style.border = '2px solid var(--border)'
+    if(sharedInfo) sharedInfo.style.display = 'block'
+    if(ownFields)  ownFields.style.display  = 'none'
+    if(tsStatus){ tsStatus.className = 'api-status api-ok'; tsStatus.textContent = 'Connected (shared)' }
+    // Save to backend
+    if(BACKEND_URL) api('PATCH', '/settings', { twilioMode: 'own' }, S.token)
+  } else {
+    // Highlight own card
+    ownCard.style.border = '2px solid var(--blue)'
+    ownCard.style.background = 'var(--blue-light)'
+    sharedCard.style.border = '2px solid var(--border)'
+    sharedCard.style.background = 'var(--white)'
+    if(sharedInfo) sharedInfo.style.display = 'none'
+    if(ownFields)  ownFields.style.display  = 'block'
+    const hasCreds = !!(S.settings.twilioSid || S.user?.twilioSid)
+    if(tsStatus){
+      tsStatus.className = hasCreds ? 'api-status api-ok' : 'api-status api-missing'
+      tsStatus.textContent = hasCreds ? 'Connected (own)' : 'Credentials needed'
+    }
+  }
+}
+
+async function saveTwilioSettings(){
+  const sid   = g('set-twilio-sid')?.value.trim()   || ''
+  const token = g('set-twilio-token')?.value        || ''
+  const phone = g('set-twilio-phone')?.value.trim() || ''
+  const wa    = g('set-twilio-wa')?.value.trim()    || ''
+  const btn   = g('btn-save-twilio')
+  const statusEl = g('twilio-save-status')
+
+  if(!sid || !phone){
+    toast('','Account SID and phone number are required','','err')
+    return
+  }
+  if(!token || token.startsWith('•')){
+    // No new token entered — only update SID/phone/wa
+  } else if(token.length < 20){
+    toast('','Auth Token looks too short','Check your Twilio console','err')
+    return
+  }
+
+  if(btn){ btn.disabled = true; btn.textContent = 'Saving…' }
+
+  try{
+    // Save locally
+    S.settings.twilioSid   = sid
+    S.settings.twilioPhone = phone
+    S.settings.twilioWa    = wa
+    if(token && !token.startsWith('•')) S.settings.twilioToken = token
+    saveDB()
+
+    // Save to backend
+    if(BACKEND_URL){
+      const payload = { twilioSid: sid, twilioPhone: phone, twilioWa: wa }
+      if(token && !token.startsWith('•')) payload.twilioToken = token
+      const data = await api('PATCH', '/settings', payload, S.token)
+      if(!data || !data.ok){
+        toast('','Could not save Twilio settings', data?.error || '', 'err')
+        return
+      }
+      if(data.user) S.user = { ...S.user, ...data.user }
+    }
+
+    // Update status badge
+    const ts = g('twilio-status')
+    if(ts){ ts.className = 'api-status api-ok'; ts.textContent = 'Connected' }
+    if(statusEl){ statusEl.textContent = 'Saved successfully'; statusEl.style.display = 'block'; statusEl.style.color = 'var(--green)' }
+    toast('✓', 'Twilio connected', 'Messages will now send from your number', 'ok')
+    checkSettingsWarning()
+
+  } catch(e){
+    toast('', 'Error saving credentials', e.message, 'err')
+  } finally {
+    if(btn){ btn.disabled = false; btn.textContent = 'Save & connect' }
+  }
+}
+
+function saveAISettings(){
+  // AI keys are set via backend .env — never stored in the browser
+  toast('','Add key to backend .env','Set OPENROUTER_API_KEY in your backend .env file, then redeploy.','info')
+}
+
+function clearAllData(){
+  openModal('Delete all data?','This will permanently remove all leads, messages, and activity. This cannot be undone.','danger',async()=>{
+    if(BACKEND_URL){
+      // Delete all leads one by one (backend cascades messages)
+      for(const lead of [...S.leads]){
+        const id = lead._id||lead.id
+        await api('DELETE',`/leads/${id}`,null,S.token)
+      }
+    }
+    S.leads=[]; S.activity=[]; saveDB(); renderAll()
+    toast('✓','Data deleted','Your account has been cleared','err')
+  })
+}
+
+// ═══════════════════════════════════════════════════════════
+// MESSAGE PERSONALISATION
+// ═══════════════════════════════════════════════════════════
+async function personalizeMessage(lead, step, channel){
+  if(BACKEND_URL && (lead._id||lead.id)){
+    try{
+      const data = await api('POST','/messages/generate',{
+        leadId:      lead._id||lead.id,
+        step,        channel,
+        senderName:  S.settings.senderName||S.settings.name||'',
+        senderPhone: S.settings.senderPhone||'',
+        signOff:     S.settings.signOff||'',
+      }, S.token)
+      if(data && data.ok && data.body && data.body.length > 10) return data.body
+    }catch(e){ console.warn('[AI] Backend generate failed, using template:', e.message) }
+  }
+  return templateMessage(lead.name, lead.context, step, channel)
+}
+
+function templateMessage(name, ctx, step, channel){
+  // Check for user's custom message first
+  const key = 'step'+step+'_'+channel
+  const custom = (S.settings.customMessages || {})[key]
+  if(custom && custom.trim()){
+    const fn = name.split(' ')[0]
+    // Replace placeholders
+    return custom
+      .replace(/\{name\}/gi, fn)
+      .replace(/\{context\}/gi, ctx.substring(0,70))
+      .replace(/\{company\}/gi, S.settings.company || '')
+      .replace(/\{phone\}/gi, S.settings.senderPhone || '')
+  }
+  const fn      = name.split(' ')[0]
+  const c       = ctx.substring(0,70)
+  const sender  = S.settings.senderName || S.settings.name || S.user?.name?.split(' ')[0] || 'us'
+  const company = S.settings.company || ''
+  const signOff = S.settings.signOff || sender
+  const intro   = signOff + (company ? ' from '+company : '')
+  const cb      = S.settings.senderPhone ? ' You can reach me at '+S.settings.senderPhone+'.' : ''
+  const t = {
+    1:{
+      whatsapp:'Hi '+fn+', this is '+intro+'. Just wanted to follow up on your interest in '+c+'. Happy to answer any questions — just reply here!',
+      sms:'Hi '+fn+', '+sender+' here — following up on your enquiry about '+c+'. Questions? Reply anytime.'+cb,
+      call:'Hello '+fn+', this is '+intro+' calling to follow up on your interest in '+c+'. We would love to help. Please feel free to call me back.'+cb
+    },
+    2:{
+      whatsapp:'Hey '+fn+', '+sender+' again. Just checking in — no rush at all. I want to make sure you have everything you need. Any questions I can answer?',
+      sms:fn+', '+sender+' here. Still thinking it over? Happy to help — just reply.'+cb,
+      call:'Hello '+fn+', '+sender+' calling again. We still have availability and would love to work with you. Please reach out whenever convenient.'+cb
+    },
+    3:{
+      whatsapp:'Hi '+fn+', '+sender+" here. I don't want you to miss out — things are moving on our end. What would it take to get started? Happy to jump on a quick call."+cb,
+      sms:fn+' — '+sender+' here. Limited availability this week. Still interested? Reply now.'+cb,
+      call:'Hello '+fn+', '+sender+' calling again. We genuinely believe we can help and availability is getting limited. Please reach out today.'+cb
+    },
+    4:{
+      whatsapp:'Hi '+fn+', '+sender+' here one last time. If you are still open to it, I would love to connect — just reply. If not, no worries. Wishing you all the best!',
+      sms:fn+' — final message from '+sender+'. Still interested? Reply YES. Otherwise, all the best!',
+      call:'Hello '+fn+', this is '+sender+' with a final follow-up. If you are still interested please reach out.'+cb+' Wishing you all the best.'
+    }
+  }
+  return (t[step]&&t[step][channel]) || 'Hi '+fn+', '+sender+' here. Feel free to reach out whenever you are ready.'
+}
+
+// ═══════════════════════════════════════════════════════════
+// PHONE VALIDATION
+// ═══════════════════════════════════════════════════════════
+function validatePhone(input){
+  const val = input.value.trim()
+  const hint = g('f-phone-hint')
+  const clean = val.replace(/[\s\-\(\)]/g,'')
+  if(!val){ hint.textContent=''; input.classList.remove('err'); return true }
+  if(!/^\+?[0-9]{7,15}$/.test(clean)){
+    hint.textContent='Enter a valid phone number including country code (e.g. +1 555 000 0000)'
+    hint.className='form-hint err'; input.classList.add('err'); return false
+  }
+  hint.textContent=''; hint.className='form-hint'; input.classList.remove('err'); return true
+}
+
+function isDuplicatePhone(phone){
+  const clean = phone.replace(/[\s\-\(\)]/g,'')
+  return S.leads.some(l=>{
+    const lclean = l.phone.replace(/[\s\-\(\)]/g,'')
+    return lclean===clean && l.status!=='unsubscribed'
+  })
+}
+
+// ═══════════════════════════════════════════════════════════
+// LEAD MANAGEMENT
+// ═══════════════════════════════════════════════════════════
+let selCh=['whatsapp','sms','call']
+let csvData=[]
+
+function toggleCh(el){
+  el.classList.toggle('on')
+  selCh=[...document.querySelectorAll('.chp.on')].map(e=>e.dataset.ch)
+  renderSeqPreview()
+}
+
+function resetAddForm(){
+  selCh=['whatsapp','sms','call']
+  document.querySelectorAll('.chp').forEach(e=>e.classList.add('on'))
+}
+
+async function submitLead(){
+  const fn=g('f-fn').value.trim(), ln=g('f-ln').value.trim()
+  const phone=g('f-phone').value.trim()
+  const ctx=g('f-ctx').value.trim(), notes=g('f-notes').value.trim(), biz=g('f-biz').value.trim()
+
+  if(!fn){ toast('','Please enter a first name','','err'); return }
+  if(!phone){ toast('','Please enter a phone number','','err'); return }
+  if(!validatePhone(g('f-phone'))){ toast('','Invalid phone number','Check the format and include the country code','err'); return }
+  if(!ctx){ toast('','Please describe their interest','This helps personalise messages','err'); return }
+  if(!selCh.length){ toast('','No channels selected','Choose at least one channel','err'); return }
+  if(isDuplicatePhone(phone)){
+    toast('','Duplicate phone number','A lead with this number already exists and is active','warn'); return
+  }
+
+  const btn=g('submit-btn')
+  btn.disabled=true; btn.textContent='Starting sequence…'
+
+  // Use backend if connected (real messages), else simulate locally
+  if(BACKEND_URL){
+    const data = await api('POST','/leads',{ name:fn+(ln?' '+ln:''), phone, context:ctx, notes, business:biz, channels:[...selCh] }, S.token)
+    btn.disabled=false; btn.textContent='Start follow-up sequence'
+    if(!data){ toast('','Could not reach backend','Check your connection and try again','err'); return }
+    if(!data.ok){ toast('',data.error||'Could not add lead','','err'); return }
+    // Refresh from backend
+    await loadLeadsFromBackend()
+    await loadActivityFromBackend()
+    updateMetrics()
+    g('nb-leads').textContent=S.leads.length
+  } else {
+    // Offline / demo mode — simulate locally
+    const lead={
+      id:'l_'+Date.now(), name:fn+(ln?' '+ln:''), phone, context:ctx,
+      notes, business:biz, channels:[...selCh], status:'active',
+      currentStep:0, totalSent:0, repliedAt:null, convertedAt:null,
+      optedOutAt:null, createdAt:new Date().toISOString(), nextFollowUpAt:null
+    }
+    S.leads.unshift(lead)
+    await triggerStep(lead,1)
+    saveDB(); updateMetrics()
+    g('nb-leads').textContent=S.leads.length
+    btn.disabled=false; btn.textContent='Start follow-up sequence'
+  }
+
+  ;['f-fn','f-ln','f-phone','f-ctx','f-notes','f-biz'].forEach(id=>g(id).value='')
+  g('f-phone-hint').textContent=''
+  toast('✓',`${fn} added`,`Sequence started across ${selCh.length} channel${selCh.length>1?'s':''}`, 'ok')
+  setTimeout(()=>sv('dashboard',document.querySelector('[data-v=dashboard]')),800)
+}
+
+async function triggerStep(lead, stepNum){
+  const cfg=S.seq.find(s=>s.step===stepNum&&s.enabled)
+  if(!cfg){ scheduleNext(lead,stepNum); return }
+  const channel=lead.channels.includes(cfg.channel)?cfg.channel:lead.channels[0]
+  if(!channel){ markCompleted(lead); saveDB(); return }
+
+  const msg=await personalizeMessage(lead,stepNum,channel)
+  const leadId = lead._id||lead.id
+  const act={
+    id:'a_'+Date.now()+'_'+Math.random(), leadId:leadId, leadName:lead.name,
+    type:channel, direction:'outbound', body:msg, status:'queued',
+    step:stepNum, createdAt:new Date().toISOString(),
+    deliveryStatus:'queued', twilioSid:null
+  }
+  S.activity.unshift(act)
+  lead.totalSent++; lead.currentStep=stepNum
+
+  // Attempt send — returns false if no backend connected yet
+  const sent=await sendViaAPI(channel, lead.phone, msg, act)
+  act.status=sent?'sent':'simulated'
+  act.deliveryStatus=sent?'sent':'simulated'
+
+  scheduleNext(lead,stepNum)
+  saveDB()
+  if(curView==='activity') renderActivityLog()
+  if(curView==='dashboard') renderDashboard()
+}
+
+function scheduleNext(lead, currentStep){
+  const nextCfg=S.seq.find(s=>s.step===currentStep+1&&s.enabled)
+  if(!nextCfg||currentStep>=4){ markCompleted(lead); return }
+  lead.nextFollowUpAt=addDaysISO(new Date(), nextCfg.delayDays||0)
+}
+
+function markCompleted(lead){
+  if(lead.status==='active') lead.status='completed'
+  lead.nextFollowUpAt=null
+}
+
+// sendViaAPI: calls the real backend if BACKEND_URL is set, otherwise simulates
+async function sendViaAPI(channel, to, body, actLog){
+  if(!BACKEND_URL){
+    actLog.status='simulated'; actLog.deliveryStatus='simulated'; return false
+  }
+  try{
+    const token = S.token || sessionStorage.getItem('cc_token') || ''
+    const res = await fetch(BACKEND_URL+'/messages/send',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},
+      body:JSON.stringify({leadId:actLog.leadId, channel, body})
+    })
+    const data = await res.json()
+    if(data && data.ok){
+      actLog.status='sent'; actLog.deliveryStatus='sent'; actLog.twilioSid=data.sid||''
+      return true
+    }
+    actLog.status='failed'; actLog.deliveryStatus='failed'
+    return false
+  }catch(err){
+    console.warn('[sendViaAPI]', err.message)
+    actLog.status='failed'; actLog.deliveryStatus='failed'
+    return false
+  }
+}
+
+// Scheduler: refreshes data every 60s when BACKEND_URL is set
+// When backend is connected, the backend cron handles actual sending
+// This scheduler only refreshes frontend state + runs locally in demo mode
+function startScheduler(){
+  setInterval(async()=>{
+    if(BACKEND_URL){
+      // Refresh leads and activity from backend (picks up cron-sent messages)
+      await loadLeadsFromBackend()
+      await loadActivityFromBackend()
+      renderAll()
+      return
+    }
+    // Offline demo mode: fire steps locally
+    const now=new Date()
+    const due=S.leads.filter(l=>l.status==='active'&&l.nextFollowUpAt&&new Date(l.nextFollowUpAt)<=now)
+    for(const lead of due){
+      const nextStep=lead.currentStep+1
+      if(nextStep>4){ markCompleted(lead); continue }
+      await triggerStep(lead,nextStep)
+    }
+    if(due.length>0){ saveDB(); renderAll() }
+  }, 60000)
+}
+
+function optOut(leadId){
+  const lead=S.leads.find(l=>l.id===leadId||l._id===leadId)
+  if(!lead) return
+  openModal('Mark as opted out?',`${lead.name} will be unsubscribed. No further messages will be sent.`,null,async()=>{
+    const id = lead._id||lead.id
+    if(BACKEND_URL){
+      const data = await api('PATCH',`/leads/${id}`,{status:'unsubscribed'}, S.token)
+      if(!data||!data.ok){ toast('','Could not update lead',data?.error||'','err'); return }
+    }
+    lead.status='unsubscribed'; lead.nextFollowUpAt=null; lead.optedOutAt=new Date().toISOString()
+    S.activity.unshift({id:'a_'+Date.now(),leadId:id,leadName:lead.name,type:'reply',direction:'inbound',body:'STOP — opted out',status:'received',step:lead.currentStep,createdAt:new Date().toISOString(),deliveryStatus:'received'})
+    saveDB(); renderAll()
+    toast('','Opted out',`${lead.name} will no longer receive messages`,'warn')
+  })
+}
+
+function markConverted(leadId){
+  const lead=S.leads.find(l=>l.id===leadId||l._id===leadId)
+  if(!lead) return
+  openModal('Mark as converted?',`Mark ${lead.name} as a converted customer?`,null,async()=>{
+    const id = lead._id||lead.id
+    if(BACKEND_URL){
+      const data = await api('PATCH',`/leads/${id}`,{status:'converted'}, S.token)
+      if(!data||!data.ok){ toast('','Could not update lead',data?.error||'','err'); return }
+    }
+    lead.status='converted'; lead.convertedAt=new Date().toISOString(); lead.nextFollowUpAt=null
+    saveDB(); renderAll(); closeDetailPanel()
+    toast('✓',`${lead.name} converted`,'Marked as a customer','ok')
+  })
+}
+
+function deleteLead(leadId){
+  const lead=S.leads.find(l=>l.id===leadId||l._id===leadId)
+  if(!lead) return
+  openModal('Delete lead?',`Permanently delete ${lead.name} and all their message history? This cannot be undone.`,'danger',async()=>{
+    const id = lead._id||lead.id
+    if(BACKEND_URL){
+      const data = await api('DELETE',`/leads/${id}`,null, S.token)
+      if(!data||!data.ok){ toast('','Could not delete lead',data?.error||'','err'); return }
+    }
+    S.leads=S.leads.filter(l=>l.id!==leadId&&l._id!==leadId)
+    S.activity=S.activity.filter(a=>a.leadId!==leadId)
+    saveDB(); renderAll(); closeDetailPanel()
+    toast('','Deleted',lead.name+' has been removed','err')
+  })
+}
+
+function simulateReply(leadId){
+  const lead=S.leads.find(l=>(l._id||l.id)===leadId)
+  if(!lead||lead.status==='unsubscribed') return
+  const id = lead._id||lead.id
+  const replies=[
+    'Yes, still interested! When can we talk?',
+    'Thanks for following up. What are the pricing options?',
+    "Sorry for the late reply — let's connect this week.",
+    "I'd love to learn more. Can you send some info?",
+    'Still thinking about it. Give me a couple more days.'
+  ]
+  const msg=replies[Math.floor(Math.random()*replies.length)]
+  S.activity.unshift({id:'a_'+Date.now(),leadId:id,leadName:lead.name,type:'reply',direction:'inbound',body:msg,status:'received',step:lead.currentStep,createdAt:new Date().toISOString(),deliveryStatus:'received'})
+  if(lead.status==='active'){ lead.status='replied'; lead.repliedAt=new Date().toISOString(); lead.nextFollowUpAt=null }
+  if(BACKEND_URL){ api('PATCH',`/leads/${id}`,{status:'replied'},S.token) }
+  saveDB(); renderAll()
+  toast('↩',`${lead.name} replied`,msg.substring(0,55)+'…','info')
+}
+
+// ═══════════════════════════════════════════════════════════
+// CSV IMPORT
+// ═══════════════════════════════════════════════════════════
+function csvDrag(e){ e.preventDefault(); g('csv-zone').classList.add('drag') }
+function csvDragLeave(){ g('csv-zone').classList.remove('drag') }
+function csvDrop(e){ e.preventDefault(); g('csv-zone').classList.remove('drag'); const f=e.dataTransfer.files[0]; if(f) processCSV(f) }
+function handleCSV(input){ if(input.files[0]) processCSV(input.files[0]) }
+
+function processCSV(file){
+  const reader=new FileReader()
+  reader.onload=(e)=>{
+    const lines=e.target.result.split('\n').filter(l=>l.trim())
+    csvData=[]
+    const start=lines[0].toLowerCase().includes('name')?1:0
+    for(let i=start;i<lines.length;i++){
+      const cols=lines[i].split(',').map(c=>c.trim().replace(/^"|"$/g,''))
+      const phone=cols[1]||''
+      const clean=phone.replace(/[\s\-\(\)]/g,'')
+      if(cols.length>=2&&cols[0]&&/^\+?[0-9]{7,15}$/.test(clean)){
+        csvData.push({name:cols[0],phone,context:cols[2]||'No context provided'})
+      }
+    }
+    g('csv-tbody').innerHTML=csvData.slice(0,5).map(r=>`<tr><td>${r.name}</td><td>${r.phone}</td><td>${r.context.substring(0,50)}</td></tr>`).join('')
+    g('csv-count').textContent=csvData.length+' valid leads'+(csvData.length>5?` (showing first 5)`:'')
+    g('csv-preview').classList.add('on')
+  }
+  reader.readAsText(file)
+}
+
+async function importCSV(){
+  if(!csvData.length) return
+  const btn=document.querySelector('.btn-import')
+  btn.disabled=true; btn.textContent='Importing…'
+  let imported=0, skipped=0
+  for(const row of csvData){
+    if(isDuplicatePhone(row.phone)){ skipped++; continue }
+    if(BACKEND_URL){
+      const data = await api('POST','/leads',{
+        name:row.name, phone:row.phone, context:row.context,
+        notes:'', business:'', channels:[...selCh]
+      }, S.token)
+      if(data&&data.ok){
+        S.leads.unshift(data.lead)
+        imported++
+      } else {
+        skipped++
+      }
+    } else {
+      // Offline demo mode
+      const lead={id:'l_'+Date.now()+'_'+Math.random(),name:row.name,phone:row.phone,context:row.context,notes:'',business:'',channels:[...selCh],status:'active',currentStep:0,totalSent:0,repliedAt:null,convertedAt:null,optedOutAt:null,createdAt:new Date().toISOString(),nextFollowUpAt:null}
+      S.leads.unshift(lead)
+      await triggerStep(lead,1)
+      imported++
+    }
+    await new Promise(r=>setTimeout(r,200))
+  }
+  saveDB(); renderAll()
+  csvData=[]; g('csv-preview').classList.remove('on'); g('csv-file').value=''
+  btn.disabled=false; btn.textContent='Import leads'
+  const msg = skipped>0 ? `${imported} imported, ${skipped} skipped (duplicates or errors)` : 'Sequences started for all leads'
+  toast('✓',`${imported} leads imported`,msg,'ok')
+}
+
+// ═══════════════════════════════════════════════════════════
+// SEQUENCE CONFIG
+// ═══════════════════════════════════════════════════════════
+function renderSeqBuilder(){
+  const numColors=[
+    {bg:'#dcfce7',color:'#16a34a',border:'#bbf7d0'},
+    {bg:'#dbeafe',color:'#2563eb',border:'#bfdbfe'},
+    {bg:'#fef3c7',color:'#d97706',border:'#fde68a'},
+    {bg:'#ede9fe',color:'#7c3aed',border:'#ddd6fe'}
+  ]
+  const channels=[
+    {key:'whatsapp',label:'💬 WhatsApp',hint:'Conversational tone, under 150 words. Use {name} for first name.'},
+    {key:'sms',     label:'📱 SMS',     hint:'Under 160 characters. Short and direct. Use {name}.'},
+    {key:'call',    label:'📞 Call',    hint:'Spoken aloud — natural language, under 50 words. No emojis.'},
+  ]
+  g('seq-list').innerHTML=S.seq.map((s,i)=>{
+    const cm = S.settings.customMessages || {}
+    const tabsHtml = channels.map((ch,ci)=>`
+      <div class="seq-msg-tab${ci===0?' active':''}" onclick="switchMsgTab(event,'step${s.step}','${ch.key}')">${ch.label}</div>
+    `).join('')
+    const panelsHtml = channels.map((ch,ci)=>{
+      const key = 'step'+s.step+'_'+ch.key
+      const val = cm[key] || ''
+      return `<div class="seq-msg-panel${ci===0?' active':''}" id="panel_${key}">
+        <textarea class="seq-msg-area" id="msg_${key}" placeholder="Leave blank to use auto-generated template — or write your own message here..." oninput="liveUpdateMsg('${key}',this.value)">${val}</textarea>
+        <div class="seq-msg-actions">
+          <span class="seq-msg-hint">${ch.hint}</span>
+          <button class="btn-reset-msg" onclick="resetMsg('${key}')" title="Clear custom message — revert to template">Reset</button>
+          <button class="btn-ai-gen" onclick="aiGenMsg('${key}',${s.step},'${ch.key}')" id="aibtn_${key}">✦ AI Write</button>
+        </div>
+      </div>`
+    }).join('')
+
+    return `<div class="seq-step" id="seqstep_${i}">
+      <div class="seq-step-header" onclick="toggleSeqStep(${i})">
+        <div class="ss-num" style="background:${numColors[i].bg};color:${numColors[i].color};border-color:${numColors[i].border}">${s.step}</div>
+        <div class="ss-icon">${s.icon}</div>
+        <div class="ss-body">
+          <div class="ss-title">${s.label}</div>
+          <div class="ss-meta">
+            Send after
+            <input class="ss-delay" type="number" min="0" max="30" value="${s.delayDays}"
+              onchange="S.seq[${i}].delayDays=parseInt(this.value)||0;renderSeqPreview()"
+              onclick="event.stopPropagation()">
+            day${s.delayDays===1?'':'s'}
+            ${s.delayDays===0?'<span style="color:var(--text3)">(immediately)</span>':''}
+            ${(()=>{const k='step'+s.step+'_'+(s.channel||'whatsapp');return (S.settings.customMessages||{})[k]?'<span style="font-size:10px;background:var(--green-light);color:var(--green);padding:2px 7px;border-radius:99px;font-weight:600;margin-left:6px">Custom</span>':''})()}
+          </div>
+        </div>
+        <div class="toggle${s.enabled?' on':''}"
+          onclick="event.stopPropagation();S.seq[${i}].enabled=!S.seq[${i}].enabled;this.classList.toggle('on');renderSeqPreview()"
+          title="${s.enabled?'Enabled — click to disable':'Disabled — click to enable'}"></div>
+        <span class="seq-expand-icon">▼</span>
+      </div>
+      <div class="seq-step-body" id="seqbody_${i}">
+        <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">Message content</div>
+        <div class="seq-msg-tab-row">${tabsHtml}</div>
+        ${panelsHtml}
+      </div>
+    </div>`
+  }).join('')
+}
+
+function toggleSeqStep(i){
+  const body = g('seqbody_'+i)
+  if(!body) return
+  const isOpen = body.classList.toggle('open')
+  const header = body.previousElementSibling
+  if(header){
+    const icon = header.querySelector('.seq-expand-icon')
+    if(icon) icon.style.transform = isOpen ? 'rotate(180deg)' : ''
+  }
+}
+
+function switchMsgTab(e, stepKey, channel){
+  e.stopPropagation()
+  const container = e.target.closest('.seq-step-body')
+  if(!container) return
+  container.querySelectorAll('.seq-msg-tab').forEach(t=>t.classList.remove('active'))
+  container.querySelectorAll('.seq-msg-panel').forEach(p=>p.classList.remove('active'))
+  e.target.classList.add('active')
+  const panel = container.querySelector('#panel_'+stepKey+'_'+channel)
+  if(panel) panel.classList.add('active')
+}
+
+function resetMsg(key){
+  const ta = g('msg_'+key)
+  if(!ta) return
+  openModal('Reset message?','This will clear your custom message for this step and channel. The auto-generated template will be used instead.',null,()=>{
+    ta.value = ''
+    if(S.settings.customMessages) delete S.settings.customMessages[key]
+    saveDB()
+    renderSeqBuilder()
+    toast('','Message reset','Template will be used for this step','ok')
+  })
+}
+
+async function aiGenMsg(key, step, channel){
+  const ta  = g('msg_'+key)
+  const btn = g('aibtn_'+key)
+  if(!ta || !btn) return
+  if(!BACKEND_URL){
+    toast('','Backend not connected','Connect your backend to use AI message generation','warn')
+    return
+  }
+  btn.disabled = true; btn.textContent = '✦ Writing…'
+  // Use first active lead for context if available, otherwise generic
+  const sampleLead = S.leads.find(l=>l.status==='active') || S.leads[0]
+  if(!sampleLead && !BACKEND_URL){
+    toast('','Add a lead first','AI needs a lead context to generate a personalised message','warn')
+    btn.disabled=false; btn.textContent='✦ AI Write'; return
+  }
+  try{
+    const data = await api('POST','/messages/generate',{
+      leadId: sampleLead?._id || sampleLead?.id || null,
+      step, channel,
+      senderName:  S.settings.senderName  || S.settings.name  || '',
+      senderPhone: S.settings.senderPhone || '',
+      signOff:     S.settings.signOff     || '',
+    }, S.token)
+    if(data && data.ok && data.body){
+      ta.value = data.body
+      toast('✓','AI message generated','Review it then click Save changes','ok')
+    } else if(data && !data.ok){
+      toast('','Could not generate',data.error||'','err')
+    }
+  }catch(e){
+    toast('','AI generation failed',e.message,'err')
+  }finally{
+    btn.disabled = false; btn.textContent = '✦ AI Write'
+  }
+}
+
+async function saveSeq(){
+  // Collect custom messages from textareas
+  const cm = S.settings.customMessages || {}
+  document.querySelectorAll('.seq-msg-area').forEach(ta=>{
+    const key = ta.id.replace('msg_','')
+    if(ta.value.trim()) cm[key] = ta.value.trim()
+    else delete cm[key]
+  })
+  S.settings.customMessages = cm
+  saveDB()
+
+  if(BACKEND_URL){
+    const config={}
+    S.seq.forEach(s=>{
+      config['step'+s.step]={ enabled:s.enabled, delayDays:s.delayDays, channel:s.channel }
+    })
+    // Include custom messages in sequence config
+    await api('PATCH','/sequence',{ config, customMessages: cm }, S.token)
+    // Also persist to settings
+    await api('PATCH','/settings',{ customMessages: JSON.stringify(cm) }, S.token)
+  }
+  renderSeqBuilder()
+  toast('✓','Sequence saved','Custom messages saved. New leads will use these.','ok')
+}
+
+function renderSeqPreview(){
+  const el=g('pb-steps'); if(!el) return
+  const enabled=S.seq.filter(s=>s.enabled)
+  if(!enabled.length){ el.innerHTML='<div style="font-size:12px;color:var(--text3)">No steps enabled</div>'; return }
+  el.innerHTML=enabled.map((s,i)=>`
+    ${i>0?'<div class="pb-conn"></div>':''}
+    <div class="pb-step">
+      <div class="pb-dot">${i+1}</div>
+      <div class="pb-day">Day ${s.delayDays}${s.delayDays===0?' (now)':''}</div>
+      <div class="pb-ch">${s.icon} ${cap(s.channel)}</div>
+    </div>`).join('')
+}
+
+// ═══════════════════════════════════════════════════════════
+// LEAD DETAIL PANEL
+// ═══════════════════════════════════════════════════════════
+let detailLeadId=null
+function openDetailPanel(lead){
+  detailLeadId=lead._id||lead.id
+  g('dp-name').textContent=lead.name
+  g('dp-phone').textContent=lead.phone
+  renderDetailBody(lead)
+  g('detail-overlay').classList.add('on')
+}
+function closeDetailPanel(){ g('detail-overlay').classList.remove('on'); detailLeadId=null }
+function closeDetail(e){ if(e.target===g('detail-overlay')) closeDetailPanel() }
+
+function renderDetailBody(lead){
+  const leadUid = lead._id||lead.id
+  const activity=S.activity.filter(a=>a.leadId===leadUid||a.leadId===lead._id||a.leadId===lead.id)
+  const totalSteps=S.seq.filter(s=>s.enabled).length
+
+  g('dp-body').innerHTML=`
+    <div class="dp-actions">
+      ${lead.status!=='converted'?`<button class="dp-btn dp-btn-green" onclick="markConverted('${lead._id||lead.id}')">Mark converted</button>`:''}
+      ${lead.status==='active'?`<button class="dp-btn dp-btn-orange" onclick="simulateReply('${lead._id||lead.id}');renderDetailBody(S.leads.find(l=>(l._id||l.id)==='${lead._id||lead.id}'))">Simulate reply</button>`:''}
+      ${lead.status!=='unsubscribed'?`<button class="dp-btn dp-btn-orange" onclick="optOut('${lead._id||lead.id}')">Opt out</button>`:''}
+      <button class="dp-btn dp-btn-red" onclick="deleteLead('${lead._id||lead.id}')">Delete</button>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-sec-title">Status</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <span class="pill p-${lead.status}">${lead.status}</span>
+        <span style="font-size:12px;color:var(--text3)">Step ${lead.currentStep} of ${totalSteps}</span>
+        ${lead.nextFollowUpAt&&lead.status==='active'?`<span style="font-size:11px;color:var(--blue);font-family:'DM Mono',monospace">Next: ${formatDate(lead.nextFollowUpAt)}</span>`:''}
+      </div>
+      <div class="seq-progress">${S.seq.filter(s=>s.enabled).map((_,i)=>`<div class="sp-step ${i+1<lead.currentStep?'done':i+1===lead.currentStep?'current':''}"></div>`).join('')}</div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-sec-title">Details</div>
+      <div class="dp-field"><div class="dp-fl">Context</div><textarea class="dp-fi" id="edit-ctx-${lead._id||lead.id}">${lead.context}</textarea></div>
+      <div class="dp-field"><div class="dp-fl">Notes</div><input class="dp-fi" type="text" id="edit-notes-${lead._id||lead.id}" value="${lead.notes||''}"></div>
+      <button class="dp-save" onclick="saveLeadEdit('${lead._id||lead.id}')">Save changes</button>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-sec-title">Message history (${activity.length})</div>
+      <div class="dp-timeline">
+        ${activity.length===0?'<div style="font-size:12px;color:var(--text3)">No messages sent yet</div>':
+          activity.map(a=>{
+            const icons={whatsapp:'💬',sms:'📱',call:'📞',reply:'↩️'}
+            const statCls={sent:'tl-stat-sent',simulated:'tl-stat-sent',pending_backend:'tl-stat-sent',failed:'tl-stat-fail',received:'tl-stat-recv'}
+            const statLabel={sent:'sent',simulated:'simulated (no backend)',pending_backend:'queued — needs backend',failed:'failed',received:'received'}
+            return `<div class="tl-item">
+              <div class="tl-icon ${a.type==='reply'?'ai-reply':a.type==='call'?'ai-call':a.type==='sms'?'ai-sms':'ai-wa'}">${icons[a.type]||'•'}</div>
+              <div class="tl-body">
+                <div class="tl-top">
+                  <div class="tl-label">${a.direction==='outbound'?`Step ${a.step} — ${cap(a.type)}`:'Reply received'}</div>
+                  <div class="tl-time">${timeAgo(a.createdAt)}</div>
+                </div>
+                <div class="tl-msg">${a.body}</div>
+                <div class="tl-stat ${statCls[a.deliveryStatus||a.status]||'tl-stat-sent'}">${statLabel[a.deliveryStatus||a.status]||a.status}</div>
+              </div>
+            </div>`
+          }).join('')}
+      </div>
+    </div>`
+}
+
+async function saveLeadEdit(leadId){
+  const lead=S.leads.find(l=>l.id===leadId||l._id===leadId)
+  if(!lead) return
+  const id = lead._id||lead.id
+  const ctx=g(`edit-ctx-${leadId}`)?.value.trim()
+  const notes=g(`edit-notes-${leadId}`)?.value.trim()
+  if(BACKEND_URL){
+    const update={}
+    if(ctx) update.context=ctx
+    if(notes!==undefined) update.notes=notes
+    const data = await api('PATCH',`/leads/${id}`,update, S.token)
+    if(!data||!data.ok){ toast('','Could not save changes',data?.error||'','err'); return }
+  }
+  if(ctx) lead.context=ctx
+  if(notes!==undefined) lead.notes=notes
+  saveDB(); renderLeadsTable()
+  toast('✓','Changes saved','Lead details updated','ok')
+}
+
+// ═══════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════
+function renderAll(){
+  updateMetrics()
+  if(curView==='dashboard') renderDashboard()
+  if(curView==='leads') renderLeadsTable()
+  if(curView==='activity') renderActivityLog()
+  g('nb-leads').textContent=S.leads.length
+}
+
+function updateMetrics(){
+  const total=S.leads.length
+  const sent=S.activity.filter(a=>a.direction==='outbound').length
+  const replies=S.activity.filter(a=>a.direction==='inbound').length
+  const engaged=S.leads.filter(l=>l.status==='replied'||l.status==='converted').length
+  const rate=total>0?Math.round((engaged/total)*100):0
+  animNum('m-total',total); animNum('m-sent',sent); animNum('m-replies',replies)
+  g('m-rate').textContent=total>0?rate+'%':'—'
+  g('m-total-c').textContent=total>0?`${S.leads.filter(l=>l.status==='active').length} active`:'Get started by adding a lead'
+  g('m-total-c').className='mc-ch '+(total>0?'ch-up':'ch-neu')
+  g('m-replies-c').textContent=total>0?`${rate}% response rate`:'from leads'
+}
+
+let nA={}
+function animNum(id,target){
+  const el=g(id); const start=parseInt(el.textContent)||0; if(start===target) return
+  if(nA[id]) cancelAnimationFrame(nA[id])
+  const t0=performance.now()
+  const tick=now=>{ const t=Math.min((now-t0)/500,1),e=1-Math.pow(1-t,3); el.textContent=Math.round(start+(target-start)*e); if(t<1) nA[id]=requestAnimationFrame(tick) }
+  nA[id]=requestAnimationFrame(tick)
+}
+
+async function renderDashboard(){
+  if(BACKEND_URL){
+    const data = await api('GET','/dashboard',null,S.token)
+    if(data&&data.ok){
+      const s = data.stats
+      animNum('m-total',   s.totalLeads)
+      animNum('m-sent',    s.totalSent)
+      animNum('m-replies', s.totalReplies)
+      g('m-rate').textContent = s.totalLeads>0 ? s.replyRate+'%' : '—'
+      g('m-total-c').textContent = s.totalLeads>0 ? s.activeLeads+' active' : 'Get started by adding a lead'
+      g('m-total-c').className = 'mc-ch '+(s.totalLeads>0?'ch-up':'ch-neu')
+      g('m-replies-c').textContent = s.totalLeads>0 ? s.replyRate+'% response rate' : 'from leads'
+      g('nb-leads').textContent = s.totalLeads
+      renderChartFromData(data.leadsOverTime)
+      renderChBreakdownFromData(data.channelBreakdown, s.totalSent)
+      renderRecentAct()
+      return
+    }
+  }
+  updateMetrics(); renderChart(); renderChBreakdown(); renderRecentAct()
+}
+
+function renderChartFromData(leadsOverTime){
+  const el=g('mini-chart'), lbl=g('chart-lbl')
+  const buckets=[]
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i)
+    const ds=d.toISOString().substring(0,10)
+    const entry = leadsOverTime?.find(e=>e._id===ds)
+    buckets.push({label:i===0?'Today':['Su','Mo','Tu','We','Th','Fr','Sa'][d.getDay()],count:entry?.count||0})
+  }
+  const max=Math.max(...buckets.map(b=>b.count),1)
+  const total=leadsOverTime?.reduce((s,e)=>s+(e.count||0),0)||0
+  lbl.textContent=total+' this week'
+  el.innerHTML=buckets.map(b=>`<div class="bg"><div class="bw"><div class="bar" style="height:${Math.max((b.count/max)*100,b.count>0?10:2)}%"></div></div><div class="bl">${b.label}</div></div>`).join('')
+}
+
+function renderChBreakdownFromData(channelBreakdown, totalSent){
+  const el=g('ch-breakdown'), lbl=g('ch-lbl')
+  lbl.textContent=(totalSent||0)+' sent'
+  const chs=[{key:'whatsapp',label:'💬 WhatsApp',color:'var(--green)'},{key:'sms',label:'📱 SMS',color:'var(--blue)'},{key:'call',label:'📞 Calls',color:'var(--orange)'}]
+  el.innerHTML=chs.map(c=>{
+    const cnt = channelBreakdown?.find(b=>b._id===c.key)?.count||0
+    const pct = totalSent>0?Math.round((cnt/totalSent)*100):0
+    return `<div class="ch-row"><div class="ch-row-top"><span>${c.label}</span><span style="font-size:12px;color:var(--text3)">${cnt} (${pct}%)</span></div><div class="ch-track"><div class="ch-fill" style="width:${pct}%;background:${c.color}"></div></div></div>`
+  }).join('')
+}
+
+function renderChart(){
+  const el=g('mini-chart'), lbl=g('chart-lbl')
+  const buckets=[]
+  for(let i=6;i>=0;i--){
+    const d=new Date(); d.setDate(d.getDate()-i)
+    const ds=d.toISOString().substring(0,10)
+    const count=S.leads.filter(l=>l.createdAt.substring(0,10)===ds).length
+    buckets.push({label:i===0?'Today':['Su','Mo','Tu','We','Th','Fr','Sa'][d.getDay()],count})
+  }
+  const max=Math.max(...buckets.map(b=>b.count),1)
+  lbl.textContent=S.leads.length+' total'
+  el.innerHTML=buckets.map(b=>`<div class="bg"><div class="bw"><div class="bar" style="height:${Math.max((b.count/max)*100,b.count>0?10:2)}%"></div></div><div class="bl">${b.label}</div></div>`).join('')
+}
+
+function renderChBreakdown(){
+  const el=g('ch-breakdown'), lbl=g('ch-lbl')
+  const out=S.activity.filter(a=>a.direction==='outbound')
+  const total=out.length; lbl.textContent=total+' sent'
+  const chs=[
+    {key:'whatsapp',label:'💬 WhatsApp',color:'var(--green)'},
+    {key:'sms',label:'📱 SMS',color:'var(--blue)'},
+    {key:'call',label:'📞 Calls',color:'var(--orange)'}
+  ]
+  el.innerHTML=chs.map(c=>{
+    const cnt=out.filter(a=>a.type===c.key).length
+    const pct=total>0?Math.round((cnt/total)*100):0
+    return `<div class="ch-row">
+      <div class="ch-row-top"><span>${c.label}</span><span style="font-size:12px;color:var(--text3)">${cnt} (${pct}%)</span></div>
+      <div class="ch-track"><div class="ch-fill" style="width:${pct}%;background:${c.color}"></div></div>
+    </div>`
+  }).join('')
+}
+
+function renderRecentAct(){
+  const el=g('recent-activity')
+  const items=S.activity.slice(0,10)
+  if(!items.length){ el.innerHTML='<div class="empty"><div class="empty-ico">○</div><div class="empty-title">No activity yet</div><div class="empty-sub">Add a lead to get started</div></div>'; return }
+  el.innerHTML=items.map(a=>actHTML(a)).join('')
+}
+
+let activityFilter='all'
+function setActivityFilter(f,el){
+  activityFilter=f
+  document.querySelectorAll('#view-activity .fbtn').forEach(b=>b.classList.remove('on'))
+  if(el) el.classList.add('on')
+  renderActivityLog()
+}
+
+function renderActivityLog(){
+  const el=g('activity-wrap')
+  const q=(g('activity-search')?.value||'').toLowerCase()
+  let items = [...S.activity]
+  if(activityFilter==='outbound') items=items.filter(a=>a.direction==='outbound')
+  if(activityFilter==='inbound')  items=items.filter(a=>a.direction==='inbound')
+  if(q) items=items.filter(a=>a.leadName.toLowerCase().includes(q)||a.body.toLowerCase().includes(q))
+  if(!items.length){
+    el.innerHTML='<div class="empty"><div class="empty-ico">○</div><div class="empty-title">No activity'+(q?' matching "'+q+'"':'yet')+'</div><div class="empty-sub">'+(q?'Try a different search':'Add a lead to start sending messages')+'</div></div>'
+    return
+  }
+  el.innerHTML=`<div class="alist">${items.map(a=>actHTML(a)).join('')}</div>`
+}
+
+function actHTML(a){
+  const icons={whatsapp:'💬',sms:'📱',call:'📞',reply:'↩️'}
+  const cls={whatsapp:'ai-wa',sms:'ai-sms',call:'ai-call',reply:'ai-reply'}
+  const statCls={sent:'as-sent',simulated:'as-sent',pending_backend:'as-sched',queued:'as-sched',failed:'as-fail',received:'as-recv'}
+  const statLabel={sent:'Sent',simulated:'Simulated',pending_backend:'Queued — connect backend to send',failed:'Failed',received:'Received',queued:'Queued'}
+  const label=a.direction==='outbound'?`Step ${a.step} — ${cap(a.type)}`:`${a.leadName} replied`
+  return `<div class="ai" onclick="const l=S.leads.find(x=>(x._id||x.id)==='${a.leadId}');if(l)openDetailPanel(l)">
+    <div class="ai-ico ${cls[a.type]||'ai-sms'}">${icons[a.type]||'•'}</div>
+    <div class="ai-body">
+      <div class="ai-name">${a.leadName}</div>
+      <div class="ai-detail">${label}</div>
+      <div class="ai-msg">${a.body}</div>
+      <div class="ai-status ${statCls[a.deliveryStatus||a.status]||'as-sent'}">${statLabel[a.deliveryStatus||a.status]||a.status}</div>
+    </div>
+    <div class="ai-time">${timeAgo(a.createdAt)}</div>
+  </div>`
+}
+
+let leadsFilter='all'
+function setFilter(f,el){
+  leadsFilter=f
+  document.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('on'))
+  el.classList.add('on')
+  renderLeadsTable()
+}
+
+function renderLeadsTable(){
+  const tbody=g('leads-tbody')
+  const q=g('lead-search')?.value.toLowerCase()||''
+  let leads=S.leads
+  if(leadsFilter!=='all') leads=leads.filter(l=>l.status===leadsFilter)
+  if(q) leads=leads.filter(l=>l.name.toLowerCase().includes(q)||l.phone.includes(q)||l.context.toLowerCase().includes(q))
+  if(!leads.length){
+    tbody.innerHTML=`<tr><td colspan="8"><div class="empty"><div class="empty-ico">○</div><div class="empty-title">${leadsFilter==='all'?'No leads yet':'No '+leadsFilter+' leads'}</div><div class="empty-sub">${leadsFilter==='all'?'Add your first lead to get started':'Try a different filter'}</div></div></td></tr>`
+    return
+  }
+  const stepLabels=['','Step 1','Step 2','Step 3','Step 4','Done']
+  tbody.innerHTML=leads.map(l=>`
+    <tr onclick="openDetailPanel(S.leads.find(x=>(x._id||x.id)==='${l.id||l._id}'))">
+      <td class="tdn">${l.name}</td>
+      <td class="tdp">${l.phone}</td>
+      <td class="tdc" title="${l.context}">${l.context}</td>
+      <td><div class="ch-icons">${l.channels.map(c=>`<div class="ch-ic">${c==='whatsapp'?'💬':c==='sms'?'📱':'📞'}</div>`).join('')}</div></td>
+      <td><span class="sbadge">${stepLabels[l.currentStep]||'—'}</span></td>
+      <td><span class="pill p-${l.status}">${l.status}</span></td>
+      <td class="tdd">${l.nextFollowUpAt&&l.status==='active'?formatDate(l.nextFollowUpAt):'—'}</td>
+      <td class="tdd">${formatDate(l.createdAt)}</td>
+    </tr>`).join('')
+}
+
+function updateUserUI(){
+  if(!S.user) return
+  const init=S.user.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()
+  g('u-avatar').textContent=init
+  g('u-name').textContent=S.user.name
+  g('u-email').textContent='Click to sign out'
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODAL
+// ═══════════════════════════════════════════════════════════
+let modalCb=null
+function openModal(title,body,type,onConfirm){
+  g('mod-title').textContent=title
+  g('mod-body').textContent=body
+  modalCb=onConfirm
+  const ok=g('mod-ok')
+  ok.className=type==='danger'?'btn-mod-danger':'btn-mod-ok'
+  ok.textContent=type==='danger'?'Delete':'Confirm'
+  g('modal-bg').classList.add('on')
+}
+function closeModal(){ g('modal-bg').classList.remove('on'); modalCb=null }
+g('mod-ok').onclick=()=>{ if(modalCb) modalCb(); closeModal() }
+
+// ═══════════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════════
+function toast(icon,title,msg,type='info'){
+  const stack=g('toast-stack')
+  const el=document.createElement('div')
+  const tc={ok:'t-ok',err:'t-err',info:'t-info',warn:'t-warn'}[type]||'t-info'
+  el.className=`toast ${tc}`
+  el.innerHTML=`<div class="t-ico">${icon}</div><div><div class="t-title">${title}</div>${msg?`<div class="t-msg">${msg}</div>`:''}</div>`
+  stack.appendChild(el)
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')))
+  setTimeout(()=>{ el.classList.remove('show'); setTimeout(()=>el.remove(),400) },4000)
+}
+
+// ═══════════════════════════════════════════════════════════
+// UTILS
+// ═══════════════════════════════════════════════════════════
+function g(id){ return document.getElementById(id) }
+function setVal(id,val){ const el=g(id); if(el) el.value=val }
+function cap(s){ return s?s[0].toUpperCase()+s.slice(1):'' }
+function addDaysISO(d,days){ const x=new Date(d); x.setDate(x.getDate()+days); return x.toISOString() }
+function formatDate(iso){ return new Date(iso).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) }
+function timeAgo(iso){
+  const s=Math.floor((Date.now()-new Date(iso).getTime())/1000)
+  if(s<5) return 'just now'
+  if(s<60) return s+'s ago'
+  if(s<3600) return Math.floor(s/60)+'m ago'
+  if(s<86400) return Math.floor(s/3600)+'h ago'
+  return Math.floor(s/86400)+'d ago'
+}
+
+// ═══════════════════════════════════════════════════════════
+// KEYBOARD
+// ═══════════════════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){ closeModal(); closeDetailPanel() }
+  if(e.key==='Enter'){
+    if(g('page-login').classList.contains('active'))  doLogin()
+    if(g('page-signup').classList.contains('active')) doSignup()
+    if(g('page-forgot').classList.contains('active')) doForgotPassword()
+  }
+})
+
+// ═══════════════════════════════════════════════════════════
+// MESSAGE PREVIEW
+// ═══════════════════════════════════════════════════════════
+function liveUpdateMsg(key, val){
+  if(!S.settings.customMessages) S.settings.customMessages = {}
+  if(val.trim()) S.settings.customMessages[key] = val.trim()
+  else delete S.settings.customMessages[key]
+  updateMessagePreview()
+}
+
+function updateMessagePreview(){
+  const el = g('msg-preview')
+  if(!el) return
+
+  const sender  = (g('set-sender-name')  ? g('set-sender-name').value.trim()  : '') || S.settings.senderName  || S.settings.name || ''
+  const phone   = (g('set-sender-phone') ? g('set-sender-phone').value.trim() : '') || S.settings.senderPhone || ''
+  const signOff = (g('set-sign-off')     ? g('set-sign-off').value.trim()     : '') || S.settings.signOff     || sender
+  const company = (g('set-co')           ? g('set-co').value.trim()           : '') || S.settings.company     || ''
+
+  if(!sender){
+    el.innerHTML = '<div style="font-size:12px;color:var(--text3);font-style:italic">Fill in your name above to see a preview</div>'
+    return
+  }
+
+  const intro     = signOff + (company ? ' from ' + company : '')
+  const phoneNote = phone ? ' You can reach me at ' + phone + '.' : ''
+  const cm        = S.settings.customMessages || {}
+
+  function resolveMsg(step, channel){
+    var key    = 'step' + step + '_' + channel
+    // Read live from the Sequences textarea if it is open
+    var liveEl = g('msg_' + key)
+    var custom = (liveEl && liveEl.value.trim()) ? liveEl.value.trim() : (cm[key] || '')
+    if(custom){
+      return {
+        text: custom
+          .replace(/\{name\}/gi,    '[Lead]')
+          .replace(/\{context\}/gi, '[their interest]')
+          .replace(/\{company\}/gi, company)
+          .replace(/\{phone\}/gi,   phone),
+        isCustom: true
+      }
+    }
+    var templates = {
+      '1_whatsapp': 'Hi [Lead], this is ' + intro + '. Just wanted to follow up on their interest. Happy to answer any questions — just reply here!',
+      '2_sms':      '[Lead], ' + sender + ' here. Still thinking it over? Happy to help — just reply.' + phoneNote,
+      '3_call':     'Hello [Lead], this is ' + intro + ' calling to follow up. Please call me back.' + phoneNote,
+      '4_whatsapp': 'Hi [Lead], ' + sender + ' here one last time. If you are still open to it I would love to connect — just reply. If not, no worries. Wishing you all the best!',
+    }
+    return { text: templates[step + '_' + channel] || '', isCustom: false }
+  }
+
+  var steps = [
+    { label:'WhatsApp — Step 1',       step:1, channel:'whatsapp' },
+    { label:'SMS — Step 2',            step:2, channel:'sms'      },
+    { label:'Phone call — Step 3',     step:3, channel:'call'     },
+    { label:'Final WhatsApp — Step 4', step:4, channel:'whatsapp' },
+  ]
+
+  el.innerHTML = steps.map(function(item){
+    var res = resolveMsg(item.step, item.channel)
+    if(!res.text) return ''
+    var badge = res.isCustom
+      ? '<span style="font-size:9px;font-weight:700;background:var(--green-light);color:var(--green);padding:1px 7px;border-radius:99px;margin-left:6px">Custom</span>'
+      : '<span style="font-size:9px;color:var(--text3);margin-left:6px">template</span>'
+    return '<div style="margin-bottom:12px">'
+      + '<div style="display:flex;align-items:center;margin-bottom:5px">'
+      + '<span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.5px">' + item.label + '</span>'
+      + badge
+      + '</div>'
+      + '<div style="background:var(--bg);border:1px solid ' + (res.isCustom ? 'var(--green-mid)' : 'var(--border)') + ';border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2);line-height:1.6">'
+      + res.text
+      + '</div></div>'
+  }).join('')
+}
+// ═══════════════════════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════════════════════
+function exportLeadsCSV(){
+  if(!S.leads.length){ toast('','No leads to export','Add leads first','warn'); return }
+  const headers = ['Name','Phone','Status','Context','Notes','Step','Added','Next Follow-up']
+  const rows = S.leads.map(l=>[
+    '"'+(l.name||'').replace(/"/g,'""')+'"',
+    l.phone||'',
+    l.status||'',
+    '"'+(l.context||'').replace(/"/g,'""')+'"',
+    '"'+(l.notes||'').replace(/"/g,'""')+'"',
+    l.currentStep||0,
+    l.createdAt?new Date(l.createdAt).toLocaleDateString():'',
+    l.nextFollowUpAt?new Date(l.nextFollowUpAt).toLocaleDateString():''
+  ])
+  const csv = [headers.join(','), ...rows.map(r=>r.join(','))].join('\n')
+  const blob = new Blob([csv], {type:'text/csv'})
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href=url; a.download='coldcloud-leads-'+new Date().toISOString().substring(0,10)+'.csv'
+  a.click(); URL.revokeObjectURL(url)
+  toast('✓','Exported',S.leads.length+' leads downloaded as CSV','ok')
+}
+
+// ═══════════════════════════════════════════════════════════
+// FORGOT PASSWORD
+// ═══════════════════════════════════════════════════════════
+async function doForgotPassword(){
+  const email = g('forgot-email').value.trim().toLowerCase()
+  const err   = g('forgot-err')
+  const ok    = g('forgot-ok')
+  const btn   = document.querySelector('#page-forgot .btn-auth')
+  err.classList.remove('on'); ok.classList.remove('on')
+
+  if(!email){
+    err.textContent = 'Please enter your email address'
+    err.classList.add('on'); return
+  }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    err.textContent = 'Please enter a valid email address'
+    err.classList.add('on'); return
+  }
+
+  if(btn){ btn.disabled = true; btn.textContent = 'Sending…' }
+
+  try{
+    if(BACKEND_URL) await api('POST', '/auth/forgot-password', { email })
+    ok.textContent = 'If an account exists for ' + email + ', a reset link has been sent. Check your inbox.'
+    ok.classList.add('on')
+    g('forgot-email').value = ''
+  }catch(e){
+    err.textContent = 'Something went wrong. Please try again.'
+    err.classList.add('on')
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = 'Send reset link' }
+  }
+}
+
+// ═══════════════════════════════════════════════════════════
+// BOOT — reads ?mode= param set by landing page links
+// ═══════════════════════════════════════════════════════════
+;(function boot(){
+  if(checkSession()){ showApp(); return }
+  const params = new URLSearchParams(window.location.search)
+  const mode = params.get('mode')
+  if(mode === 'signup') showPage('signup')
+  else showPage('login')
+  // Clean the URL without reloading
+  if(mode && window.history.replaceState){
+    window.history.replaceState({}, '', window.location.pathname)
+  }
+})()
+</script>
+</body>
+</html>

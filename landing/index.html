@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ColdCloud — Follow-Up Automation for Growing Businesses</title>
+  <meta name="description" content="Automatically follow up with leads via WhatsApp, SMS, and phone calls. Close more deals without doing more work. Free to start.">
+  <meta property="og:title" content="ColdCloud — Follow-Up Automation">
+  <meta property="og:description" content="Stop losing leads. Automate your follow-ups via WhatsApp, SMS, and calls.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="canonical" href="https://coldcloud.io/">
+  <meta name="robots" content="index, follow">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+<!-- ============================================================
+     NAVIGATION
+     ============================================================ -->
+<header class="nav" role="banner">
+  <div class="nav-inner">
+
+    <a href="index.html" class="nav-brand" aria-label="ColdCloud home">
+      <div class="nav-logo-mark" aria-hidden="true">CC</div>
+      <span class="nav-logo-name">ColdCloud</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="#problem">Problem</a>
+      <a href="#solution">Solution</a>
+      <a href="#features">Features</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="#pricing">Pricing</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a href="https://cold-cloud.vercel.app/?mode=login" class="btn btn-ghost">Sign in</a>
+      <a href="https://cold-cloud.vercel.app/?mode=signup" class="btn btn-primary btn-sm">Get started free</a>
+    </div>
+
+    <button class="nav-toggle" id="nav-toggle" aria-label="Toggle menu" aria-expanded="false">☰</button>
+
+  </div>
+</header>
+
+<!-- Mobile menu -->
+<div class="nav-mobile" id="nav-mobile" role="navigation" aria-label="Mobile navigation">
+  <a href="#problem">Problem</a>
+  <a href="#solution">Solution</a>
+  <a href="#features">Features</a>
+  <a href="#how-it-works">How it works</a>
+  <a href="#pricing">Pricing</a>
+  <div class="nav-mobile-divider"></div>
+  <div class="nav-mobile-actions">
+    <a href="https://cold-cloud.vercel.app/?mode=login" class="btn btn-secondary">Sign in</a>
+    <a href="https://cold-cloud.vercel.app/?mode=signup" class="btn btn-primary">Get started free</a>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     HERO
+     ============================================================ -->
+<main>
+<section class="hero" aria-labelledby="hero-heading">
+  <div class="hero-inner">
+
+    <!-- Left: copy -->
+    <div class="hero-content">
+      <div class="hero-eyebrow reveal">
+        <span class="hero-eyebrow-dot" aria-hidden="true"></span>
+        Follow-up automation for sales teams
+      </div>
+      <h1 class="hero-title reveal reveal-delay-1" id="hero-heading">
+        Stop losing leads<br>
+        to <span class="highlight">silence</span>
+      </h1>
+      <p class="hero-sub reveal reveal-delay-2">
+        ColdCloud automatically follows up with every lead via WhatsApp, SMS, and phone calls — so you stay top of mind without doing it manually.
+      </p>
+      <div class="hero-actions reveal reveal-delay-3">
+        <a href="https://cold-cloud.vercel.app/?mode=signup" class="btn btn-primary btn-lg">
+          Start for free
+          <span aria-hidden="true">→</span>
+        </a>
+        <a href="#how-it-works" class="btn btn-secondary btn-lg">
+          See how it works
+        </a>
+      </div>
+      <div class="hero-trust reveal reveal-delay-4">
+        <span class="trust-item">Free forever</span>
+        <span class="trust-item">No card required</span>
+        <span class="trust-item">Set up in 5 minutes</span>
+      </div>
+    </div>
+
+    <!-- Right: app mockup -->
+    <div class="hero-visual reveal reveal-delay-2">
+      <div class="app-mockup">
+        <div class="mockup-bar">
+          <div class="mockup-dot dot-r" aria-hidden="true"></div>
+          <div class="mockup-dot dot-y" aria-hidden="true"></div>
+          <div class="mockup-dot dot-g" aria-hidden="true"></div>
+          <div class="mockup-title-bar">coldcloud.io/dashboard</div>
+        </div>
+        <div class="mockup-body">
+          <div class="mockup-metrics">
+            <div class="mm-card">
+              <div class="mm-label">Leads this week</div>
+              <div class="mm-value" data-count="24" data-suffix="">0</div>
+              <div class="mm-change up">↑ 8 active</div>
+            </div>
+            <div class="mm-card">
+              <div class="mm-label">Reply rate</div>
+              <div class="mm-value" data-count="34" data-suffix="%">0%</div>
+              <div class="mm-change up">↑ vs 12% avg</div>
+            </div>
+          </div>
+          <div class="mockup-feed-title">Recent activity</div>
+          <div class="mockup-feed" id="hero-feed" aria-live="polite" aria-label="Activity feed">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating badges -->
+      <div class="mockup-float mf-bottom-left" aria-hidden="true">
+        <div class="mf-icon">↩️</div>
+        <div class="mf-text">
+          <div class="mf-title">Sarah just replied</div>
+          <div class="mf-sub">"Yes, I'm interested!"</div>
+        </div>
+      </div>
+      <div class="mockup-float mf-top-right" style="padding:8px 16px;" aria-hidden="true">
+        <div class="mf-green-badge">+3 replies today</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+<!-- ============================================================
+     PROOF BAR
+     ============================================================ -->
+<div class="proof-bar" role="complementary" aria-label="Key statistics">
+  <div class="proof-bar-inner">
+    <span class="proof-label">Why it matters:</span>
+    <div class="proof-stat">
+      <strong>80%</strong>
+      <span>of sales need 5+ follow-ups</span>
+    </div>
+    <div class="proof-stat">
+      <strong>44%</strong>
+      <span>of salespeople give up after 1 attempt</span>
+    </div>
+    <div class="proof-stat">
+      <strong>98%</strong>
+      <span>WhatsApp open rate</span>
+    </div>
+    <div class="proof-stat">
+      <strong>5 min</strong>
+      <span>to get started</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     PROBLEM SECTION
+     ============================================================ -->
+<section id="problem" class="section" aria-labelledby="problem-heading">
+  <div class="container">
+    <div class="problem-grid">
+
+      <div class="problem-text">
+        <div class="section-label reveal">The problem</div>
+        <h2 class="section-title reveal reveal-delay-1" id="problem-heading">
+          Most leads go cold<br>
+          because of <em>no follow-up</em>
+        </h2>
+        <p class="section-sub reveal reveal-delay-2">
+          You get a lead. You send one message. They don't reply. You move on. That lead — and the revenue attached to it — is gone.
+        </p>
+        <div class="problem-list" style="margin-top:28px">
+          <div class="problem-item reveal reveal-delay-2">
+            <div class="problem-item-icon">⏰</div>
+            <div>
+              <div class="problem-item-title">No time to follow up manually</div>
+              <div class="problem-item-desc">Salespeople spend more time chasing than selling. Manually following up with 30+ leads every day isn't sustainable.</div>
+            </div>
+          </div>
+          <div class="problem-item reveal reveal-delay-3">
+            <div class="problem-item-icon">🤷</div>
+            <div>
+              <div class="problem-item-title">Leads fall through the cracks</div>
+              <div class="problem-item-desc">Without a system, the third and fourth follow-ups never happen. The deals that needed the most persistence get dropped.</div>
+            </div>
+          </div>
+          <div class="problem-item reveal reveal-delay-4">
+            <div class="problem-item-icon">💸</div>
+            <div>
+              <div class="problem-item-title">Revenue lost to inaction</div>
+              <div class="problem-item-desc">Studies show 80% of sales happen after the 5th touchpoint. Most businesses never get there.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="problem-stat-block reveal reveal-delay-2">
+        <div class="psb-number" data-count="80" data-suffix="%">0%</div>
+        <p class="psb-label">of sales require at least 5 follow-up attempts before closing</p>
+        <div class="psb-source">Source: National Sales Executive Association</div>
+        <div class="psb-divider"></div>
+        <div class="psb-stats">
+          <div>
+            <div class="psb-stat-num" data-count="44" data-suffix="%">0%</div>
+            <div class="psb-stat-label">of reps give up after 1 attempt</div>
+          </div>
+          <div>
+            <div class="psb-stat-num" data-count="22" data-suffix="%">0%</div>
+            <div class="psb-stat-label">give up after just 2 attempts</div>
+          </div>
+          <div>
+            <div class="psb-stat-num" data-count="12" data-suffix="%">0%</div>
+            <div class="psb-stat-label">make it to a 3rd attempt</div>
+          </div>
+          <div>
+            <div class="psb-stat-num" data-count="8" data-suffix="%">0%</div>
+            <div class="psb-stat-label">ever send a 5th follow-up</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SOLUTION SECTION
+     ============================================================ -->
+<section id="solution" class="section section-alt" aria-labelledby="solution-heading">
+  <div class="container">
+    <div class="solution-header">
+      <div class="section-label reveal">The solution</div>
+      <h2 class="section-title reveal reveal-delay-1" id="solution-heading">
+        Automated follow-ups<br>that feel <em>personal</em>
+      </h2>
+      <p class="section-sub reveal reveal-delay-2">
+        ColdCloud sends the right message on the right channel at the right time — automatically. You focus on closing. We handle the follow-up.
+      </p>
+    </div>
+    <div class="solution-grid">
+
+      <div class="solution-card blue reveal reveal-delay-1">
+        <div class="sc-icon-wrap blue">💬</div>
+        <h3 class="sc-title">Multi-channel reach</h3>
+        <p class="sc-desc">
+          Reach leads where they actually are. WhatsApp, SMS, and voice calls — in a single automated sequence. 98% of WhatsApp messages are opened within minutes.
+        </p>
+        <div class="sc-channels">
+          <span class="sc-ch wa">WhatsApp</span>
+          <span class="sc-ch sms">SMS</span>
+          <span class="sc-ch phone">Call</span>
+        </div>
+      </div>
+
+      <div class="solution-card green reveal reveal-delay-2">
+        <div class="sc-icon-wrap green">✦</div>
+        <h3 class="sc-title">Personalised messages</h3>
+        <p class="sc-desc">
+          Every message is tailored to the lead's name, context, and what they were interested in. Not spam — a natural continuation of a real conversation.
+        </p>
+        <div style="margin-top:16px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 14px;font-size:12px;color:var(--text-2);line-height:1.5">
+          <span style="color:var(--text-3);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Example message</span>
+          "Hi Sarah, just checking in on your interest in our gym membership. Happy to answer any questions whenever you're ready."
+        </div>
+      </div>
+
+      <div class="solution-card amber reveal reveal-delay-3">
+        <div class="sc-icon-wrap amber">⚙️</div>
+        <h3 class="sc-title">Configurable sequences</h3>
+        <p class="sc-desc">
+          Set your own timing and channels for each step. Day 0, Day 3, Day 5, Day 7 — or whatever works for your business. Adjust in seconds.
+        </p>
+        <div style="margin-top:16px;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+            <span style="background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:4px;font-weight:600;font-family:'JetBrains Mono',monospace;font-size:10px">Day 0</span>
+            <span style="color:var(--text-2)">WhatsApp — first touch</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+            <span style="background:#dbeafe;color:#2563eb;padding:2px 8px;border-radius:4px;font-weight:600;font-family:'JetBrains Mono',monospace;font-size:10px">Day 3</span>
+            <span style="color:var(--text-2)">SMS — short follow-up</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+            <span style="background:#fef3c7;color:#d97706;padding:2px 8px;border-radius:4px;font-weight:600;font-family:'JetBrains Mono',monospace;font-size:10px">Day 5</span>
+            <span style="color:var(--text-2)">Phone call — voice message</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+            <span style="background:#ede9fe;color:#7c3aed;padding:2px 8px;border-radius:4px;font-weight:600;font-family:'JetBrains Mono',monospace;font-size:10px">Day 7</span>
+            <span style="color:var(--text-2)">WhatsApp — final message</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     FEATURES SECTION
+     ============================================================ -->
+<section id="features" class="section" aria-labelledby="features-heading">
+  <div class="container">
+    <div class="section-label reveal">Features</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:flex-end;margin-bottom:52px">
+      <h2 class="section-title reveal reveal-delay-1" id="features-heading" style="margin-bottom:0">
+        Everything you need<br>to convert more leads
+      </h2>
+      <p class="section-sub reveal reveal-delay-2" style="max-width:100%">
+        ColdCloud keeps it simple. The features below are everything you need — and nothing you don't.
+      </p>
+    </div>
+    <div class="features-grid">
+
+      <div class="feature-card featured reveal reveal-delay-1">
+        <div class="fc-num">01</div>
+        <div class="fc-icon">⚡</div>
+        <h3 class="fc-title">Automatic sequences</h3>
+        <p class="fc-desc">Add a lead once. ColdCloud sends every follow-up on the right day, through the right channel — without you lifting a finger.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="fc-num">02</div>
+        <div class="fc-icon">✦</div>
+        <h3 class="fc-title">Smart message generation</h3>
+        <p class="fc-desc">Connect your Claude API key and every message is written based on the lead's name and what they were interested in. Or use the built-in templates.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="fc-num">03</div>
+        <div class="fc-icon">📊</div>
+        <h3 class="fc-title">Live dashboard</h3>
+        <p class="fc-desc">See every message sent, every reply received, and your reply rate — all in one clean view. Know exactly what's working.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="fc-num">04</div>
+        <div class="fc-icon">📋</div>
+        <h3 class="fc-title">CSV import</h3>
+        <p class="fc-desc">Paste a spreadsheet and import 100 leads in seconds. Every lead gets the same quality sequence — automatically.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="fc-num">05</div>
+        <div class="fc-icon">🚫</div>
+        <h3 class="fc-title">Opt-out handling</h3>
+        <p class="fc-desc">Anyone who replies STOP is automatically unsubscribed and flagged. No manual work. Fully compliant with messaging regulations.</p>
+      </div>
+
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="fc-num">06</div>
+        <div class="fc-icon">🔒</div>
+        <h3 class="fc-title">Secure per-user data</h3>
+        <p class="fc-desc">Each team member's leads and data are completely isolated. Passwords are hashed. Your data is yours — and only yours.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     HOW IT WORKS
+     ============================================================ -->
+<section id="how-it-works" class="section section-alt" aria-labelledby="hiw-heading">
+  <div class="container">
+    <div class="hiw-header">
+      <div class="section-label reveal">How it works</div>
+      <h2 class="section-title reveal reveal-delay-1" id="hiw-heading">Up and running in minutes</h2>
+      <p class="section-sub reveal reveal-delay-2">
+        No technical setup required. Add a lead, configure your sequence once, and let ColdCloud do the work.
+      </p>
+    </div>
+    <div class="hiw-steps">
+
+      <div class="hiw-step reveal reveal-delay-1">
+        <div class="hiw-num" aria-hidden="true">
+          <span class="hiw-icon">＋</span>
+        </div>
+        <h3 class="hiw-title">Add a lead</h3>
+        <p class="hiw-desc">Enter their name, phone number, and what they were interested in. That's all you need.</p>
+      </div>
+
+      <div class="hiw-step reveal reveal-delay-2">
+        <div class="hiw-num" aria-hidden="true">
+          <span class="hiw-icon">⚙️</span>
+        </div>
+        <h3 class="hiw-title">Sequence starts</h3>
+        <p class="hiw-desc">ColdCloud immediately queues the first message and schedules the rest based on your configuration.</p>
+      </div>
+
+      <div class="hiw-step reveal reveal-delay-3">
+        <div class="hiw-num" aria-hidden="true">
+          <span class="hiw-icon">📨</span>
+        </div>
+        <h3 class="hiw-title">Messages go out</h3>
+        <p class="hiw-desc">Each message is sent on time, personalised to the lead, through WhatsApp, SMS, or a voice call.</p>
+      </div>
+
+      <div class="hiw-step reveal reveal-delay-4">
+        <div class="hiw-num" aria-hidden="true">
+          <span class="hiw-icon">🎉</span>
+        </div>
+        <h3 class="hiw-title">Lead converts</h3>
+        <p class="hiw-desc">When they reply, you get notified instantly. Mark them as converted with one click.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     CHANNELS
+     ============================================================ -->
+<section class="section" aria-labelledby="channels-heading">
+  <div class="container">
+    <div class="channels-header">
+      <div>
+        <div class="section-label reveal">Channels</div>
+        <h2 class="section-title reveal reveal-delay-1" id="channels-heading">
+          Reach leads on the<br>channels they actually use
+        </h2>
+        <p class="section-sub reveal reveal-delay-2">
+          Phone calls get heard. WhatsApp gets read. SMS reaches everyone. ColdCloud uses all three so no lead slips through.
+        </p>
+      </div>
+      <div class="reveal reveal-delay-2" style="background:var(--bg);border:1px solid var(--border);border-radius:16px;padding:28px">
+        <div style="font-size:13px;font-weight:600;color:var(--text-2);margin-bottom:16px">Average open rates by channel</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px">
+              <span>💬 WhatsApp</span><span style="color:var(--green)">98%</span>
+            </div>
+            <div style="height:6px;background:var(--border);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:98%;background:var(--green);border-radius:99px;transition:width .8s ease"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px">
+              <span>📱 SMS</span><span style="color:var(--blue)">85%</span>
+            </div>
+            <div style="height:6px;background:var(--border);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:85%;background:var(--blue);border-radius:99px"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px">
+              <span>📞 Phone call</span><span style="color:var(--amber)">75%</span>
+            </div>
+            <div style="height:6px;background:var(--border);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:75%;background:var(--amber);border-radius:99px"></div>
+            </div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:600;margin-bottom:5px">
+              <span>📧 Email</span><span style="color:var(--text-3)">20%</span>
+            </div>
+            <div style="height:6px;background:var(--border);border-radius:99px;overflow:hidden">
+              <div style="height:100%;width:20%;background:var(--text-3);border-radius:99px"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="channels-grid">
+      <div class="channel-card wa reveal reveal-delay-1">
+        <div class="ch-icon-wrap">💬</div>
+        <h3 class="ch-name">WhatsApp</h3>
+        <p class="ch-desc">The most opened messaging channel in the world. Conversational, personal, and hard to ignore.</p>
+        <div class="ch-stat"><strong>98%</strong> open rate</div>
+      </div>
+      <div class="channel-card sms reveal reveal-delay-2">
+        <div class="ch-icon-wrap">📱</div>
+        <h3 class="ch-name">SMS</h3>
+        <p class="ch-desc">Works on every phone without an app. Short, direct messages that land even without internet.</p>
+        <div class="ch-stat"><strong>85%</strong> open rate</div>
+      </div>
+      <div class="channel-card phone reveal reveal-delay-3">
+        <div class="ch-icon-wrap">📞</div>
+        <h3 class="ch-name">Phone call</h3>
+        <p class="ch-desc">Nothing signals genuine interest like a real phone call. Used for step 3 — when the stakes are highest.</p>
+        <div class="ch-stat"><strong>75%</strong> answer rate</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     SEQUENCE VISUAL
+     ============================================================ -->
+<section class="section section-alt" aria-labelledby="sequence-heading">
+  <div class="container">
+    <div class="sequence-inner">
+
+      <div>
+        <div class="section-label reveal">Your sequence</div>
+        <h2 class="section-title reveal reveal-delay-1" id="sequence-heading">
+          Four touchpoints.<br>Fully automated.
+        </h2>
+        <p class="section-sub reveal reveal-delay-2" style="max-width:100%;margin-bottom:24px">
+          The default sequence is designed to maximise replies without overwhelming. Adjust every step — timing, channel, and message — to fit your business.
+        </p>
+        <a href="https://cold-cloud.vercel.app/?mode=signup" class="btn btn-primary reveal reveal-delay-3">Configure your sequence →</a>
+      </div>
+
+      <div class="seq-list reveal reveal-delay-2">
+        <div class="seq-item">
+          <div class="seq-step-num sn-green">1</div>
+          <div class="seq-ch-icon">💬</div>
+          <div class="seq-content">
+            <div class="seq-day">Day 0 — Immediate</div>
+            <div class="seq-ch-name">WhatsApp</div>
+            <div class="seq-ch-note">Warm first touch. Introduce yourself and ask if they have questions.</div>
+          </div>
+          <div class="seq-status ss-active">Active</div>
+        </div>
+        <div class="seq-item">
+          <div class="seq-step-num sn-blue">2</div>
+          <div class="seq-ch-icon">📱</div>
+          <div class="seq-content">
+            <div class="seq-day">Day 3</div>
+            <div class="seq-ch-name">SMS</div>
+            <div class="seq-ch-note">Short and punchy. Reminds them you're available.</div>
+          </div>
+          <div class="seq-status ss-sched">Scheduled</div>
+        </div>
+        <div class="seq-item">
+          <div class="seq-step-num sn-amber">3</div>
+          <div class="seq-ch-icon">📞</div>
+          <div class="seq-content">
+            <div class="seq-day">Day 5</div>
+            <div class="seq-ch-name">Phone call</div>
+            <div class="seq-ch-note">A real voice message. Creates genuine urgency.</div>
+          </div>
+          <div class="seq-status ss-sched">Scheduled</div>
+        </div>
+        <div class="seq-item">
+          <div class="seq-step-num sn-purple">4</div>
+          <div class="seq-ch-icon">💬</div>
+          <div class="seq-content">
+            <div class="seq-day">Day 7</div>
+            <div class="seq-ch-name">Final WhatsApp</div>
+            <div class="seq-ch-note">Honest last message. No pressure — but a clear CTA.</div>
+          </div>
+          <div class="seq-status ss-sched">Scheduled</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     TESTIMONIALS
+     ============================================================ -->
+<section id="testimonials" class="section" aria-labelledby="testimonials-heading">
+  <div class="container">
+    <div class="testimonials-header">
+      <div class="section-label reveal">Testimonials</div>
+      <h2 class="section-title reveal reveal-delay-1" id="testimonials-heading">What people are saying</h2>
+    </div>
+    <div class="testimonials-grid">
+
+      <div class="testimonial-card reveal reveal-delay-1">
+        <div class="tc-stars" aria-label="5 stars">⭐⭐⭐⭐⭐</div>
+        <p class="tc-quote">"We were losing around 60% of our leads to no follow-up. ColdCloud fixed that overnight. Our reply rate went from 8% to 31% in the first month."</p>
+        <div class="tc-author">
+          <div class="tc-avatar av-blue" aria-hidden="true">MR</div>
+          <div>
+            <div class="tc-name">Beta User</div>
+            <div class="tc-role">Fitness Business Owner</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card reveal reveal-delay-2">
+        <div class="tc-stars" aria-label="5 stars">⭐⭐⭐⭐⭐</div>
+        <p class="tc-quote">"The WhatsApp follow-ups are incredible. Leads respond to them like they're talking to a real person. Set it up in an afternoon. Hasn't needed touching since."</p>
+        <div class="tc-author">
+          <div class="tc-avatar av-green" aria-hidden="true">PS</div>
+          <div>
+            <div class="tc-name">Beta User</div>
+            <div class="tc-role">Real Estate Sales Manager</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testimonial-card reveal reveal-delay-3">
+        <div class="tc-stars" aria-label="5 stars">⭐⭐⭐⭐⭐</div>
+        <p class="tc-quote">"I have 200 leads in the pipeline and I manage all of them alone. Before ColdCloud I could only realistically follow up with maybe 30. Now I get to all of them."</p>
+        <div class="tc-author">
+          <div class="tc-avatar av-amber" aria-hidden="true">JO</div>
+          <div>
+            <div class="tc-name">Beta User</div>
+            <div class="tc-role">Independent Insurance Broker</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     PRICING
+     ============================================================ -->
+<section id="pricing" class="section section-alt" aria-labelledby="pricing-heading">
+  <div class="container">
+    <div class="pricing-header">
+      <div class="section-label reveal">Pricing</div>
+      <h2 class="section-title reveal reveal-delay-1" id="pricing-heading">Simple, honest pricing</h2>
+      <p class="section-sub reveal reveal-delay-2">
+        Start free. Upgrade when you're ready. No hidden fees, no contracts.
+      </p>
+    </div>
+    <div class="pricing-grid">
+
+      <!-- Free -->
+      <div class="pricing-card reveal reveal-delay-1">
+        <div class="badge badge-blue" style="margin-bottom:14px">Free</div>
+        <div class="pc-name">Starter</div>
+        <div class="pc-price">$0</div>
+        <div class="pc-period">forever</div>
+        <div class="pc-desc">Everything you need to get started and test ColdCloud with your real leads.</div>
+        <div class="pc-divider"></div>
+        <div class="pc-features">
+          <div class="pcf-item"><span class="pcf-check">✓</span> Up to 50 leads</div>
+          <div class="pcf-item"><span class="pcf-check">✓</span> WhatsApp, SMS & calls</div>
+          <div class="pcf-item"><span class="pcf-check">✓</span> 4-step sequences</div>
+          <div class="pcf-item"><span class="pcf-check">✓</span> Activity log & dashboard</div>
+          <div class="pcf-item"><span class="pcf-check">✓</span> CSV import</div>
+          <div class="pcf-item"><span class="pcf-check" style="color:var(--text-3)">—</span> <span class="pcf-muted">AI personalisation</span></div>
+          <div class="pcf-item"><span class="pcf-check" style="color:var(--text-3)">—</span> <span class="pcf-muted">Team members</span></div>
+        </div>
+        <a href="https://cold-cloud.vercel.app/?mode=signup" class="btn btn-secondary btn-lg pc-cta">Get started free</a>
+      </div>
+
+      <!-- Pro -->
+      <div class="pricing-card featured reveal reveal-delay-2">
+        <div class="pc-popular">Most popular</div>
+        <div class="badge badge-blue" style="margin-bottom:14px">Pro</div>
+        <div class="pc-name">Pro</div>
+        <div class="pc-price" style="color:#fff">$29</div>
+        <div class="pc-period">per month</div>
+        <div class="pc-desc">For teams and growing businesses that need unlimited reach and AI-powered messages.</div>
+        <div class="pc-divider"></div>
+        <div class="pc-features">
+          <div class="pcf-item"><span class="pcf-check">✓</span> Unlimited leads</div>
+          <div class="pcf-item"><span class="pcf-check">✓</span> WhatsApp, SMS & calls</div>
+          <div class="pcf-item"><span class="pcf-check">✓</span> Custom sequences</div>
+          <div class="pcf-item"><span class="pcf-check">✓</span> Full dashboard & analytics</div>
+          <div class="pcf-item"><span class="pcf-check">✓</span> Bulk CSV import</div>
+          <div class="pcf-item"><span class="pcf-check">✓</span> AI message personalisation</div>
+          <div class="pcf-item"><span class="pcf-check">✓</span> Up to 5 team members</div>
+        </div>
+        <a href="https://cold-cloud.vercel.app/?mode=signup" class="btn btn-featured btn-lg pc-cta">Start Pro free for 14 days</a>
+      </div>
+
+    </div>
+    <p style="text-align:center;margin-top:24px;font-size:13px;color:var(--text-3)" class="reveal">
+      Need a custom plan for a larger team? <a href="mailto:hello@coldcloud.io" style="color:var(--blue)">Get in touch →</a>
+    </p>
+  </div>
+</section>
+
+
+<!-- ============================================================
+     FINAL CTA
+     ============================================================ -->
+<section class="cta-section" aria-labelledby="cta-heading">
+  <div class="container">
+    <div class="cta-box reveal">
+      <h2 class="cta-title" id="cta-heading">
+        Start following up.<br>Start closing more.
+      </h2>
+      <p class="cta-sub">
+        Free to use. Takes 5 minutes to set up. Your first lead can be in a sequence before you finish your coffee.
+      </p>
+      <div class="cta-actions">
+        <a href="https://cold-cloud.vercel.app/?mode=signup" class="btn btn-cta-white btn-lg">
+          Create free account →
+        </a>
+        <a href="#how-it-works" class="btn btn-cta-outline btn-lg">
+          See how it works
+        </a>
+      </div>
+      <p class="cta-note">No credit card required. Free forever.</p>
+    </div>
+  </div>
+</section>
+
+</main>
+
+
+<!-- ============================================================
+     FOOTER
+     ============================================================ -->
+<!-- ── PRIVACY & TERMS (minimal placeholder) ── -->
+<section id="privacy-policy" style="padding:60px 0;background:#f8f9fa;border-top:1px solid #e2e8f0" aria-labelledby="privacy-heading">
+  <div style="max-width:700px;margin:0 auto;padding:0 40px">
+    <h2 id="privacy-heading" style="font-size:22px;font-weight:700;margin-bottom:16px;letter-spacing:-.3px">Privacy Policy</h2>
+    <p style="font-size:14px;color:#475569;line-height:1.7;margin-bottom:12px">ColdCloud stores only the data you provide: lead names, phone numbers, and follow-up context. We do not sell your data. We do not share it with third parties except Twilio (for message delivery) and Anthropic (for message personalisation), both under strict data processing agreements.</p>
+    <p style="font-size:14px;color:#475569;line-height:1.7;margin-bottom:12px">Your data is stored securely in MongoDB Atlas. You can delete all your data at any time from the Settings page in the app.</p>
+    <p style="font-size:14px;color:#475569;line-height:1.7">Questions? Email <a href="mailto:hello@coldcloud.io" style="color:#2563eb">hello@coldcloud.io</a></p>
+  </div>
+</section>
+<section id="terms" style="padding:60px 0;background:#fff;border-top:1px solid #e2e8f0" aria-labelledby="terms-heading">
+  <div style="max-width:700px;margin:0 auto;padding:0 40px">
+    <h2 id="terms-heading" style="font-size:22px;font-weight:700;margin-bottom:16px;letter-spacing:-.3px">Terms of Service</h2>
+    <p style="font-size:14px;color:#475569;line-height:1.7;margin-bottom:12px">By using ColdCloud you agree to use it only for legitimate business communications with people who have expressed interest in your product or service. You must not use ColdCloud to send unsolicited messages (spam).</p>
+    <p style="font-size:14px;color:#475569;line-height:1.7;margin-bottom:12px">You are responsible for complying with messaging regulations in your country (TCPA, GDPR, etc.). ColdCloud provides opt-out handling but compliance is your responsibility.</p>
+    <p style="font-size:14px;color:#475569;line-height:1.7">ColdCloud is provided as-is. We are not liable for messages sent through your Twilio account. Questions? <a href="mailto:hello@coldcloud.io" style="color:#2563eb">hello@coldcloud.io</a></p>
+  </div>
+</section>
+
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-top">
+
+      <div class="footer-brand">
+        <div class="nav-brand">
+          <div class="nav-logo-mark" aria-hidden="true">CC</div>
+          <span class="nav-logo-name">ColdCloud</span>
+        </div>
+        <p class="footer-tagline">
+          Follow-up automation for businesses that want to convert more leads without doing more work.
+        </p>
+        <div style="display:flex;gap:8px">
+          <a href="https://cold-cloud.vercel.app/?mode=signup" class="btn btn-primary btn-sm">Get started free</a>
+        </div>
+      </div>
+
+      <div class="footer-links-grid">
+        <div class="fl-group">
+          <div class="fl-group-title">Product</div>
+          <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-it-works">How it works</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+            <li><a href="https://cold-cloud.vercel.app/">Dashboard</a></li>
+          </ul>
+        </div>
+        <div class="fl-group">
+          <div class="fl-group-title">Resources</div>
+          <ul>
+            <li><a href="mailto:hello@coldcloud.io">Documentation</a></li>
+            <li><a href="mailto:hello@coldcloud.io">API reference</a></li>
+            <li><a href="https://github.com/coldcloud/docs" target="_blank">Setup guide</a></li>
+            <li><a href="mailto:hello@coldcloud.io">Changelog</a></li>
+          </ul>
+        </div>
+        <div class="fl-group">
+          <div class="fl-group-title">Company</div>
+          <ul>
+            <li><a href="#problem">About</a></li>
+            <li><a href="mailto:hello@coldcloud.io">Contact</a></li>
+            <li><a href="#privacy-policy">Privacy policy</a></li>
+            <li><a href="#terms">Terms of service</a></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copy">© 2025 ColdCloud. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="#privacy-policy">Privacy</a>
+        <a href="#terms">Terms</a>
+        <a href="mailto:hello@coldcloud.io">Contact</a>
+      </div>
+    </div>
+
+  </div>
+</footer>
+
+<script src="scripts/main.js"></script>
+</body>
+</html>
