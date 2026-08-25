@@ -25,8 +25,12 @@
   <div class="nav-inner">
 
     <a href="index.html" class="nav-brand" aria-label="ColdCloud home">
-      <div class="nav-logo-mark" aria-hidden="true">CC</div>
-      <span class="nav-logo-name">ColdCloud</span>
+      <img
+  src="assets/coldcloud-logo.png"
+  alt="ColdCloud"
+  class="nav-logo"
+>
+
     </a>
 
     <nav class="nav-links" aria-label="Main navigation">
@@ -63,407 +67,1439 @@
 
 
 <!-- ============================================================
-     HERO
+     HERO — COLD CLOUD LEAD RECOVERY
      ============================================================ -->
 <main>
-<section class="hero" aria-labelledby="hero-heading">
+
+<section class="hero cc-hero" aria-labelledby="hero-heading">
+
   <div class="hero-inner">
 
-    <!-- Left: copy -->
+    <!-- ========================================================
+         LEFT — HERO COPY
+         ======================================================== -->
+
     <div class="hero-content">
+
       <div class="hero-eyebrow reveal">
         <span class="hero-eyebrow-dot" aria-hidden="true"></span>
-        Follow-up automation for sales teams
+        Lead recovery for growing businesses
       </div>
+
       <h1 class="hero-title reveal reveal-delay-1" id="hero-heading">
-        Stop losing leads<br>
-        to <span class="highlight">silence</span>
+        Turn forgotten leads<br>
+        into <span class="highlight">new opportunities.</span>
       </h1>
+
       <p class="hero-sub reveal reveal-delay-2">
-        ColdCloud automatically follows up with every lead via WhatsApp, SMS, and phone calls — so you stay top of mind without doing it manually.
+        ColdCloud finds the leads worth recovering, understands why they went cold,
+        and brings the right conversations back to life — automatically.
       </p>
+
       <div class="hero-actions reveal reveal-delay-3">
-        <a href="https://cold-cloud-app.vercel.app/?mode=signup" class="btn btn-primary btn-lg">
-          Start for free
+
+        <a
+          href="https://cold-cloud-app.vercel.app/?mode=signup"
+          class="btn btn-primary btn-lg"
+        >
+          Find recoverable leads
           <span aria-hidden="true">→</span>
         </a>
-        <a href="#how-it-works" class="btn btn-secondary btn-lg">
+
+        <a
+          href="#how-it-works"
+          class="btn btn-secondary btn-lg"
+        >
           See how it works
         </a>
+
       </div>
+
       <div class="hero-trust reveal reveal-delay-4">
-        <span class="trust-item">Free forever</span>
-        <span class="trust-item">No card required</span>
-        <span class="trust-item">Set up in 5 minutes</span>
+
+        <span class="trust-item">
+          ✓ Use your existing leads
+        </span>
+
+        <span class="trust-item">
+          ✓ No CRM replacement
+        </span>
+
+        <span class="trust-item">
+          ✓ Start in minutes
+        </span>
+
       </div>
+
     </div>
 
-    <!-- Right: app mockup -->
-    <div class="hero-visual reveal reveal-delay-2">
-      <div class="app-mockup">
-        <div class="mockup-bar">
-          <div class="mockup-dot dot-r" aria-hidden="true"></div>
-          <div class="mockup-dot dot-y" aria-hidden="true"></div>
-          <div class="mockup-dot dot-g" aria-hidden="true"></div>
-          <div class="mockup-title-bar">coldcloud.io/dashboard</div>
-        </div>
-        <div class="mockup-body">
-          <div class="mockup-metrics">
-            <div class="mm-card">
-              <div class="mm-label">Leads this week</div>
-              <div class="mm-value" data-count="24" data-suffix="">0</div>
-              <div class="mm-change up">↑ 8 active</div>
-            </div>
-            <div class="mm-card">
-              <div class="mm-label">Reply rate</div>
-              <div class="mm-value" data-count="34" data-suffix="%">0%</div>
-              <div class="mm-change up">↑ vs 12% avg</div>
-            </div>
+
+    <!-- ========================================================
+         RIGHT — RECOVERY DASHBOARD
+         ======================================================== -->
+
+    <div class="hero-visual cc-recovery-visual reveal reveal-delay-2">
+
+      <div class="cc-recovery-window">
+
+        <!-- Browser bar -->
+        <div class="cc-window-bar">
+
+          <div class="cc-window-dots">
+            <span class="cc-dot cc-red"></span>
+            <span class="cc-dot cc-yellow"></span>
+            <span class="cc-dot cc-green"></span>
           </div>
-          <div class="mockup-feed-title">Recent activity</div>
-          <div class="mockup-feed" id="hero-feed" aria-live="polite" aria-label="Activity feed">
-            <!-- Populated by JS -->
+
+          <div class="cc-window-url">
+            coldcloud.io/recovery
           </div>
+
+          <div class="cc-live">
+            <span></span>
+            LIVE
+          </div>
+
         </div>
+
+
+        <!-- Dashboard -->
+        <div class="cc-recovery-body">
+
+          <!-- Header -->
+          <div class="cc-recovery-header">
+
+            <div>
+              <div class="cc-mini-label">
+                RECOVERY OVERVIEW
+              </div>
+
+              <div class="cc-recovery-name">
+                Dormant leads
+              </div>
+            </div>
+
+            <div class="cc-period">
+              Last 12 months⌄
+            </div>
+
+          </div>
+
+
+          <!-- ==================================================
+               MAIN STAT
+               ================================================== -->
+
+          <div class="cc-main-metric">
+
+            <div>
+
+              <div class="cc-metric-label">
+                Leads analyzed
+              </div>
+
+              <div
+                class="cc-big-number cc-counter"
+                data-target="10248"
+              >
+                0
+              </div>
+
+              <div class="cc-metric-change">
+                <span>↑</span>
+                Ready for recovery analysis
+              </div>
+
+            </div>
+
+
+            <!-- Recovery percentage -->
+            <div class="cc-analysis-ring">
+
+              <div class="cc-ring-inner">
+
+                <strong
+                  class="cc-counter"
+                  data-target="20.5"
+                  data-decimal="true"
+                >
+                  0
+                </strong>
+
+                <span>
+                  % recoverable
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- ==================================================
+               RECOVERY PIPELINE
+               ================================================== -->
+
+          <div class="cc-pipeline">
+
+            <div class="cc-pipeline-line">
+              <div class="cc-pipeline-progress"></div>
+            </div>
+
+
+            <div class="cc-stage cc-stage-1">
+
+              <div class="cc-stage-icon">
+                10K
+              </div>
+
+              <span>
+                Dormant
+              </span>
+
+            </div>
+
+
+            <div class="cc-stage cc-stage-2">
+
+              <div class="cc-stage-icon">
+                2.1K
+              </div>
+
+              <span>
+                Recoverable
+              </span>
+
+            </div>
+
+
+            <div class="cc-stage cc-stage-3">
+
+              <div class="cc-stage-icon">
+                648
+              </div>
+
+              <span>
+                Re-engaged
+              </span>
+
+            </div>
+
+
+            <div class="cc-stage cc-stage-4">
+
+              <div class="cc-stage-icon hot">
+                37
+              </div>
+
+              <span>
+                Hot
+              </span>
+
+            </div>
+
+          </div>
+
+
+          <!-- ==================================================
+               RECENT RECOVERY
+               ================================================== -->
+
+          <div class="cc-section-title">
+
+            <span>
+              Recent recovery
+            </span>
+
+            <span>
+              View all →
+            </span>
+
+          </div>
+
+
+          <div class="cc-lead-list">
+
+
+            <!-- John -->
+            <div class="cc-lead-row">
+
+              <div class="cc-avatar">
+                JS
+              </div>
+
+              <div class="cc-lead-info">
+
+                <strong>
+                  John Smith
+                </strong>
+
+                <span>
+                  Previous objection · Price
+                </span>
+
+              </div>
+
+              <div class="cc-lead-status hot-status">
+                <i></i>
+                Hot
+              </div>
+
+            </div>
+
+
+            <!-- Sarah -->
+            <div class="cc-lead-row">
+
+              <div class="cc-avatar avatar-green">
+                SJ
+              </div>
+
+              <div class="cc-lead-info">
+
+                <strong>
+                  Sarah Johnson
+                </strong>
+
+                <span>
+                  Responded · 2 min ago
+                </span>
+
+              </div>
+
+              <div class="cc-lead-status recovered-status">
+                <i></i>
+                Re-engaged
+              </div>
+
+            </div>
+
+
+            <!-- Mike -->
+            <div class="cc-lead-row">
+
+              <div class="cc-avatar avatar-purple">
+                MC
+              </div>
+
+              <div class="cc-lead-info">
+
+                <strong>
+                  Mike Chen
+                </strong>
+
+                <span>
+                  Timing issue detected
+                </span>
+
+              </div>
+
+              <div class="cc-lead-status possible-status">
+                <i></i>
+                Possible
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
 
-      <!-- Floating badges -->
-      <div class="mockup-float mf-bottom-left" aria-hidden="true">
-        <div class="mf-icon">↩️</div>
-        <div class="mf-text">
-          <div class="mf-title">Sarah just replied</div>
-          <div class="mf-sub">"Yes, I'm interested!"</div>
+
+      <!-- ======================================================
+           FLOATING HOT OPPORTUNITY
+           ====================================================== -->
+
+      <div
+        class="cc-hot-notification"
+        aria-hidden="true"
+      >
+
+        <div class="cc-hot-icon">
+          🔥
         </div>
+
+        <div>
+
+          <strong>
+            John just became a hot opportunity
+          </strong>
+
+          <span>
+            "Yes, we're interested again."
+          </span>
+
+        </div>
+
       </div>
-      <div class="mockup-float mf-top-right" style="padding:8px 16px;" aria-hidden="true">
-        <div class="mf-green-badge">+3 replies today</div>
+
+
+      <!-- ======================================================
+           FLOATING SIGNAL
+           ====================================================== -->
+
+      <div
+        class="cc-recovery-signal"
+        aria-hidden="true"
+      >
+
+        <span class="cc-signal-dot"></span>
+
+        Recovery signal detected
+
       </div>
+
     </div>
 
   </div>
+
 </section>
 
 
 <!-- ============================================================
      PROOF BAR
      ============================================================ -->
-<div class="proof-bar" role="complementary" aria-label="Key statistics">
+
+<div
+  class="proof-bar cc-proof-bar"
+  role="complementary"
+  aria-label="ColdCloud recovery benefits"
+>
+
   <div class="proof-bar-inner">
-    <span class="proof-label">Why it matters:</span>
+
+    <span class="proof-label">
+      Lead recovery
+    </span>
+
+
     <div class="proof-stat">
-      <strong>80%</strong>
-      <span>of sales need 5+ follow-ups</span>
+
+      <strong>
+        10K+
+      </strong>
+
+      <span>
+        dormant leads analyzed
+      </span>
+
     </div>
+
+
     <div class="proof-stat">
-      <strong>44%</strong>
-      <span>of salespeople give up after 1 attempt</span>
+
+      <strong>
+        AI
+      </strong>
+
+      <span>
+        context-aware recovery
+      </span>
+
     </div>
+
+
     <div class="proof-stat">
-      <strong>98%</strong>
-      <span>WhatsApp open rate</span>
+
+      <strong>
+        24/7
+      </strong>
+
+      <span>
+        automated re-engagement
+      </span>
+
     </div>
+
+
     <div class="proof-stat">
-      <strong>5 min</strong>
-      <span>to get started</span>
+
+      <strong>
+        🔥
+      </strong>
+
+      <span>
+        hot opportunities surfaced
+      </span>
+
     </div>
+
   </div>
+
 </div>
 
+</main>
+
 
 <!-- ============================================================
-     PROBLEM SECTION
+     HERO COUNTER ANIMATION
      ============================================================ -->
-<section id="problem" class="section" aria-labelledby="problem-heading">
-  <div class="container">
-    <div class="problem-grid">
 
-      <div class="problem-text">
-        <div class="section-label reveal">The problem</div>
-        <h2 class="section-title reveal reveal-delay-1" id="problem-heading">
-          Most leads go cold<br>
-          because of <em>no follow-up</em>
-        </h2>
-        <p class="section-sub reveal reveal-delay-2">
-          You get a lead. You send one message. They don't reply. You move on. That lead — and the revenue attached to it — is gone.
-        </p>
-        <div class="problem-list" style="margin-top:28px">
-          <div class="problem-item reveal reveal-delay-2">
-            <div class="problem-item-icon">⏰</div>
-            <div>
-              <div class="problem-item-title">No time to follow up manually</div>
-              <div class="problem-item-desc">Salespeople spend more time chasing than selling. Manually following up with 30+ leads every day isn't sustainable.</div>
-            </div>
-          </div>
-          <div class="problem-item reveal reveal-delay-3">
-            <div class="problem-item-icon">🤷</div>
-            <div>
-              <div class="problem-item-title">Leads fall through the cracks</div>
-              <div class="problem-item-desc">Without a system, the third and fourth follow-ups never happen. The deals that needed the most persistence get dropped.</div>
-            </div>
-          </div>
-          <div class="problem-item reveal reveal-delay-4">
-            <div class="problem-item-icon">💸</div>
-            <div>
-              <div class="problem-item-title">Revenue lost to inaction</div>
-              <div class="problem-item-desc">Studies show 80% of sales happen after the 5th touchpoint. Most businesses never get there.</div>
-            </div>
-          </div>
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const counters =
+    document.querySelectorAll(".cc-counter");
+
+
+  counters.forEach(function (counter, index) {
+
+    const target =
+      parseFloat(counter.dataset.target);
+
+    const decimal =
+      counter.dataset.decimal === "true";
+
+    const duration = 2200;
+
+    let startTime = null;
+
+
+    function animate(timestamp) {
+
+      if (!startTime) {
+        startTime = timestamp;
+      }
+
+      const elapsed =
+        timestamp - startTime;
+
+      const progress =
+        Math.min(elapsed / duration, 1);
+
+
+      /* Smooth ease-out */
+
+      const eased =
+        1 - Math.pow(1 - progress, 4);
+
+
+      const value =
+        target * eased;
+
+
+      /* Display number */
+
+      if (decimal) {
+
+        counter.textContent =
+          value.toFixed(1);
+
+      } else {
+
+        counter.textContent =
+          Math.floor(value).toLocaleString();
+
+      }
+
+
+      /* Growing effect */
+
+      const scale =
+        1 + Math.sin(progress * Math.PI) * 0.08;
+
+      counter.style.transform =
+        `scale(${scale})`;
+
+
+      if (progress < 1) {
+
+        requestAnimationFrame(animate);
+
+      } else {
+
+        counter.textContent =
+          decimal
+            ? target.toFixed(1)
+            : target.toLocaleString();
+
+        counter.style.transform =
+          "scale(1)";
+
+      }
+
+    }
+
+
+    /* Slight stagger */
+
+    setTimeout(function () {
+
+      requestAnimationFrame(animate);
+
+    }, index * 300);
+
+  });
+
+
+  /* ==========================================================
+     ROTATING LEAD HIGHLIGHT
+     ========================================================== */
+
+  const rows =
+    document.querySelectorAll(".cc-lead-row");
+
+  let activeRow = 0;
+
+
+  function highlightLead() {
+
+    rows.forEach(function (row) {
+
+      row.classList.remove(
+        "cc-lead-active"
+      );
+
+    });
+
+
+    if (!rows.length) return;
+
+
+    rows[activeRow].classList.add(
+      "cc-lead-active"
+    );
+
+
+    activeRow =
+      (activeRow + 1) % rows.length;
+
+  }
+
+
+  setTimeout(
+    highlightLead,
+    2500
+  );
+
+
+  setInterval(
+    highlightLead,
+    3500
+  );
+
+});
+
+</script>
+<!-- ============================================================
+     PROBLEM — DORMANT LEADS
+     ============================================================ -->
+<section id="problem" class="section cc-problem" aria-labelledby="problem-heading">
+
+  <div class="container">
+
+    <div class="cc-problem-grid">
+
+      <!-- ======================================================
+           LEFT — MESSAGE
+           ====================================================== -->
+
+      <div class="cc-problem-copy">
+
+        <div class="section-label reveal">
+          THE PROBLEM
         </div>
+
+        <h2
+          class="section-title reveal reveal-delay-1"
+          id="problem-heading"
+        >
+          Your old leads<br>
+          aren't <em>dead.</em>
+        </h2>
+
+        <p class="section-sub reveal reveal-delay-2">
+          They're buried in CRMs, spreadsheets, inboxes and forgotten
+          conversations. Businesses spend money acquiring leads —
+          then lose track of them when the timing isn't right.
+        </p>
+
+
+        <!-- Problem signals -->
+
+        <div class="cc-problem-signals">
+
+          <div class="cc-problem-signal reveal reveal-delay-2">
+
+            <div class="cc-signal-icon">
+              <span>01</span>
+            </div>
+
+            <div>
+              <strong>
+                Interest disappears into the CRM
+              </strong>
+
+              <p>
+                A lead says “maybe later” and becomes another
+                row in a spreadsheet.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="cc-problem-signal reveal reveal-delay-3">
+
+            <div class="cc-signal-icon">
+              <span>02</span>
+            </div>
+
+            <div>
+              <strong>
+                Context gets forgotten
+              </strong>
+
+              <p>
+                The reason they went cold is buried inside
+                months of messages and notes.
+              </p>
+            </div>
+
+          </div>
+
+
+          <div class="cc-problem-signal reveal reveal-delay-4">
+
+            <div class="cc-signal-icon">
+              <span>03</span>
+            </div>
+
+            <div>
+              <strong>
+                Potential revenue stays dormant
+              </strong>
+
+              <p>
+                Nobody knows which old leads are actually
+                worth trying again.
+              </p>
+            </div>
+
+          </div>
+
+        </div>
+
       </div>
 
-      <div class="problem-stat-block reveal reveal-delay-2">
-        <div class="psb-number" data-count="80" data-suffix="%">0%</div>
-        <p class="psb-label">of sales require at least 5 follow-up attempts before closing</p>
-        <div class="psb-source">Source: National Sales Executive Association</div>
-        <div class="psb-divider"></div>
-        <div class="psb-stats">
-          <div>
-            <div class="psb-stat-num" data-count="44" data-suffix="%">0%</div>
-            <div class="psb-stat-label">of reps give up after 1 attempt</div>
+
+      <!-- ======================================================
+           RIGHT — DORMANT LEAD SCANNER
+           ====================================================== -->
+
+      <div class="cc-lead-scanner reveal reveal-delay-2">
+
+        <!-- browser -->
+        <div class="cc-scanner-window">
+
+          <div class="cc-scanner-top">
+
+            <div class="cc-scanner-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+
+            <div class="cc-scanner-url">
+              coldcloud.io / lead-recovery
+            </div>
+
+            <div class="cc-scanner-status">
+              <i></i>
+              SCANNING
+            </div>
+
           </div>
-          <div>
-            <div class="psb-stat-num" data-count="22" data-suffix="%">0%</div>
-            <div class="psb-stat-label">give up after just 2 attempts</div>
+
+
+          <!-- scanner header -->
+
+          <div class="cc-scanner-header">
+
+            <div>
+
+              <div class="cc-mini-label">
+                DORMANT LEADS
+              </div>
+
+              <h3>
+                Recovery candidates
+              </h3>
+
+            </div>
+
+            <div class="cc-scan-period">
+              LAST 12 MONTHS
+            </div>
+
           </div>
-          <div>
-            <div class="psb-stat-num" data-count="12" data-suffix="%">0%</div>
-            <div class="psb-stat-label">make it to a 3rd attempt</div>
+
+
+          <!-- main scan -->
+
+          <div class="cc-scan-area">
+
+            <div class="cc-scan-grid"></div>
+
+            <div class="cc-scan-line"></div>
+
+
+            <!-- center metric -->
+
+            <div class="cc-scan-center">
+
+              <div
+                class="cc-scan-number"
+                data-count="10248"
+                data-suffix=""
+              >
+                0
+              </div>
+
+              <span>
+                dormant leads
+              </span>
+
+              <div class="cc-scan-pulse"></div>
+
+            </div>
+
+
+            <!-- floating lead nodes -->
+
+            <div class="cc-lead-node node-1">
+
+              <div class="cc-node-avatar">
+                JS
+              </div>
+
+              <div class="cc-node-info">
+
+                <strong>
+                  John Smith
+                </strong>
+
+                <span>
+                  Price objection
+                </span>
+
+              </div>
+
+              <b class="cc-node-tag">
+                POSSIBLE
+              </b>
+
+            </div>
+
+
+            <div class="cc-lead-node node-2">
+
+              <div class="cc-node-avatar green">
+                SJ
+              </div>
+
+              <div class="cc-node-info">
+
+                <strong>
+                  Sarah Johnson
+                </strong>
+
+                <span>
+                  Timing issue
+                </span>
+
+              </div>
+
+              <b class="cc-node-tag hot">
+                HIGH
+              </b>
+
+            </div>
+
+
+            <div class="cc-lead-node node-3">
+
+              <div class="cc-node-avatar purple">
+                MC
+              </div>
+
+              <div class="cc-node-info">
+
+                <strong>
+                  Mike Chen
+                </strong>
+
+                <span>
+                  No response
+                </span>
+
+              </div>
+
+              <b class="cc-node-tag">
+                UNKNOWN
+              </b>
+
+            </div>
+
           </div>
-          <div>
-            <div class="psb-stat-num" data-count="8" data-suffix="%">0%</div>
-            <div class="psb-stat-label">ever send a 5th follow-up</div>
+
+
+          <!-- recovery analysis -->
+
+          <div class="cc-analysis">
+
+            <div class="cc-analysis-head">
+
+              <span>
+                RECOVERY SIGNALS
+              </span>
+
+              <span>
+                LIVE
+              </span>
+
+            </div>
+
+
+            <div class="cc-analysis-items">
+
+              <div class="cc-analysis-item">
+
+                <span class="cc-analysis-dot blue"></span>
+
+                <span>
+                  Previous interest
+                </span>
+
+                <strong>
+                  detected
+                </strong>
+
+              </div>
+
+
+              <div class="cc-analysis-item">
+
+                <span class="cc-analysis-dot green"></span>
+
+                <span>
+                  Timing signal
+                </span>
+
+                <strong>
+                  detected
+                </strong>
+
+              </div>
+
+
+              <div class="cc-analysis-item">
+
+                <span class="cc-analysis-dot amber"></span>
+
+                <span>
+                  Purchase intent
+                </span>
+
+                <strong>
+                  evaluating
+                </strong>
+
+              </div>
+
+            </div>
+
           </div>
+
         </div>
+
+
+        <!-- floating notification -->
+
+        <div class="cc-recovery-alert">
+
+          <div class="cc-alert-icon">
+            ↗
+          </div>
+
+          <div>
+
+            <strong>
+              Recovery opportunity detected
+            </strong>
+
+            <span>
+              2,104 leads worth investigating
+            </span>
+
+          </div>
+
+          <div class="cc-alert-pulse"></div>
+
+        </div>
+
       </div>
 
     </div>
+
   </div>
+
 </section>
-
-
 <!-- ============================================================
-     SOLUTION SECTION
+     SOLUTION — LEAD RECOVERY
      ============================================================ -->
 <section id="solution" class="section section-alt cc-solution" aria-labelledby="solution-heading">
+
   <div class="container">
 
     <div class="cc-solution-grid">
 
-      <!-- LEFT: COPY -->
+      <!-- ======================================================
+           LEFT — COPY
+           ====================================================== -->
       <div class="cc-solution-copy">
 
-        <div class="section-label">
+        <div class="section-label reveal">
           The solution
         </div>
 
-        <h2 class="section-title" id="solution-heading">
-          Automated follow-ups<br>
-          that feel <em>personal.</em>
+        <h2 class="section-title reveal reveal-delay-1" id="solution-heading">
+          Turn forgotten leads<br>
+          into <em>new opportunities.</em>
         </h2>
 
-        <p class="section-sub">
-          ColdCloud keeps conversations moving after a lead goes quiet.
-          You focus on the opportunities that need you.
+        <p class="section-sub reveal reveal-delay-2">
+          ColdCloud finds the leads worth recovering, understands why
+          they went cold, and brings the right conversations back to life —
+          automatically.
         </p>
 
 
+        <!-- SOLUTION POINTS -->
         <div class="cc-solution-points">
 
-          <div class="cc-solution-point">
-            <div class="cc-point-icon cc-point-blue">↗</div>
+          <!-- POINT 1 -->
+          <div class="cc-solution-point reveal reveal-delay-2">
+
+            <div class="cc-point-icon cc-point-blue">
+              ◈
+            </div>
 
             <div>
-              <h3>Reach leads where they are</h3>
+              <h3>
+                Find the leads worth recovering
+              </h3>
+
               <p>
-                Bring your follow-ups into one workflow
-                instead of chasing every conversation.
+                Analyze your existing CRM, CSV, Excel, and lead data
+                to identify dormant leads with real recovery potential.
               </p>
             </div>
+
           </div>
 
 
-          <div class="cc-solution-point">
-            <div class="cc-point-icon cc-point-purple">✦</div>
+          <!-- POINT 2 -->
+          <div class="cc-solution-point reveal reveal-delay-3">
+
+            <div class="cc-point-icon cc-point-purple">
+              ✦
+            </div>
 
             <div>
-              <h3>Personal, not robotic</h3>
+              <h3>
+                Understand why they went cold
+              </h3>
+
               <p>
-                Messages use the lead's context so
-                follow-ups feel like a real conversation.
+                ColdCloud uses previous conversations, interests,
+                objections, and timing signals to understand the lead.
               </p>
             </div>
+
           </div>
 
 
-          <div class="cc-solution-point">
-            <div class="cc-point-icon cc-point-green">✓</div>
+          <!-- POINT 3 -->
+          <div class="cc-solution-point reveal reveal-delay-4">
+
+            <div class="cc-point-icon cc-point-green">
+              ↗
+            </div>
 
             <div>
-              <h3>Know when to step in</h3>
+              <h3>
+                Re-engage automatically
+              </h3>
+
               <p>
-                When a lead responds or shows interest,
-                the conversation comes back to your team.
+                Send a contextual recovery message instead of another
+                generic “just following up” text.
               </p>
             </div>
+
+          </div>
+
+
+          <!-- POINT 4 -->
+          <div class="cc-solution-point reveal reveal-delay-5">
+
+            <div class="cc-point-icon cc-point-amber">
+              ⚡
+            </div>
+
+            <div>
+              <h3>
+                Hand hot opportunities to humans
+              </h3>
+
+              <p>
+                When a dormant lead shows buying intent, your team gets
+                the opportunity — with the full context already attached.
+              </p>
+            </div>
+
           </div>
 
         </div>
 
 
+        <!-- CTA -->
         <a
           href="https://cold-cloud-app.vercel.app/?mode=signup"
-          class="btn btn-primary cc-solution-btn"
+          class="btn btn-primary cc-solution-btn reveal reveal-delay-5"
         >
-          See ColdCloud in action →
+          Find recoverable leads
+          <span aria-hidden="true">→</span>
         </a>
 
       </div>
 
 
-      <!-- RIGHT: PRODUCT VISUAL -->
-      <div class="cc-solution-visual">
+      <!-- ======================================================
+           RIGHT — COLDCLOUD RECOVERY ENGINE
+           ====================================================== -->
+      <div class="cc-solution-visual reveal reveal-delay-2">
 
-        <div class="cc-solution-window">
+        <div class="cc-recovery-visual">
 
-          <div class="cc-window-header">
-            <div>
-              <div class="cc-window-label">LEAD FOLLOW-UP</div>
-              <div class="cc-window-name">Sarah Johnson</div>
-              <div class="cc-window-context">
-                Website enquiry · Personal training
+          <div class="cc-recovery-canvas">
+
+
+            <!-- ==================================================
+                 01 — DORMANT LEAD
+                 ================================================== -->
+            <div class="cc-recovery-lead">
+
+              <div class="cc-lead-top">
+
+                <div class="cc-avatar">
+                  SJ
+                </div>
+
+                <div>
+                  <div class="cc-lead-name">
+                    Sarah Johnson
+                  </div>
+
+                  <div class="cc-lead-source">
+                    Website enquiry
+                  </div>
+                </div>
+
+                <span class="cc-cold-badge">
+                  COLD
+                </span>
+
               </div>
+
+
+              <div class="cc-lead-details">
+
+                <div>
+                  <span>Interested in</span>
+                  <strong>Personal Training</strong>
+                </div>
+
+                <div>
+                  <span>Last contact</span>
+                  <strong>7 months ago</strong>
+                </div>
+
+                <div>
+                  <span>Previous objection</span>
+                  <strong>Timing</strong>
+                </div>
+
+              </div>
+
             </div>
 
-            <div class="cc-window-status">
+
+            <!-- ==================================================
+                 FLOW 01
+                 ================================================== -->
+            <div class="cc-flow-line line-one">
               <span></span>
-              Active
             </div>
-          </div>
 
 
-          <div class="cc-solution-timeline">
+            <!-- ==================================================
+                 02 — AI ANALYSIS
+                 ================================================== -->
+            <div class="cc-analysis">
 
-            <!-- 01 -->
-            <div class="cc-solution-event">
+              <div class="cc-analysis-icon">
+                ✦
+              </div>
 
-              <div class="cc-event-marker cc-marker-success">
+              <div class="cc-analysis-content">
+
+                <span class="cc-analysis-label">
+                  COLDCLOUD INTELLIGENCE
+                </span>
+
+                <strong>
+                  Analyzing lead context
+                </strong>
+
+                <div class="cc-analysis-items">
+
+                  <span>
+                    ✓ Previous interest
+                  </span>
+
+                  <span>
+                    ✓ Conversation history
+                  </span>
+
+                  <span>
+                    ✓ Timing signals
+                  </span>
+
+                </div>
+
+              </div>
+
+
+              <div class="cc-analysis-score">
+
+                <span>
+                  RECOVERY
+                </span>
+
+                <strong>
+                  87%
+                </strong>
+
+              </div>
+
+            </div>
+
+
+            <!-- ==================================================
+                 FLOW 02
+                 ================================================== -->
+            <div class="cc-flow-line line-two">
+              <span></span>
+            </div>
+
+
+            <!-- ==================================================
+                 03 — RECOVERY DECISION
+                 ================================================== -->
+            <div class="cc-recovery-decision">
+
+              <div class="cc-decision-icon">
                 ✓
               </div>
 
-              <div class="cc-event-content">
+              <div>
 
-                <div class="cc-event-heading">
-                  <strong>Lead captured</strong>
-                  <span>10:42 AM</span>
-                </div>
+                <span class="cc-decision-label">
+                  RECOVERY SIGNAL
+                </span>
+
+                <strong>
+                  Worth re-engaging
+                </strong>
 
                 <p>
-                  Sarah submitted an enquiry through your website.
+                  Previous interest + strong timing signal
                 </p>
 
+              </div>
+
+              <div class="cc-decision-arrow">
+                →
               </div>
 
             </div>
 
 
-            <!-- 02 -->
-            <div class="cc-solution-event">
+            <!-- ==================================================
+                 04 — FOLLOW-UP MESSAGE
+                 ================================================== -->
+            <div class="cc-followup">
 
-              <div class="cc-event-marker cc-marker-blue">
-                ↗
-              </div>
+              <div class="cc-followup-header">
 
-              <div class="cc-event-content">
+                <div class="cc-followup-channel">
 
-                <div class="cc-event-heading">
-                  <strong>WhatsApp message sent</strong>
-                  <span>10:43 AM</span>
-                </div>
-
-                <div class="cc-message">
-                  <p>
-                    Hey Sarah, just checking in on your
-                    interest in personal training. Happy to
-                    answer any questions whenever you're ready.
-                  </p>
-
-                  <span class="cc-message-status">
-                    ✓ Sent
+                  <span class="cc-channel-icon">
+                    ◌
                   </span>
+
+                  <div>
+
+                    <span>
+                      FOLLOW-UP
+                    </span>
+
+                    <strong>
+                      WhatsApp
+                    </strong>
+
+                  </div>
+
                 </div>
+
+
+                <span class="cc-followup-status">
+                  READY
+                </span>
+
+              </div>
+
+
+              <div class="cc-followup-message">
+
+                <div class="cc-message-avatar">
+                  CC
+                </div>
+
+                <div class="cc-message-content">
+
+                  <span>
+                    ColdCloud
+                  </span>
+
+                  <p>
+                    Hey Sarah — you mentioned you'd revisit
+                    personal training when the timing was right.
+                    Is this something you're still considering?
+                  </p>
+
+                </div>
+
+              </div>
+
+
+              <div class="cc-followup-footer">
+
+                <span>
+                  Personalised from lead context
+                </span>
+
+                <button type="button">
+                  Send →
+                </button>
 
               </div>
 
             </div>
 
 
-            <!-- 03 -->
-            <div class="cc-solution-event">
+            <!-- ==================================================
+                 05 — RESPONSE DETECTED
+                 ================================================== -->
+            <div class="cc-response">
 
-              <div class="cc-event-marker cc-marker-amber">
-                ◷
+              <div class="cc-response-icon">
+                ↩
               </div>
 
-              <div class="cc-event-content">
+              <div class="cc-response-content">
 
-                <div class="cc-event-heading">
-                  <strong>No response</strong>
-                  <span>3 days later</span>
-                </div>
+                <span>
+                  RESPONSE DETECTED
+                </span>
+
+                <strong>
+                  Sarah replied
+                </strong>
 
                 <p>
-                  Next follow-up scheduled automatically.
+                  “Actually yes — I'm interested again.”
                 </p>
 
               </div>
 
-            </div>
-
-
-            <!-- 04 -->
-            <div class="cc-solution-event">
-
-              <div class="cc-event-marker cc-marker-purple">
-                ○
-              </div>
-
-              <div class="cc-event-content">
-
-                <div class="cc-event-heading">
-                  <strong>Sarah replied</strong>
-                  <span>2 min ago</span>
-                </div>
-
-                <div class="cc-reply">
-                  <p>
-                    “Yeah, I'm interested. How much is it?”
-                  </p>
-
-                  <span>Interested lead</span>
-                </div>
-
+              <div class="cc-hot-badge">
+                🔥 HOT
               </div>
 
             </div>
 
-          </div>
 
+            <!-- ==================================================
+                 06 — HUMAN HANDOFF
+                 ================================================== -->
+            <div class="cc-human-handoff">
 
-          <!-- HANDOFF -->
-          <div class="cc-solution-handoff">
+              <div class="cc-human-icon">
+                👤
+              </div>
 
-            <div class="cc-handoff-icon">
-              ✦
+              <div>
+
+                <span>
+                  HUMAN FOLLOW-UP
+                </span>
+
+                <strong>
+                  Opportunity recovered
+                </strong>
+
+                <p>
+                  Sarah is ready for a conversation.
+                </p>
+
+              </div>
+
+              <button type="button">
+                Open lead →
+              </button>
+
             </div>
 
-            <div class="cc-handoff-copy">
-              <strong>Lead is interested</strong>
-              <span>Take over the conversation from here.</span>
+
+            <!-- ==================================================
+                 FLOATING SIGNALS
+                 ================================================== -->
+            <div class="cc-floating-signal cc-signal-one">
+
+              <span></span>
+
+              Recovery signal detected
+
             </div>
 
-            <button type="button" class="cc-handoff-btn">
-              Open conversation
-            </button>
+
+            <div class="cc-floating-signal cc-signal-two">
+
+              <span>
+                🔥
+              </span>
+
+              Opportunity recovered
+
+            </div>
+
 
           </div>
 
@@ -474,6 +1510,7 @@
     </div>
 
   </div>
+
 </section>
 <!-- ============================================================
      FEATURES SECTION
@@ -700,56 +1737,658 @@
   </div>
 </section>
 <!-- ============================================================
-     HOW IT WORKS
+     HOW IT WORKS — 4 STEP FLOW
      ============================================================ -->
-<section id="how-it-works" class="section section-alt" aria-labelledby="hiw-heading">
-  <div class="container">
-    <div class="hiw-header">
-      <div class="section-label reveal">How it works</div>
-      <h2 class="section-title reveal reveal-delay-1" id="hiw-heading">Up and running in minutes</h2>
-      <p class="section-sub reveal reveal-delay-2">
-        No technical setup required. Add a lead, configure your sequence once, and let ColdCloud do the work.
+
+<section id="how-it-works" class="cc-how-section">
+
+  <div class="cc-how-container">
+
+    <!-- HEADER -->
+    <div class="cc-how-header">
+
+      <div class="cc-how-label">
+        <span></span>
+        HOW IT WORKS
+      </div>
+
+      <h2>
+        From old leads to<br>
+        <em>new opportunities.</em>
+      </h2>
+
+      <p>
+        Connect the leads you already have, let ColdCloud find
+        the ones worth recovering, and step in when real
+        buying intent appears.
       </p>
-    </div>
-    <div class="hiw-steps">
-
-      <div class="hiw-step reveal reveal-delay-1">
-        <div class="hiw-num" aria-hidden="true">
-          <span class="hiw-icon">＋</span>
-        </div>
-        <h3 class="hiw-title">Add a lead</h3>
-        <p class="hiw-desc">Enter their name, phone number, and what they were interested in. That's all you need.</p>
-      </div>
-
-      <div class="hiw-step reveal reveal-delay-2">
-        <div class="hiw-num" aria-hidden="true">
-          <span class="hiw-icon">⚙️</span>
-        </div>
-        <h3 class="hiw-title">Sequence starts</h3>
-        <p class="hiw-desc">ColdCloud immediately queues the first message and schedules the rest based on your configuration.</p>
-      </div>
-
-      <div class="hiw-step reveal reveal-delay-3">
-        <div class="hiw-num" aria-hidden="true">
-          <span class="hiw-icon">📨</span>
-        </div>
-        <h3 class="hiw-title">Messages go out</h3>
-        <p class="hiw-desc">Each message is sent on time, personalised to the lead, through WhatsApp, SMS, or a voice call.</p>
-      </div>
-
-      <div class="hiw-step reveal reveal-delay-4">
-        <div class="hiw-num" aria-hidden="true">
-          <span class="hiw-icon">🎉</span>
-        </div>
-        <h3 class="hiw-title">Lead converts</h3>
-        <p class="hiw-desc">When they reply, you get notified instantly. Mark them as converted with one click.</p>
-      </div>
 
     </div>
+
+
+    <!-- FLOW -->
+    <div class="cc-how-flow">
+
+      <!-- STEP 1 -->
+      <div class="cc-how-step">
+
+        <div class="cc-how-icon cc-icon-blue">
+          <span>+</span>
+        </div>
+
+        <div class="cc-how-number">
+          01
+        </div>
+
+        <h3>
+          Bring in your leads
+        </h3>
+
+        <p>
+          Import leads from your CRM, CSV, Excel,
+          forms, or existing systems.
+        </p>
+
+      </div>
+
+
+      <!-- CONNECTOR -->
+      <div class="cc-how-connector">
+        <span></span>
+      </div>
+
+
+      <!-- STEP 2 -->
+      <div class="cc-how-step">
+
+        <div class="cc-how-icon cc-icon-purple">
+          <span>✦</span>
+        </div>
+
+        <div class="cc-how-number">
+          02
+        </div>
+
+        <h3>
+          ColdCloud understands
+        </h3>
+
+        <p>
+          Previous conversations, interest, objections
+          and timing signals are analyzed in context.
+        </p>
+
+      </div>
+
+
+      <!-- CONNECTOR -->
+      <div class="cc-how-connector">
+        <span></span>
+      </div>
+
+
+      <!-- STEP 3 -->
+      <div class="cc-how-step">
+
+        <div class="cc-how-icon cc-icon-green">
+          <span>↗</span>
+        </div>
+
+        <div class="cc-how-number">
+          03
+        </div>
+
+        <h3>
+          Recover opportunities
+        </h3>
+
+        <p>
+          ColdCloud re-engages the leads worth pursuing
+          with contextual follow-ups.
+        </p>
+
+      </div>
+
+
+      <!-- CONNECTOR -->
+      <div class="cc-how-connector">
+        <span></span>
+      </div>
+
+
+      <!-- STEP 4 -->
+      <div class="cc-how-step">
+
+        <div class="cc-how-icon cc-icon-orange">
+          <span>✓</span>
+        </div>
+
+        <div class="cc-how-number">
+          04
+        </div>
+
+        <h3>
+          Hand off when it matters
+        </h3>
+
+        <p>
+          When buying intent appears, your team gets
+          the context and takes over.
+        </p>
+
+      </div>
+
+    </div>
+
   </div>
+
 </section>
 
 
+<style>
+
+/* ============================================================
+   COLDCLOUD — HOW IT WORKS
+   ============================================================ */
+
+.cc-how-section {
+  position: relative;
+  overflow: hidden;
+
+  padding: 115px 0 125px;
+
+  background:
+    radial-gradient(
+      circle at 50% 40%,
+      rgba(37, 99, 235, .045),
+      transparent 38%
+    ),
+    #ffffff;
+}
+
+
+/* CONTAINER */
+
+.cc-how-container {
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.cc-how-header {
+  max-width: 680px;
+  margin: 0 auto 72px;
+  text-align: center;
+}
+
+.cc-how-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+
+  margin-bottom: 22px;
+
+  color: #2563eb;
+
+  font-family:
+    "JetBrains Mono",
+    "SFMono-Regular",
+    Consolas,
+    monospace;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 1.2px;
+}
+
+.cc-how-label span {
+  width: 18px;
+  height: 2px;
+
+  border-radius: 99px;
+
+  background: #2563eb;
+}
+
+
+.cc-how-header h2 {
+  margin: 0;
+
+  color: #101828;
+
+  font-size: clamp(42px, 5vw, 58px);
+  line-height: 1.03;
+
+  letter-spacing: -2.8px;
+  font-weight: 780;
+}
+
+.cc-how-header h2 em {
+  color: #2563eb;
+  font-style: normal;
+
+  position: relative;
+}
+
+.cc-how-header h2 em::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+  bottom: -5px;
+
+  height: 3px;
+
+  border-radius: 99px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #2563eb,
+      rgba(37,99,235,0)
+    );
+}
+
+
+.cc-how-header p {
+  max-width: 620px;
+
+  margin: 24px auto 0;
+
+  color: #64748b;
+
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+
+/* ============================================================
+   FLOW
+   ============================================================ */
+
+.cc-how-flow {
+  position: relative;
+
+  display: grid;
+
+  grid-template-columns:
+    1fr
+    70px
+    1fr
+    70px
+    1fr
+    70px
+    1fr;
+
+  align-items: start;
+}
+
+
+/* ============================================================
+   STEP
+   ============================================================ */
+
+.cc-how-step {
+  position: relative;
+
+  text-align: center;
+
+  opacity: 0;
+  transform: translateY(20px);
+
+  animation:
+    ccHowStepIn
+    .7s
+    cubic-bezier(.22,1,.36,1)
+    forwards;
+}
+
+.cc-how-step:nth-child(1) {
+  animation-delay: .15s;
+}
+
+.cc-how-step:nth-child(3) {
+  animation-delay: .3s;
+}
+
+.cc-how-step:nth-child(5) {
+  animation-delay: .45s;
+}
+
+.cc-how-step:nth-child(7) {
+  animation-delay: .6s;
+}
+
+
+/* ============================================================
+   ICON
+   ============================================================ */
+
+.cc-how-icon {
+  position: relative;
+
+  width: 56px;
+  height: 56px;
+
+  margin: 0 auto 19px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  font-size: 23px;
+  font-weight: 500;
+
+  background: white;
+
+  transition:
+    transform .3s ease,
+    box-shadow .3s ease;
+}
+
+
+/* outer ring */
+
+.cc-how-icon::before {
+  content: "";
+
+  position: absolute;
+
+  inset: -1px;
+
+  border-radius: inherit;
+
+  border: 1px solid currentColor;
+
+  opacity: .16;
+}
+
+
+/* glow */
+
+.cc-how-icon::after {
+  content: "";
+
+  position: absolute;
+
+  inset: -7px;
+
+  border-radius: inherit;
+
+  border: 1px solid currentColor;
+
+  opacity: 0;
+
+  transform: scale(.8);
+
+  transition:
+    opacity .3s ease,
+    transform .3s ease;
+}
+
+
+.cc-how-step:hover .cc-how-icon {
+  transform: translateY(-5px) scale(1.04);
+}
+
+.cc-how-step:hover .cc-how-icon::after {
+  opacity: .12;
+  transform: scale(1);
+}
+
+
+/* COLORS */
+
+.cc-icon-blue {
+  color: #2563eb;
+  background: #eff6ff;
+}
+
+.cc-icon-purple {
+  color: #7c3aed;
+  background: #f5f3ff;
+}
+
+.cc-icon-green {
+  color: #16a34a;
+  background: #f0fdf4;
+}
+
+.cc-icon-orange {
+  color: #ea580c;
+  background: #fff7ed;
+}
+
+
+/* ============================================================
+   NUMBER
+   ============================================================ */
+
+.cc-how-number {
+  margin-bottom: 8px;
+
+  color: #94a3b8;
+
+  font-family:
+    "JetBrains Mono",
+    monospace;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+}
+
+
+/* ============================================================
+   TEXT
+   ============================================================ */
+
+.cc-how-step h3 {
+  margin: 0 0 10px;
+
+  color: #111827;
+
+  font-size: 15px;
+  font-weight: 750;
+
+  letter-spacing: -.2px;
+}
+
+
+.cc-how-step p {
+  max-width: 220px;
+
+  margin: 0 auto;
+
+  color: #64748b;
+
+  font-size: 12px;
+  line-height: 1.65;
+}
+
+
+/* ============================================================
+   CONNECTOR
+   ============================================================ */
+
+.cc-how-connector {
+  position: relative;
+
+  height: 56px;
+
+  display: flex;
+  align-items: center;
+}
+
+
+.cc-how-connector::before {
+  content: "";
+
+  width: 100%;
+  height: 1px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #dbe4f0,
+      #cbd5e1,
+      #dbe4f0
+    );
+}
+
+
+/* moving signal */
+
+.cc-how-connector span {
+  position: absolute;
+
+  left: 0;
+
+  width: 5px;
+  height: 5px;
+
+  border-radius: 50%;
+
+  background: #2563eb;
+
+  box-shadow:
+    0 0 0 4px rgba(37,99,235,.07),
+    0 0 12px rgba(37,99,235,.35);
+
+  animation:
+    ccHowSignal
+    2.2s
+    ease-in-out
+    infinite;
+}
+
+
+.cc-how-connector:nth-child(4) span {
+  animation-delay: .45s;
+}
+
+.cc-how-connector:nth-child(6) span {
+  animation-delay: .9s;
+}
+
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes ccHowStepIn {
+
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+}
+
+
+@keyframes ccHowSignal {
+
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    left: calc(100% - 5px);
+    opacity: 0;
+  }
+
+}
+
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+
+@media (max-width: 900px) {
+
+  .cc-how-flow {
+    grid-template-columns: 1fr 1fr;
+    gap: 55px 30px;
+  }
+
+  .cc-how-connector {
+    display: none;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .cc-how-section {
+    padding: 80px 0;
+  }
+
+  .cc-how-container {
+    width: min(100% - 30px, 1180px);
+  }
+
+  .cc-how-header {
+    margin-bottom: 50px;
+  }
+
+  .cc-how-header h2 {
+    font-size: 40px;
+    letter-spacing: -2px;
+  }
+
+  .cc-how-header p {
+    font-size: 14px;
+  }
+
+  .cc-how-flow {
+    grid-template-columns: 1fr;
+    gap: 42px;
+  }
+
+  .cc-how-step p {
+    max-width: 280px;
+  }
+
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+
+  .cc-how-section *,
+  .cc-how-section *::before,
+  .cc-how-section *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+
+}
+
+</style>
 <!-- ============================================================
      CHANNELS
      ============================================================ -->
@@ -924,187 +2563,1641 @@
   </div>
 </section>
 <!-- ============================================================
-     SEQUENCE VISUAL
+     COLDCLOUD — HOW IT WORKS / LEAD RECOVERY
+     SELF-CONTAINED SECTION
      ============================================================ -->
-<section class="section section-alt cc-sequence" aria-labelledby="sequence-heading">
-  <div class="container">
 
-    <div class="cc-sequence-grid">
+<section id="solution" class="cc-recovery-section">
 
-      <!-- LEFT -->
-      <div class="cc-sequence-copy">
+  <style>
+    /* ==========================================================
+       COLDCLOUD RECOVERY SECTION
+       ========================================================== */
 
-        <div class="section-label reveal">
-          HOW COLDCLOUD WORKS
+    .cc-recovery-section {
+      position: relative;
+      overflow: hidden;
+      padding: 120px 0;
+      background:
+        radial-gradient(circle at 78% 45%, rgba(37,99,235,.09), transparent 32%),
+        radial-gradient(circle at 15% 80%, rgba(99,102,241,.05), transparent 28%),
+        #f8fafc;
+      color: #101828;
+    }
+
+    .cc-recovery-section *,
+    .cc-recovery-section *::before,
+    .cc-recovery-section *::after {
+      box-sizing: border-box;
+    }
+
+    .cc-recovery-section .cc-container {
+      width: min(1180px, calc(100% - 48px));
+      margin: 0 auto;
+    }
+
+    .cc-recovery-grid {
+      display: grid;
+      grid-template-columns: .82fr 1.18fr;
+      gap: 70px;
+      align-items: center;
+    }
+
+    /* ==========================================================
+       LEFT CONTENT
+       ========================================================== */
+
+    .cc-recovery-copy {
+      position: relative;
+      z-index: 5;
+    }
+
+    .cc-recovery-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 22px;
+
+      color: #2563eb;
+      font-family: "JetBrains Mono", monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .cc-recovery-label::before {
+      content: "";
+      width: 18px;
+      height: 2px;
+      border-radius: 99px;
+      background: #2563eb;
+    }
+
+    .cc-recovery-title {
+      margin: 0;
+      max-width: 620px;
+
+      font-size: clamp(42px, 4.5vw, 64px);
+      line-height: .98;
+      letter-spacing: -3px;
+      font-weight: 780;
+    }
+
+    .cc-recovery-title span {
+      color: #2563eb;
+      position: relative;
+    }
+
+    .cc-recovery-title span::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -5px;
+      height: 3px;
+      border-radius: 99px;
+      background: linear-gradient(
+        90deg,
+        #2563eb,
+        rgba(37,99,235,.05)
+      );
+    }
+
+    .cc-recovery-description {
+      max-width: 570px;
+      margin: 26px 0 34px;
+
+      color: #475569;
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    /* ==========================================================
+       STEPS
+       ========================================================== */
+
+    .cc-recovery-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      margin-bottom: 32px;
+    }
+
+    .cc-recovery-step {
+      position: relative;
+      display: grid;
+      grid-template-columns: 42px 1fr;
+      gap: 13px;
+      padding: 11px 0;
+
+      opacity: 0;
+      transform: translateX(-15px);
+      animation: ccStepIn .7s cubic-bezier(.22,1,.36,1) forwards;
+    }
+
+    .cc-recovery-step:nth-child(1) { animation-delay: .2s; }
+    .cc-recovery-step:nth-child(2) { animation-delay: .35s; }
+    .cc-recovery-step:nth-child(3) { animation-delay: .5s; }
+    .cc-recovery-step:nth-child(4) { animation-delay: .65s; }
+
+    .cc-step-number {
+      width: 34px;
+      height: 34px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 1px solid #dbe4f0;
+      border-radius: 10px;
+
+      background: rgba(255,255,255,.8);
+      color: #64748b;
+
+      font-family: "JetBrains Mono", monospace;
+      font-size: 9px;
+      font-weight: 700;
+
+      box-shadow: 0 5px 15px rgba(15,23,42,.04);
+    }
+
+    .cc-recovery-step:hover .cc-step-number {
+      color: #2563eb;
+      border-color: #93c5fd;
+      background: #eff6ff;
+      transform: translateY(-2px);
+    }
+
+    .cc-step-title {
+      display: block;
+      margin-top: 1px;
+
+      color: #111827;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .cc-step-description {
+      display: block;
+      margin-top: 4px;
+
+      color: #64748b;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .cc-recovery-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+
+      padding: 13px 19px;
+      border-radius: 10px;
+
+      background: #2563eb;
+      color: white;
+
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+
+      box-shadow: 0 12px 28px rgba(37,99,235,.20);
+
+      transition:
+        transform .25s ease,
+        box-shadow .25s ease;
+    }
+
+    .cc-recovery-cta:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 17px 35px rgba(37,99,235,.28);
+    }
+
+    /* ==========================================================
+       VISUAL
+       ========================================================== */
+
+    .cc-recovery-visual {
+      position: relative;
+      min-height: 650px;
+      display: flex;
+      align-items: center;
+    }
+
+    .cc-recovery-panel {
+      position: relative;
+      width: 100%;
+      min-height: 620px;
+
+      padding: 22px;
+
+      border: 1px solid rgba(148,163,184,.25);
+      border-radius: 26px;
+
+      background:
+        linear-gradient(
+          145deg,
+          rgba(255,255,255,.96),
+          rgba(248,250,252,.88)
+        );
+
+      box-shadow:
+        0 40px 90px rgba(15,23,42,.10),
+        0 12px 35px rgba(37,99,235,.06);
+
+      overflow: hidden;
+    }
+
+    /* technical grid */
+
+    .cc-recovery-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+
+      background-image:
+        linear-gradient(rgba(37,99,235,.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37,99,235,.035) 1px, transparent 1px);
+
+      background-size: 28px 28px;
+
+      mask-image: linear-gradient(
+        to bottom,
+        black,
+        transparent 90%
+      );
+
+      pointer-events: none;
+    }
+
+    /* glowing scanner */
+
+    .cc-recovery-panel::after {
+      content: "";
+      position: absolute;
+
+      left: -30%;
+      top: 0;
+
+      width: 35%;
+      height: 100%;
+
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(37,99,235,.08),
+        transparent
+      );
+
+      transform: skewX(-12deg);
+
+      animation: ccScanner 6s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* ==========================================================
+       LEAD HEADER
+       ========================================================== */
+
+    .cc-lead-card {
+      position: relative;
+      z-index: 2;
+
+      padding: 19px;
+
+      border: 1px solid #e2e8f0;
+      border-radius: 17px;
+
+      background: rgba(255,255,255,.95);
+
+      box-shadow: 0 10px 30px rgba(15,23,42,.05);
+
+      animation: ccFloat 5s ease-in-out infinite;
+    }
+
+    .cc-lead-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .cc-lead-avatar {
+      width: 42px;
+      height: 42px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 12px;
+
+      background: #eff6ff;
+      color: #2563eb;
+
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .cc-lead-name {
+      color: #111827;
+      font-size: 14px;
+      font-weight: 750;
+    }
+
+    .cc-lead-source {
+      margin-top: 3px;
+      color: #94a3b8;
+      font-size: 10px;
+    }
+
+    .cc-lead-status {
+      margin-left: auto;
+
+      padding: 6px 9px;
+
+      border-radius: 7px;
+
+      background: #f1f5f9;
+      color: #64748b;
+
+      font-family: "JetBrains Mono", monospace;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: .5px;
+    }
+
+    .cc-lead-info {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 15px;
+
+      margin-top: 18px;
+      padding-top: 16px;
+
+      border-top: 1px solid #eef2f7;
+    }
+
+    .cc-lead-info span {
+      display: block;
+      color: #94a3b8;
+      font-size: 8px;
+      margin-bottom: 5px;
+    }
+
+    .cc-lead-info strong {
+      color: #334155;
+      font-size: 10px;
+    }
+
+    /* ==========================================================
+       FLOW LINE
+       ========================================================== */
+
+    .cc-flow {
+      position: relative;
+      z-index: 2;
+
+      height: 45px;
+
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .cc-flow::before {
+      content: "";
+
+      width: 1px;
+      height: 100%;
+
+      background: linear-gradient(
+        to bottom,
+        rgba(37,99,235,.08),
+        rgba(37,99,235,.45),
+        rgba(37,99,235,.08)
+      );
+    }
+
+    .cc-flow-dot {
+      position: absolute;
+
+      width: 7px;
+      height: 7px;
+
+      border-radius: 50%;
+
+      background: #2563eb;
+      box-shadow:
+        0 0 0 5px rgba(37,99,235,.08),
+        0 0 15px rgba(37,99,235,.4);
+
+      animation: ccFlowDot 1.7s linear infinite;
+    }
+
+    /* ==========================================================
+       AI ANALYSIS
+       ========================================================== */
+
+    .cc-ai-card {
+      position: relative;
+      z-index: 2;
+
+      display: flex;
+      align-items: center;
+      gap: 14px;
+
+      padding: 18px;
+
+      border: 1px solid #bfdbfe;
+      border-radius: 17px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #f8fbff,
+          #ffffff
+        );
+
+      box-shadow:
+        0 15px 40px rgba(37,99,235,.08),
+        inset 0 0 30px rgba(37,99,235,.025);
+
+      animation: ccAiPulse 3s ease-in-out infinite;
+    }
+
+    .cc-ai-icon {
+      width: 42px;
+      height: 42px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border: 1px solid #bfdbfe;
+      border-radius: 12px;
+
+      background: #eff6ff;
+      color: #2563eb;
+
+      font-size: 19px;
+
+      animation: ccIconPulse 2.5s ease-in-out infinite;
+    }
+
+    .cc-ai-label {
+      display: block;
+
+      color: #2563eb;
+
+      font-family: "JetBrains Mono", monospace;
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 5px;
+    }
+
+    .cc-ai-title {
+      display: block;
+
+      color: #1e293b;
+      font-size: 12px;
+      font-weight: 750;
+    }
+
+    .cc-ai-signals {
+      display: flex;
+      gap: 5px;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .cc-ai-signal {
+      padding: 4px 7px;
+
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+
+      background: white;
+      color: #64748b;
+
+      font-size: 7px;
+    }
+
+    .cc-recovery-score {
+      margin-left: auto;
+      text-align: right;
+    }
+
+    .cc-recovery-score span {
+      display: block;
+
+      color: #94a3b8;
+
+      font-family: "JetBrains Mono", monospace;
+      font-size: 7px;
+      letter-spacing: .8px;
+    }
+
+    .cc-recovery-score strong {
+      display: block;
+
+      margin-top: 3px;
+
+      color: #2563eb;
+
+      font-size: 25px;
+      letter-spacing: -1px;
+    }
+
+    /* ==========================================================
+       DECISION
+       ========================================================== */
+
+    .cc-decision {
+      position: relative;
+      z-index: 2;
+
+      display: flex;
+      align-items: center;
+      gap: 13px;
+
+      padding: 15px 17px;
+
+      border: 1px solid #bbf7d0;
+      border-radius: 15px;
+
+      background: rgba(240,253,244,.85);
+
+      animation:
+        ccDecisionIn .8s 1.5s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .cc-decision-icon {
+      width: 34px;
+      height: 34px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 9px;
+
+      background: #dcfce7;
+      color: #16a34a;
+
+      font-weight: 800;
+    }
+
+    .cc-decision-label {
+      display: block;
+
+      color: #16a34a;
+
+      font-family: "JetBrains Mono", monospace;
+      font-size: 7px;
+      font-weight: 700;
+      letter-spacing: .8px;
+      margin-bottom: 4px;
+    }
+
+    .cc-decision strong {
+      color: #166534;
+      font-size: 11px;
+    }
+
+    .cc-decision p {
+      margin: 3px 0 0;
+
+      color: #65a30d;
+      font-size: 8px;
+    }
+
+    .cc-decision-arrow {
+      margin-left: auto;
+
+      color: #16a34a;
+      font-size: 18px;
+
+      animation: ccArrow 1.4s ease-in-out infinite;
+    }
+
+    /* ==========================================================
+       FOLLOW UP
+       ========================================================== */
+
+    .cc-message-card {
+      position: relative;
+      z-index: 2;
+
+      padding: 17px;
+
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+
+      background: white;
+
+      box-shadow: 0 10px 30px rgba(15,23,42,.05);
+
+      animation: ccMessageIn .8s 1.9s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .cc-message-top {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .cc-channel {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cc-channel-icon {
+      width: 27px;
+      height: 27px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 8px;
+
+      background: #dcfce7;
+      color: #16a34a;
+
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .cc-channel-text span {
+      display: block;
+
+      color: #94a3b8;
+
+      font-family: "JetBrains Mono", monospace;
+      font-size: 6px;
+      letter-spacing: .8px;
+    }
+
+    .cc-channel-text strong {
+      display: block;
+
+      margin-top: 2px;
+
+      color: #334155;
+      font-size: 10px;
+    }
+
+    .cc-ready {
+      margin-left: auto;
+
+      padding: 5px 8px;
+
+      border-radius: 6px;
+
+      background: #eff6ff;
+      color: #2563eb;
+
+      font-family: "JetBrains Mono", monospace;
+      font-size: 7px;
+      font-weight: 700;
+    }
+
+    .cc-message-body {
+      display: flex;
+      gap: 10px;
+
+      padding: 12px;
+
+      border: 1px solid #eef2f7;
+      border-radius: 11px;
+
+      background: #f8fafc;
+    }
+
+    .cc-message-avatar {
+      flex-shrink: 0;
+
+      width: 27px;
+      height: 27px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 8px;
+
+      background: #2563eb;
+      color: white;
+
+      font-size: 8px;
+      font-weight: 800;
+    }
+
+    .cc-message-body span {
+      display: block;
+
+      color: #2563eb;
+      font-size: 8px;
+      font-weight: 750;
+      margin-bottom: 5px;
+    }
+
+    .cc-message-body p {
+      margin: 0;
+
+      color: #475569;
+      font-size: 9px;
+      line-height: 1.6;
+    }
+
+    .cc-message-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      margin-top: 10px;
+
+      color: #94a3b8;
+      font-size: 7px;
+    }
+
+    .cc-send {
+      padding: 6px 9px;
+
+      border: 0;
+      border-radius: 6px;
+
+      background: #2563eb;
+      color: white;
+
+      font-size: 7px;
+      font-weight: 700;
+
+      animation: ccSendPulse 2s ease-in-out infinite;
+    }
+
+    /* ==========================================================
+       RESPONSE
+       ========================================================== */
+
+    .cc-response {
+      position: relative;
+      z-index: 2;
+
+      display: flex;
+      align-items: center;
+      gap: 12px;
+
+      padding: 14px 16px;
+
+      border: 1px solid #bbf7d0;
+      border-radius: 15px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #f0fdf4,
+          #ffffff
+        );
+
+      animation: ccResponseIn .8s 2.7s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .cc-response-icon {
+      width: 34px;
+      height: 34px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 9px;
+
+      background: #dcfce7;
+      color: #16a34a;
+
+      font-size: 16px;
+    }
+
+    .cc-response-label {
+      display: block;
+
+      color: #16a34a;
+
+      font-family: "JetBrains Mono", monospace;
+      font-size: 6px;
+      font-weight: 700;
+      letter-spacing: .8px;
+    }
+
+    .cc-response strong {
+      display: block;
+
+      margin-top: 3px;
+
+      color: #166534;
+      font-size: 10px;
+    }
+
+    .cc-response p {
+      margin: 3px 0 0;
+
+      color: #64748b;
+      font-size: 8px;
+    }
+
+    .cc-hot {
+      margin-left: auto;
+
+      padding: 6px 9px;
+
+      border-radius: 7px;
+
+      background: #fff7ed;
+      color: #ea580c;
+
+      font-size: 8px;
+      font-weight: 800;
+
+      animation: ccHotPulse 1.5s ease-in-out infinite;
+    }
+
+    /* ==========================================================
+       HUMAN HANDOFF
+       ========================================================== */
+
+    .cc-handoff {
+      position: relative;
+      z-index: 2;
+
+      display: flex;
+      align-items: center;
+      gap: 11px;
+
+      margin-top: 10px;
+      padding: 13px 15px;
+
+      border-radius: 14px;
+
+      background: #111827;
+      color: white;
+
+      box-shadow: 0 15px 35px rgba(15,23,42,.16);
+
+      animation: ccHandoffIn .8s 3.2s cubic-bezier(.22,1,.36,1) both;
+    }
+
+    .cc-handoff-icon {
+      width: 30px;
+      height: 30px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 8px;
+
+      background: rgba(255,255,255,.08);
+
+      font-size: 13px;
+    }
+
+    .cc-handoff-text span {
+      display: block;
+
+      color: #94a3b8;
+
+      font-family: "JetBrains Mono", monospace;
+      font-size: 6px;
+      letter-spacing: .8px;
+    }
+
+    .cc-handoff-text strong {
+      display: block;
+
+      margin-top: 3px;
+
+      font-size: 10px;
+    }
+
+    .cc-handoff-button {
+      margin-left: auto;
+
+      padding: 7px 10px;
+
+      border: 1px solid rgba(255,255,255,.15);
+      border-radius: 7px;
+
+      background: rgba(255,255,255,.06);
+      color: white;
+
+      font-size: 7px;
+      font-weight: 700;
+    }
+
+    /* ==========================================================
+       FLOATING BADGES
+       ========================================================== */
+
+    .cc-floating {
+      position: absolute;
+      z-index: 8;
+
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      padding: 9px 12px;
+
+      border: 1px solid rgba(226,232,240,.9);
+      border-radius: 10px;
+
+      background: rgba(255,255,255,.94);
+
+      box-shadow:
+        0 15px 35px rgba(15,23,42,.12),
+        0 5px 15px rgba(37,99,235,.05);
+
+      color: #334155;
+
+      font-size: 8px;
+      font-weight: 700;
+
+      backdrop-filter: blur(12px);
+    }
+
+    .cc-floating-one {
+      top: 19%;
+      left: -25px;
+      animation: ccBadgeFloat 4s ease-in-out infinite;
+    }
+
+    .cc-floating-two {
+      right: -25px;
+      bottom: 19%;
+      animation: ccBadgeFloat 4.5s .5s ease-in-out infinite;
+    }
+
+    .cc-floating-dot {
+      width: 6px;
+      height: 6px;
+
+      border-radius: 50%;
+      background: #2563eb;
+
+      box-shadow: 0 0 10px rgba(37,99,235,.5);
+    }
+
+    .cc-floating-fire {
+      font-size: 12px;
+    }
+
+    /* ==========================================================
+       ANIMATIONS
+       ========================================================== */
+
+    @keyframes ccStepIn {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes ccScanner {
+      0% {
+        transform: translateX(-100%) skewX(-12deg);
+      }
+
+      55%,100% {
+        transform: translateX(430%) skewX(-12deg);
+      }
+    }
+
+    @keyframes ccFloat {
+      0%,100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    @keyframes ccFlowDot {
+      0% {
+        top: 0;
+        opacity: 0;
+      }
+
+      15% {
+        opacity: 1;
+      }
+
+      85% {
+        opacity: 1;
+      }
+
+      100% {
+        top: calc(100% - 7px);
+        opacity: 0;
+      }
+    }
+
+    @keyframes ccAiPulse {
+      0%,100% {
+        box-shadow:
+          0 15px 40px rgba(37,99,235,.07),
+          inset 0 0 30px rgba(37,99,235,.02);
+      }
+
+      50% {
+        box-shadow:
+          0 18px 50px rgba(37,99,235,.14),
+          inset 0 0 35px rgba(37,99,235,.05);
+      }
+    }
+
+    @keyframes ccIconPulse {
+      0%,100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.07) rotate(3deg);
+      }
+    }
+
+    @keyframes ccDecisionIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes ccMessageIn {
+      from {
+        opacity: 0;
+        transform: translateY(18px) scale(.98);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes ccResponseIn {
+      from {
+        opacity: 0;
+        transform: translateY(15px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes ccHandoffIn {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes ccArrow {
+      0%,100% {
+        transform: translateX(0);
+      }
+
+      50% {
+        transform: translateX(5px);
+      }
+    }
+
+    @keyframes ccSendPulse {
+      0%,100% {
+        box-shadow: 0 0 0 rgba(37,99,235,0);
+      }
+
+      50% {
+        box-shadow: 0 0 0 5px rgba(37,99,235,.08);
+      }
+    }
+
+    @keyframes ccHotPulse {
+      0%,100% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.06);
+      }
+    }
+
+    @keyframes ccBadgeFloat {
+      0%,100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-7px);
+      }
+    }
+
+    /* ==========================================================
+       RESPONSIVE
+       ========================================================== */
+
+    @media (max-width: 1000px) {
+
+      .cc-recovery-grid {
+        grid-template-columns: 1fr;
+        gap: 55px;
+      }
+
+      .cc-recovery-copy {
+        max-width: 700px;
+      }
+
+      .cc-recovery-visual {
+        max-width: 760px;
+        width: 100%;
+        margin: auto;
+      }
+    }
+
+    @media (max-width: 650px) {
+
+      .cc-recovery-section {
+        padding: 80px 0;
+      }
+
+      .cc-recovery-section .cc-container {
+        width: min(100% - 28px, 1180px);
+      }
+
+      .cc-recovery-title {
+        font-size: 42px;
+        letter-spacing: -2px;
+      }
+
+      .cc-recovery-description {
+        font-size: 14px;
+      }
+
+      .cc-recovery-panel {
+        min-height: auto;
+        padding: 13px;
+        border-radius: 19px;
+      }
+
+      .cc-lead-info {
+        grid-template-columns: 1fr;
+        gap: 9px;
+      }
+
+      .cc-ai-card {
+        align-items: flex-start;
+      }
+
+      .cc-recovery-score strong {
+        font-size: 20px;
+      }
+
+      .cc-floating {
+        display: none;
+      }
+
+      .cc-handoff-button {
+        display: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      .cc-recovery-section *,
+      .cc-recovery-section *::before,
+      .cc-recovery-section *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+
+    }
+  </style>
+
+
+  <div class="cc-container">
+
+    <div class="cc-recovery-grid">
+
+      <!-- ======================================================
+           LEFT
+           ====================================================== -->
+
+      <div class="cc-recovery-copy">
+
+        <div class="cc-recovery-label">
+          How ColdCloud works
         </div>
 
-        <h2 class="section-title reveal reveal-delay-1" id="sequence-heading">
-          Follow up without<br>
-          <em>chasing.</em>
+        <h2 class="cc-recovery-title">
+          Turn inactive leads<br>
+          into <span>new opportunities.</span>
         </h2>
 
-        <p class="section-sub reveal reveal-delay-2">
-          ColdCloud keeps the conversation moving after a lead goes quiet.
-          Your team only steps in when someone is ready to talk.
+        <p class="cc-recovery-description">
+          ColdCloud analyzes the leads you've already acquired,
+          finds the ones worth recovering, and brings the right
+          conversations back to life.
         </p>
 
-        <div class="cc-sequence-meta reveal reveal-delay-3">
 
-          <div class="cc-meta-row">
-            <span class="cc-meta-dot"></span>
+        <div class="cc-recovery-steps">
+
+          <div class="cc-recovery-step">
+            <div class="cc-step-number">01</div>
+
             <div>
-              <strong>Automatic follow-up</strong>
-              <span>Messages go out according to your sequence.</span>
+              <strong class="cc-step-title">
+                Understand the lead
+              </strong>
+
+              <span class="cc-step-description">
+                Previous interest, conversations, objections
+                and timing signals — all in context.
+              </span>
             </div>
           </div>
 
-          <div class="cc-meta-row">
-            <span class="cc-meta-dot"></span>
+
+          <div class="cc-recovery-step">
+            <div class="cc-step-number">02</div>
+
             <div>
-              <strong>Stop when they respond</strong>
-              <span>No awkward messages after the conversation starts.</span>
+              <strong class="cc-step-title">
+                Find recoverable opportunities
+              </strong>
+
+              <span class="cc-step-description">
+                ColdCloud identifies which inactive leads
+                are actually worth re-engaging.
+              </span>
             </div>
           </div>
 
-          <div class="cc-meta-row">
-            <span class="cc-meta-dot"></span>
+
+          <div class="cc-recovery-step">
+            <div class="cc-step-number">03</div>
+
             <div>
-              <strong>Hand off when it matters</strong>
-              <span>Your team takes over when a lead is interested.</span>
+              <strong class="cc-step-title">
+                Re-engage automatically
+              </strong>
+
+              <span class="cc-step-description">
+                Contextual follow-ups are sent through
+                the right channel at the right time.
+              </span>
+            </div>
+          </div>
+
+
+          <div class="cc-recovery-step">
+            <div class="cc-step-number">04</div>
+
+            <div>
+              <strong class="cc-step-title">
+                Hand hot opportunities to humans
+              </strong>
+
+              <span class="cc-step-description">
+                When buying intent appears, your team gets
+                the context and takes over.
+              </span>
             </div>
           </div>
 
         </div>
+
 
         <a
           href="https://cold-cloud-app.vercel.app/?mode=signup"
-          class="btn btn-primary reveal reveal-delay-4"
+          class="cc-recovery-cta"
         >
-          See ColdCloud in action →
+          Recover your leads
+          <span>→</span>
         </a>
 
       </div>
 
 
-      <!-- RIGHT: REALISTIC LEAD TIMELINE -->
-      <div class="cc-timeline reveal reveal-delay-2">
+      <!-- ======================================================
+           RIGHT — ANIMATED PRODUCT VISUAL
+           ====================================================== -->
 
-        <div class="cc-timeline-header">
-          <div>
-            <div class="cc-timeline-label">LEAD FOLLOW-UP</div>
-            <div class="cc-timeline-name">Sarah Johnson</div>
-            <div class="cc-timeline-context">
-              Personal training · New enquiry
-            </div>
-          </div>
+      <div class="cc-recovery-visual">
 
-          <span class="cc-live">
-            <span></span> Active
-          </span>
-        </div>
+        <div class="cc-recovery-panel">
 
 
-        <div class="cc-timeline-body">
+          <!-- LEAD -->
 
-          <!-- STEP 1 -->
-          <div class="cc-event">
-            <div class="cc-event-line">
-              <span class="cc-event-number">01</span>
-            </div>
+          <div class="cc-lead-card">
 
-            <div class="cc-event-content">
-              <div class="cc-event-top">
-                <span class="cc-event-title">Lead added</span>
-                <span class="cc-event-time">Today · 10:42</span>
+            <div class="cc-lead-header">
+
+              <div class="cc-lead-avatar">
+                SJ
               </div>
 
-              <div class="cc-event-box cc-event-muted">
-                Sarah submitted a request for personal training.
-              </div>
-            </div>
-          </div>
-
-
-          <!-- STEP 2 -->
-          <div class="cc-event">
-            <div class="cc-event-line">
-              <span class="cc-event-number cc-active">02</span>
-            </div>
-
-            <div class="cc-event-content">
-              <div class="cc-event-top">
-                <span class="cc-event-title">Follow-up sent</span>
-                <span class="cc-event-time">Today · 10:43</span>
-              </div>
-
-              <div class="cc-event-box">
-                <div class="cc-message-channel">
-                  <span class="cc-channel-icon">W</span>
-                  WhatsApp
-                  <span class="cc-sent">✓ Sent</span>
+              <div>
+                <div class="cc-lead-name">
+                  Sarah Johnson
                 </div>
+
+                <div class="cc-lead-source">
+                  Website enquiry
+                </div>
+              </div>
+
+              <span class="cc-lead-status">
+                INACTIVE
+              </span>
+
+            </div>
+
+
+            <div class="cc-lead-info">
+
+              <div>
+                <span>Interested in</span>
+                <strong>Personal Training</strong>
+              </div>
+
+              <div>
+                <span>Last contact</span>
+                <strong>7 months ago</strong>
+              </div>
+
+              <div>
+                <span>Previous objection</span>
+                <strong>Timing</strong>
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- FLOW -->
+
+          <div class="cc-flow">
+            <span class="cc-flow-dot"></span>
+          </div>
+
+
+          <!-- AI -->
+
+          <div class="cc-ai-card">
+
+            <div class="cc-ai-icon">
+              ✦
+            </div>
+
+            <div>
+
+              <span class="cc-ai-label">
+                COLDCLOUD INTELLIGENCE
+              </span>
+
+              <strong class="cc-ai-title">
+                Understanding lead context
+              </strong>
+
+              <div class="cc-ai-signals">
+                <span class="cc-ai-signal">
+                  ✓ Previous interest
+                </span>
+
+                <span class="cc-ai-signal">
+                  ✓ Conversation history
+                </span>
+
+                <span class="cc-ai-signal">
+                  ✓ Timing signals
+                </span>
+              </div>
+
+            </div>
+
+            <div class="cc-recovery-score">
+              <span>RECOVERY</span>
+              <strong>87%</strong>
+            </div>
+
+          </div>
+
+
+          <!-- FLOW -->
+
+          <div class="cc-flow">
+            <span class="cc-flow-dot"></span>
+          </div>
+
+
+          <!-- DECISION -->
+
+          <div class="cc-decision">
+
+            <div class="cc-decision-icon">
+              ✓
+            </div>
+
+            <div>
+
+              <span class="cc-decision-label">
+                RECOVERY SIGNAL
+              </span>
+
+              <strong>
+                Worth re-engaging
+              </strong>
+
+              <p>
+                Previous interest + strong timing signal
+              </p>
+
+            </div>
+
+            <div class="cc-decision-arrow">
+              →
+            </div>
+
+          </div>
+
+
+          <!-- FLOW -->
+
+          <div class="cc-flow">
+            <span class="cc-flow-dot"></span>
+          </div>
+
+
+          <!-- MESSAGE -->
+
+          <div class="cc-message-card">
+
+            <div class="cc-message-top">
+
+              <div class="cc-channel">
+
+                <div class="cc-channel-icon">
+                  W
+                </div>
+
+                <div class="cc-channel-text">
+                  <span>FOLLOW-UP</span>
+                  <strong>WhatsApp</strong>
+                </div>
+
+              </div>
+
+              <span class="cc-ready">
+                READY
+              </span>
+
+            </div>
+
+
+            <div class="cc-message-body">
+
+              <div class="cc-message-avatar">
+                CC
+              </div>
+
+              <div>
+
+                <span>
+                  ColdCloud
+                </span>
 
                 <p>
-                  Hey Sarah, just checking in on your interest
-                  in personal training. Happy to answer any
-                  questions whenever you're ready.
+                  Hey Sarah — you mentioned you'd revisit
+                  personal training when the timing was right.
+                  Is this something you're still considering?
                 </p>
+
               </div>
+
             </div>
+
+
+            <div class="cc-message-footer">
+
+              <span>
+                Personalised from lead context
+              </span>
+
+              <button class="cc-send">
+                Send →
+              </button>
+
+            </div>
+
           </div>
 
 
-          <!-- STEP 3 -->
-          <div class="cc-event">
-            <div class="cc-event-line">
-              <span class="cc-event-number">03</span>
-            </div>
+          <!-- FLOW -->
 
-            <div class="cc-event-content">
-              <div class="cc-event-top">
-                <span class="cc-event-title">No response</span>
-                <span class="cc-event-time">3 days later</span>
-              </div>
-
-              <div class="cc-event-box cc-event-muted">
-                Next follow-up scheduled automatically.
-              </div>
-            </div>
+          <div class="cc-flow">
+            <span class="cc-flow-dot"></span>
           </div>
 
 
-          <!-- STEP 4 -->
-          <div class="cc-event cc-event-last">
-            <div class="cc-event-line">
-              <span class="cc-event-number cc-success">04</span>
+          <!-- RESPONSE -->
+
+          <div class="cc-response">
+
+            <div class="cc-response-icon">
+              ↩
             </div>
 
-            <div class="cc-event-content">
-              <div class="cc-event-top">
-                <span class="cc-event-title">Lead replied</span>
-                <span class="cc-event-time">2 min ago</span>
-              </div>
+            <div>
 
-              <div class="cc-event-box cc-reply-box">
+              <span class="cc-response-label">
+                RESPONSE DETECTED
+              </span>
 
-                <div class="cc-reply-header">
-                  <span class="cc-reply-avatar">S</span>
-                  <strong>Sarah</strong>
-                  <span class="cc-reply-status">Interested</span>
-                </div>
+              <strong>
+                Sarah replied
+              </strong>
 
-                <p>
-                  “Yeah, I'm interested. How much is it?”
-                </p>
-
-                <div class="cc-handoff">
-                  <span>↗</span>
-                  Ready for your team
-                </div>
-
-              </div>
+              <p>
+                “Actually yes — I'm interested again.”
+              </p>
 
             </div>
+
+            <span class="cc-hot">
+              🔥 HOT
+            </span>
+
+          </div>
+
+
+          <!-- HUMAN HANDOFF -->
+
+          <div class="cc-handoff">
+
+            <div class="cc-handoff-icon">
+              👤
+            </div>
+
+            <div class="cc-handoff-text">
+
+              <span>
+                HUMAN FOLLOW-UP
+              </span>
+
+              <strong>
+                Opportunity recovered
+              </strong>
+
+            </div>
+
+            <button class="cc-handoff-button">
+              Open lead →
+            </button>
+
+          </div>
+
+
+          <!-- FLOATING SIGNALS -->
+
+          <div class="cc-floating cc-floating-one">
+            <span class="cc-floating-dot"></span>
+            Recovery signal detected
+          </div>
+
+          <div class="cc-floating cc-floating-two">
+            <span class="cc-floating-fire">
+              🔥
+            </span>
+            Opportunity recovered
           </div>
 
         </div>
@@ -1112,7 +4205,9 @@
       </div>
 
     </div>
+
   </div>
+
 </section>
 <!-- ============================================================
      PRICING
@@ -1214,11 +4309,13 @@
     <div class="cc-footer-main">
 
       <div class="cc-footer-brand">
-        <a href="index.html" class="nav-brand">
-          <div class="nav-logo-mark" aria-hidden="true">CC</div>
-          <span class="nav-logo-name">ColdCloud</span>
-        </a>
-
+        <a href="index.html" class="nav-brand footer-logo" aria-label="ColdCloud home">
+  <img
+    src="assets/coldcloud-logo.png"
+    alt="ColdCloud"
+    class="nav-logo"
+  >
+</a>
         <p>
           Follow-up automation that helps businesses
           turn more leads into conversations.
