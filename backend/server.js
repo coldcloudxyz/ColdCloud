@@ -16,6 +16,7 @@ const { generateMessage }                     = require('./ai')
 const { triggerStep, processScheduledFollowUps } = require('./sequence')
 
 const app  = express()
+app.set('trust proxy', 1)
 const PORT = process.env.PORT || 3001
 
 // ── Security ──────────────────────────────────────────────────
