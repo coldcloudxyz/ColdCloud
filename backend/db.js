@@ -52,9 +52,9 @@ async function isConnected() {
   try {
     await query('SELECT 1')
     return true
-  } catch {
+  } catch (err) {
+    console.error('[DB] Connection failed:', err.message)
     return false
   }
 }
-
 module.exports = { query, getOne, getMany, isConnected, getPool }
