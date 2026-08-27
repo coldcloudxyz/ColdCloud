@@ -713,69 +713,452 @@ textarea.form-inp{resize:vertical;min-height:72px;font-size:13px}
   .mod-acts{flex-direction:column-reverse}
   .btn-mod-cancel,.btn-mod-ok,.btn-mod-danger{width:100%;text-align:center}
 }
+/* ═══════════════════════════════════════════════
+   COLDCLOUD — PREMIUM AUTH UI
+   ═══════════════════════════════════════════════ */
+
+#page-login {
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 20px;
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgba(37, 99, 235, 0.10),
+      transparent 45%
+    ),
+    #f8fafc;
+}
+
+#page-login .auth-card {
+  width: 100%;
+  max-width: 430px;
+  padding: 38px;
+  border-radius: 20px;
+  background: rgba(255,255,255,.96);
+  border: 1px solid rgba(15,23,42,.08);
+  box-shadow:
+    0 30px 80px rgba(15,23,42,.08),
+    0 8px 24px rgba(15,23,42,.04);
+}
+
+/* BRAND */
+
+#page-login .auth-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 34px;
+}
+
+.auth-logo-img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+#page-login .auth-brand-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -.4px;
+  color: #111827;
+}
+
+/* HEADING */
+
+#page-login .auth-h {
+  font-size: 30px;
+  line-height: 1.15;
+  font-weight: 700;
+  letter-spacing: -.8px;
+  color: #111827;
+  margin-bottom: 9px;
+}
+
+#page-login .auth-sub {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #64748b;
+  margin-bottom: 26px;
+}
+
+/* GOOGLE */
+
+.google-auth-btn {
+  width: 100%;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 9px;
+
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease,
+    transform .2s ease;
+}
+
+.google-auth-btn:hover {
+  border-color: #9ca3af;
+  box-shadow: 0 5px 18px rgba(15,23,42,.07);
+  transform: translateY(-1px);
+}
+
+.google-icon {
+  width: 20px;
+  height: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-family: Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+
+  color: #4285f4;
+}
+
+/* DIVIDER */
+
+#page-login .auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 25px 0;
+  color: #94a3b8;
+  font-size: 11px;
+}
+
+#page-login .auth-divider::before,
+#page-login .auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+/* FORM */
+
+#page-login .fg {
+  margin-bottom: 17px;
+}
+
+#page-login .fl {
+  display: block;
+  margin-bottom: 7px;
+
+  font-size: 13px;
+  font-weight: 600;
+  color: #374151;
+}
+
+#page-login .fi {
+  width: 100%;
+  height: 46px;
+
+  padding: 0 13px;
+
+  background: #fff;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+
+  color: #111827;
+  font-size: 14px;
+
+  outline: none;
+
+  transition:
+    border-color .2s ease,
+    box-shadow .2s ease;
+}
+
+#page-login .fi::placeholder {
+  color: #9ca3af;
+}
+
+#page-login .fi:focus {
+  border-color: #2563eb;
+  box-shadow:
+    0 0 0 3px rgba(37,99,235,.10);
+}
+
+/* PASSWORD ROW */
+
+.password-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.forgot-link {
+  font-size: 12px;
+  color: #2563eb;
+  cursor: pointer;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* PASSWORD */
+
+.password-wrap {
+  position: relative;
+}
+
+.password-wrap .fi {
+  padding-right: 45px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+
+  border: 0;
+  background: transparent;
+
+  color: #94a3b8;
+  font-size: 13px;
+
+  cursor: pointer;
+}
+
+.password-toggle:hover {
+  color: #475569;
+}
+
+/* SIGN IN */
+
+#page-login .auth-submit {
+  width: 100%;
+  height: 48px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  margin-top: 5px;
+
+  border: 0;
+  border-radius: 9px;
+
+  background: #2563eb;
+  color: #fff;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background .2s ease,
+    transform .2s ease,
+    box-shadow .2s ease;
+}
+
+#page-login .auth-submit:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(37,99,235,.20);
+}
+
+.auth-arrow {
+  font-size: 16px;
+  transition: transform .2s ease;
+}
+
+#page-login .auth-submit:hover .auth-arrow {
+  transform: translateX(3px);
+}
+
+/* DEMO */
+
+.demo-note {
+  text-align: center;
+  margin-top: 13px;
+
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+/* BOTTOM */
+
+#page-login .auth-alt {
+  margin-top: 23px;
+
+  text-align: center;
+
+  font-size: 13px;
+  color: #64748b;
+}
+
+#page-login .auth-alt span {
+  color: #2563eb;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#page-login .auth-alt span:hover {
+  text-decoration: underline;
+}
+
+/* MOBILE */
+
+@media (max-width: 520px) {
+
+  #page-login {
+    padding: 20px 14px;
+  }
+
+  #page-login .auth-card {
+    padding: 28px 22px;
+    border-radius: 16px;
+  }
+
+  #page-login .auth-h {
+    font-size: 26px;
+  }
+
+}
+.page {
+  display: none;
+}
+
+.page.active {
+  display: flex !important;
+}
 </style>
 </head>
 <body>
 
 <!-- ══════════ LOGIN ══════════ -->
 <div id="page-login" class="page active">
+
   <div class="auth-card">
+
+    <!-- BRAND -->
     <div class="auth-brand">
-      <div class="auth-brand-mark">CC</div>
+      <img
+        src="../landing/assets/coldcloud-logo.png"
+        alt="ColdCloud"
+        class="auth-logo-img"
+      >
       <div class="auth-brand-name">ColdCloud</div>
     </div>
-    <div class="auth-h">Sign in to your account</div>
-    <div class="auth-sub">Enter your email and password to continue</div>
+
+    <!-- HEADING -->
+    <div class="auth-h">Welcome back</div>
+
+    <div class="auth-sub">
+      Sign in to continue to your ColdCloud workspace.
+    </div>
+
+    <!-- GOOGLE -->
+    <button
+      type="button"
+      class="google-auth-btn"
+      onclick="signInWithGoogle()"
+    >
+      <span class="google-icon">G</span>
+      <span>Continue with Google</span>
+    </button>
+
+    <!-- DIVIDER -->
+    <div class="auth-divider">
+      <span>or continue with email</span>
+    </div>
+
+    <!-- ERROR -->
     <div class="auth-err" id="login-err"></div>
-    <div class="fg"><label class="fl">Email address</label><input class="fi" id="l-email" type="email" placeholder="you@company.com" value="demo@coldcloud.io" autocomplete="email"></div>
-    <div class="fg"><label class="fl">Password</label><input class="fi" id="l-pw" type="password" placeholder="••••••••" value="demo1234" autocomplete="current-password"></div>
-    <button class="btn-auth" id="btn-login" onclick="doLogin()">Sign in</button>
-    <div style="text-align:right;margin-top:-2px;margin-bottom:6px"><span style="font-size:12px;color:var(--text3);cursor:pointer" onclick="showPage('forgot')">Forgot password?</span></div>
-    <div style="font-size:11px;color:var(--text3);text-align:center;margin:-4px 0 8px">Demo: demo@coldcloud.io / demo1234</div>
-    <div class="auth-divider">or</div>
-    <div class="auth-alt">Don't have an account? <span onclick="showPage('signup')">Create one free</span></div>
-  </div>
-</div>
 
-<!-- ══════════ SIGNUP ══════════ -->
-<div id="page-signup" class="page">
-  <div class="auth-card">
-    <div class="auth-brand">
-      <div class="auth-brand-mark">CC</div>
-      <div class="auth-brand-name">ColdCloud</div>
-    </div>
-    <div class="auth-h">Create your account</div>
-    <div class="auth-sub">Free to use. No credit card required.</div>
-    <div class="auth-err" id="signup-err"></div>
-    <div class="frow">
-      <div class="fg"><label class="fl">First name</label><input class="fi" id="s-fn" type="text" placeholder="Alex" autocomplete="given-name"></div>
-      <div class="fg"><label class="fl">Last name</label><input class="fi" id="s-ln" type="text" placeholder="Rivera" autocomplete="family-name"></div>
-    </div>
-    <div class="fg"><label class="fl">Work email</label><input class="fi" id="s-email" type="email" placeholder="you@company.com" autocomplete="email"></div>
-    <div class="fg"><label class="fl">Company <span style="color:var(--text3);font-weight:400">(optional)</span></label><input class="fi" id="s-co" type="text" placeholder="Acme Corp" autocomplete="organization"></div>
-    <div class="fg"><label class="fl">Password</label><input class="fi" id="s-pw" type="password" placeholder="At least 8 characters" autocomplete="new-password"></div>
-    <button class="btn-auth" onclick="doSignup()">Create account</button>
-    <div class="auth-alt">Already have an account? <span onclick="showPage('login')">Sign in</span></div>
-  </div>
-</div>
+    <!-- EMAIL -->
+    <div class="fg">
+      <label class="fl" for="l-email">Work email</label>
 
-<!-- ══════════ FORGOT PASSWORD ══════════ -->
-<div id="page-forgot" class="page">
-  <div class="auth-card">
-    <div class="auth-brand">
-      <div class="auth-brand-mark">CC</div>
-      <div class="auth-brand-name">ColdCloud</div>
+      <input
+        class="fi"
+        id="l-email"
+        type="email"
+        placeholder="you@company.com"
+        autocomplete="email"
+      >
     </div>
-    <div class="auth-h">Reset your password</div>
-    <div class="auth-sub">Enter your email and we'll send you a reset link.</div>
-    <div class="auth-err" id="forgot-err"></div>
-    <div class="auth-ok" id="forgot-ok"></div>
-    <div class="fg"><label class="fl">Email address</label><input class="fi" id="forgot-email" type="email" placeholder="you@company.com" autocomplete="email"></div>
-    <button class="btn-auth" onclick="doForgotPassword()">Send reset link</button>
-    <div class="auth-alt"><span onclick="showPage('login')" style="color:var(--blue);font-weight:500;cursor:pointer">Back to sign in</span></div>
-  </div>
-</div>
 
+    <!-- PASSWORD -->
+    <div class="fg">
+      <div class="password-label-row">
+        <label class="fl" for="l-pw">Password</label>
+
+        <span
+          class="forgot-link"
+          onclick="showPage('forgot')"
+        >
+          Forgot password?
+        </span>
+      </div>
+
+      <div class="password-wrap">
+
+        <input
+          class="fi"
+          id="l-pw"
+          type="password"
+          placeholder="Enter your password"
+          autocomplete="current-password"
+        >
+
+        <button
+          type="button"
+          class="password-toggle"
+          onclick="togglePassword('l-pw', this)"
+          aria-label="Show password"
+        >
+          ◉
+        </button>
+
+      </div>
+    </div>
+
+    <!-- LOGIN -->
+    <button
+      class="btn-auth auth-submit"
+      id="btn-login"
+      onclick="doLogin()"
+    >
+      <span>Sign in</span>
+      <span class="auth-arrow">→</span>
+    </button>
+
+    <!-- DEMO -->
+    <div class="demo-note">
+      Demo account available for testing
+    </div>
+
+    <!-- SIGNUP -->
+    <div class="auth-alt">
+      Don't have an account?
+      <span onclick="showPage('signup')">
+        Create one free
+      </span>
+    </div>
+
+  </div>
+
+</div>
 <!-- ══════════ APP ══════════ -->
 <div id="page-app" class="page">
 
@@ -1122,8 +1505,177 @@ textarea.form-inp{resize:vertical;min-height:72px;font-size:13px}
 </div>
 
 <div class="toast-stack" id="toast-stack"></div>
+<!-- LOGIN -->
+<div id="page-login" class="page active">
+  ...
+</div>
 
+<!-- ══════════ SIGNUP ══════════ -->
+<div id="page-signup" class="page">
+
+  <div class="auth-card">
+
+    <div class="auth-brand">
+      <img
+        src="../landing/assets/coldcloud-logo.png"
+        alt="ColdCloud"
+        class="auth-logo-img"
+      >
+      <div class="auth-brand-name">ColdCloud</div>
+    </div>
+
+    <div class="auth-h">Create your account</div>
+
+    <div class="auth-sub">
+      Start recovering more leads with ColdCloud.
+    </div>
+
+    <button
+      type="button"
+      class="google-auth-btn"
+      onclick="signInWithGoogle()"
+    >
+      <span class="google-icon">G</span>
+      <span>Continue with Google</span>
+    </button>
+
+    <div class="auth-divider">
+      <span>or continue with email</span>
+    </div>
+
+    <div class="auth-err" id="signup-err"></div>
+
+    <div class="frow">
+
+      <div class="fg">
+        <label class="fl" for="s-fn">First name</label>
+        <input
+          class="fi"
+          id="s-fn"
+          type="text"
+          placeholder="Alex"
+          autocomplete="given-name"
+        >
+      </div>
+
+      <div class="fg">
+        <label class="fl" for="s-ln">Last name</label>
+        <input
+          class="fi"
+          id="s-ln"
+          type="text"
+          placeholder="Rivera"
+          autocomplete="family-name"
+        >
+      </div>
+
+    </div>
+
+    <div class="fg">
+      <label class="fl" for="s-email">Work email</label>
+      <input
+        class="fi"
+        id="s-email"
+        type="email"
+        placeholder="you@company.com"
+        autocomplete="email"
+      >
+    </div>
+
+    <div class="fg">
+      <label class="fl" for="s-co">
+        Company
+        <span style="color:var(--text3);font-weight:400">(optional)</span>
+      </label>
+
+      <input
+        class="fi"
+        id="s-co"
+        type="text"
+        placeholder="Acme Corp"
+        autocomplete="organization"
+      >
+    </div>
+
+    <div class="fg">
+
+      <label class="fl" for="s-pw">Password</label>
+
+      <div class="password-wrap">
+
+        <input
+          class="fi"
+          id="s-pw"
+          type="password"
+          placeholder="At least 8 characters"
+          autocomplete="new-password"
+        >
+
+        <button
+          type="button"
+          class="password-toggle"
+          onclick="togglePassword('s-pw', this)"
+          aria-label="Show password"
+        >
+          ◉
+        </button>
+
+      </div>
+
+    </div>
+
+    <button
+      type="button"
+      class="btn-auth auth-submit"
+      onclick="doSignup()"
+    >
+      <span>Create account</span>
+      <span class="auth-arrow">→</span>
+    </button>
+
+    <div class="auth-alt">
+      Already have an account?
+      <span onclick="showPage('login')">
+        Sign in
+      </span>
+    </div>
+
+  </div>
+
+</div>
 <script>
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(function(page) {
+    page.classList.remove('active');
+  });
+
+  const page = document.getElementById('page-' + name);
+
+  if (!page) {
+    console.error('Page not found:', 'page-' + name);
+    return;
+  }
+
+  page.classList.add('active');
+}
+
+function getUsers(){
+}
+function saveUsers(u){
+}
+// AUTH
+async function hashPw(pw){
+}
+// Open the correct auth page from the landing page
+const params = new URLSearchParams(window.location.search)
+const mode = params.get('mode')
+
+if (mode === 'signup') {
+  showPage('signup')
+} else if (mode === 'login') {
+  showPage('login')
+}
+
 // ═══════════════════════════════════════════════════════════
 // BACKEND CONFIG
 // Change this to your deployed backend URL once deployed.
@@ -1202,6 +1754,7 @@ function loadDB(){
 
 function getUsers(){ try{ return JSON.parse(localStorage.getItem('cc_users')||'[]') }catch(e){ return [] } }
 function saveUsers(u){ try{ localStorage.setItem('cc_users', JSON.stringify(u)) }catch(e){} }
+
 
 // ═══════════════════════════════════════════════════════════
 // AUTH
@@ -1401,11 +1954,24 @@ function checkSession(){
 // ═══════════════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════════════
-function showPage(name){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'))
-  g('page-'+name).classList.add('active')
-}
+function showPage(name) {
+  const pages = document.querySelectorAll('.page');
 
+  pages.forEach(function(page) {
+    page.classList.remove('active');
+    page.style.display = 'none';
+  });
+
+  const target = document.getElementById('page-' + name);
+
+  if (!target) {
+    console.error('Page not found: page-' + name);
+    return;
+  }
+
+  target.classList.add('active');
+  target.style.display = 'block';
+}
 async function showApp(){
   try{
     showPage('app'); updateUserUI(); loadSettingsUI(); checkSettingsWarning()
