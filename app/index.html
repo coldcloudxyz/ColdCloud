@@ -1933,7 +1933,14 @@ function doLogout(){
     showPage('login')
   })
 }
+function signInWithGoogle(){
+  if(!BACKEND_URL){
+    alert('Google sign-in is unavailable in offline mode.')
+    return
+  }
 
+  window.location.href = `${BACKEND_URL}/auth/google`
+}
 function checkSession(){
   try{
     const u=sessionStorage.getItem('cc_session')
@@ -3267,16 +3274,62 @@ async function doForgotPassword(){
 // ═══════════════════════════════════════════════════════════
 // BOOT — reads ?mode= param set by landing page links
 // ═══════════════════════════════════════════════════════════
-;(function boot(){
-  if(checkSession()){ showApp(); return }
+;(async function boot(){
+
+  // Google OAuth callback
   const params = new URLSearchParams(window.location.search)
+  const googleToken = params.get('google_token')
+
+  if(googleToken){
+    try{
+      const data = await api('GET', '/auth/me', null, googleToken)
+
+      if(data && data.ok && data.user){
+        await loginSuccess(data.user, googleToken)
+
+        // Remove token from URL
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname
+        )
+
+        return
+      }
+
+      console.error('[Google Auth] Invalid token')
+    }catch(e){
+      console.error('[Google Auth]', e)
+    }
+
+    // Remove failed token from URL
+    window.history.replaceState(
+      {},
+      document.title,
+      window.location.pathname
+    )
+  }
+
+  // Existing session
+  if(checkSession()){
+    showApp()
+    return
+  }
+
   const mode = params.get('mode')
+
   if(mode === 'signup') showPage('signup')
   else showPage('login')
-  // Clean the URL without reloading
+
+  // Clean mode from URL
   if(mode && window.history.replaceState){
-    window.history.replaceState({}, '', window.location.pathname)
+    window.history.replaceState(
+      {},
+      '',
+      window.location.pathname
+    )
   }
+
 })()
 </script>
 </body>

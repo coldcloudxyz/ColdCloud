@@ -6,6 +6,7 @@ const cors          = require('cors')
 const helmet        = require('helmet')
 const bcrypt        = require('bcryptjs')
 const jwt           = require('jsonwebtoken')
+const { OAuth2Client } = require('google-auth-library')
 const cron          = require('node-cron')
 const rateLimit     = require('express-rate-limit')
 const mongoSanitize = require('express-mongo-sanitize')
@@ -18,6 +19,12 @@ const { triggerStep, processScheduledFollowUps } = require('./sequence')
 const app  = express()
 app.set('trust proxy', 1)
 const PORT = process.env.PORT || 3001
+
+const googleClient = new OAuth2Client(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URI
+)
 
 // ── Security ──────────────────────────────────────────────────
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }))
@@ -150,6 +157,77 @@ app.post('/auth/login', authLimiter, requireDB, async (req, res) => {
   }
 })
 
+app.get('/auth/google', (req, res) => {
+  const url = googleClient.generateAuthUrl({
+    access_type: 'offline',
+    scope: ['openid', 'email', 'profile'],
+    prompt: 'select_account'
+  })
+
+  res.redirect(url)
+})
+
+app.get('/auth/google/callback', requireDB, async (req, res) => {
+  try {
+    const { code } = req.query
+
+    if (!code) {
+      return res.status(400).send('Google authentication failed: missing code')
+    }
+
+    const { tokens } = await googleClient.getToken(code)
+    googleClient.setCredentials(tokens)
+
+    const ticket = await googleClient.verifyIdToken({
+      idToken: tokens.id_token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    })
+
+    const payload = ticket.getPayload()
+
+    const googleId = payload.sub
+    const email = payload.email?.toLowerCase().trim()
+    const name = payload.name || email?.split('@')[0] || 'ColdCloud User'
+
+    if (!email) {
+      return res.status(400).send('Google account did not provide an email')
+    }
+
+    let user = await getOne(
+      'SELECT * FROM users WHERE email=$1',
+      [email]
+    )
+
+    if (!user) {
+      user = await getOne(
+        `INSERT INTO users (email, name, company)
+         VALUES ($1,$2,$3)
+         RETURNING *`,
+        [email, name, '']
+      )
+    }
+
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        email: user.email,
+        name: user.name
+      },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    )
+
+    const frontendUrl = process.env.FRONTEND_URL?.split(',')[0]?.trim()
+
+    res.redirect(
+      `${frontendUrl}/?google_token=${encodeURIComponent(token)}`
+    )
+
+  } catch (err) {
+    console.error('[Google Auth]', err)
+    res.status(500).send('Google authentication failed')
+  }
+})
 app.post('/auth/forgot-password', authLimiter, requireDB, async (req, res) => {
   try {
     const { email } = req.body
