@@ -1276,8 +1276,279 @@ td{
 }
 
 
-/* ══════════════════ METRICS / CARDS RESPONSIVE ══════════════════ */
-@media(max-width:1050px){
+/* ═══════════════════════════════════════════════
+   COLDCLOUD — PREMIUM DASHBOARD
+   ═══════════════════════════════════════════════ */
+
+#view-dashboard{
+  max-width:1400px;
+}
+
+/* Header */
+#view-dashboard .vh{
+  margin-bottom:26px;
+}
+
+#view-dashboard .vt{
+  font-size:28px;
+  font-weight:750;
+  letter-spacing:-.8px;
+  color:var(--text);
+  line-height:1.15;
+}
+
+#view-dashboard .vs{
+  margin-top:7px;
+  font-size:13px;
+  color:var(--text2);
+}
+
+/* ───────────── METRIC CARDS ───────────── */
+
+.mgrid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.mc{
+  position:relative;
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:19px 20px;
+  min-height:142px;
+  overflow:hidden;
+  box-shadow:0 1px 2px rgba(15,23,42,.03);
+  transition:
+    transform .18s ease,
+    box-shadow .18s ease,
+    border-color .18s ease;
+}
+
+.mc::after{
+  content:'';
+  position:absolute;
+  width:90px;
+  height:90px;
+  right:-28px;
+  top:-32px;
+  border-radius:50%;
+  background:var(--blue-light);
+  opacity:.75;
+}
+
+.mc:hover{
+  transform:translateY(-2px);
+  border-color:#dbe4f5;
+  box-shadow:0 10px 30px rgba(15,23,42,.07);
+}
+
+.mc-top{
+  position:relative;
+  z-index:1;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  margin-bottom:18px;
+}
+
+.mc-lbl{
+  font-size:12px;
+  font-weight:600;
+  color:var(--text2);
+}
+
+.mc-ico{
+  position:relative;
+  z-index:2;
+  width:34px;
+  height:34px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:10px;
+  background:var(--blue-light);
+  color:var(--blue);
+  font-size:15px;
+  opacity:1;
+}
+
+.mc-val{
+  position:relative;
+  z-index:1;
+  font-size:30px;
+  line-height:1;
+  font-weight:750;
+  letter-spacing:-1.2px;
+  color:var(--text);
+  margin-bottom:9px;
+}
+
+.mc-ch{
+  position:relative;
+  z-index:1;
+  font-size:11px;
+  line-height:1.4;
+}
+
+.ch-up{color:var(--green)}
+.ch-neu{color:var(--text3)}
+.ch-warn{color:var(--orange)}
+
+
+/* ───────────── DASHBOARD CARDS ───────────── */
+
+.two-col{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 340px;
+  gap:14px;
+  margin-bottom:18px;
+}
+
+.card{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+  box-shadow:0 1px 2px rgba(15,23,42,.03);
+}
+
+.card-h{
+  min-height:62px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 18px;
+  border-bottom:1px solid var(--border);
+}
+
+.card-title{
+  font-size:13px;
+  font-weight:650;
+  color:var(--text);
+}
+
+.card-meta{
+  font-size:10px;
+  font-weight:500;
+  color:var(--text3);
+  font-family:'DM Mono',monospace;
+}
+
+
+/* ───────────── BAR CHART ───────────── */
+
+.mini-chart{
+  padding:18px 20px 13px;
+  display:flex;
+  align-items:flex-end;
+  gap:9px;
+  height:175px;
+}
+
+.bg{
+  flex:1;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+}
+
+.bw{
+  flex:1;
+  width:100%;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+}
+
+.bar{
+  width:min(32px,70%);
+  min-height:4px;
+  border-radius:7px 7px 3px 3px;
+  background:linear-gradient(
+    to top,
+    var(--blue),
+    #60a5fa
+  );
+  opacity:.9;
+  transition:
+    height .5s ease,
+    transform .15s ease;
+}
+
+.bar:hover{
+  opacity:1;
+  transform:translateY(-2px);
+}
+
+.bl{
+  font-size:9px;
+  color:var(--text3);
+  font-family:'DM Mono',monospace;
+}
+
+
+/* ───────────── CHANNEL BREAKDOWN ───────────── */
+
+.ch-list{
+  padding:17px 18px 18px;
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+
+.ch-row{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+}
+
+.ch-row-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  font-size:12px;
+  font-weight:550;
+  color:var(--text2);
+}
+
+.ch-track{
+  height:7px;
+  background:#eef2f7;
+  border-radius:99px;
+  overflow:hidden;
+}
+
+.ch-fill{
+  height:100%;
+  border-radius:99px;
+  transition:width .6s ease;
+}
+
+
+/* ───────────── RECENT ACTIVITY ───────────── */
+
+#view-dashboard > .card:last-child{
+  margin-bottom:20px;
+}
+
+#view-dashboard > .card:last-child #recent-activity{
+  min-height:170px;
+}
+
+#view-dashboard .empty{
+  padding:42px 20px;
+}
+
+
+/* ───────────── DASHBOARD RESPONSIVE ───────────── */
+
+@media(max-width:1100px){
+
   .mgrid{
     grid-template-columns:repeat(2,minmax(0,1fr));
   }
@@ -1285,74 +1556,56 @@ td{
   .two-col{
     grid-template-columns:1fr;
   }
+
 }
 
-@media(max-width:600px){
+@media(max-width:700px){
+
+  #view-dashboard .vt{
+    font-size:24px;
+  }
+
   .mgrid{
     grid-template-columns:1fr 1fr;
     gap:10px;
   }
 
   .mc{
-    padding:15px;
-    border-radius:12px;
+    padding:16px;
+    min-height:130px;
   }
 
   .mc-val{
     font-size:25px;
   }
 
-  .mc-ico{
-    width:28px;
-    height:28px;
-    font-size:13px;
-  }
-
-  .two-col{
-    gap:12px;
-    margin-bottom:14px;
-  }
-
-  .card-h{
-    padding:14px 15px;
-  }
-
   .mini-chart{
-    height:125px;
-    padding:16px 12px 12px;
-    gap:4px;
+    height:150px;
+    gap:5px;
+    padding-left:12px;
+    padding-right:12px;
   }
 
-  .bar{
-    max-width:24px;
-  }
-
-  .ch-list{
-    padding:15px;
-  }
-
-  .tctrl{
-    align-items:stretch;
-  }
-
-  .tsearch{
-    min-width:100%;
-    max-width:none;
-  }
-
-  .twrap{
-    border-radius:11px;
-  }
 }
 
-@media(max-width:420px){
+@media(max-width:480px){
+
   .mgrid{
     grid-template-columns:1fr;
   }
 
-  .mc{
-    min-height:120px;
+  .two-col{
+    grid-template-columns:1fr;
   }
+
+  .card-h{
+    padding:13px 15px;
+  }
+
+  .mini-chart{
+    height:135px;
+  }
+
 }
 /* ══════════════════ LEAD DETAIL PANEL — PREMIUM ══════════════════ */
 .detail-overlay{
