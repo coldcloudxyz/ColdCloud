@@ -10314,3 +10314,571 @@ footer{
     transition:none !important;
   }
 }
+
+
+/* ==========================================================
+   COLDCloud — RADICAL ART-DIRECTION OVERRIDE
+   Goal: editorial / cinematic / product-film aesthetic.
+   ========================================================== */
+
+/* ---------- RESET THE "SAAS TEMPLATE" FEEL ---------- */
+body{
+  background:#f8f8f7;
+  color:#303238;
+  font-family:"Helvetica Neue","SF Pro Display",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  font-weight:400;
+  letter-spacing:-.012em;
+}
+
+.nav{
+  background:rgba(248,248,247,.78);
+  border-bottom:1px solid rgba(20,24,30,.06);
+  backdrop-filter:blur(18px);
+  box-shadow:none;
+}
+
+.nav-inner{
+  max-width:1320px;
+}
+
+.nav-links a{
+  font-size:12px;
+  color:#777b82;
+  font-weight:400;
+}
+
+.nav-actions .btn{
+  border-radius:999px;
+  box-shadow:none;
+}
+
+/* ---------- HERO = EDITORIAL COVER ---------- */
+.hero.cc-hero{
+  min-height:920px;
+  padding:120px 0 150px;
+  background:
+    radial-gradient(ellipse 70% 70% at 72% 58%,rgba(198,218,244,.48),transparent 63%),
+    #f8f8f7;
+}
+
+.hero.cc-hero::before{
+  display:none;
+}
+
+.hero.cc-hero::after{
+  width:1000px;
+  height:1000px;
+  right:-390px;
+  top:55%;
+  opacity:.7;
+  background:
+    radial-gradient(circle,
+      rgba(255,255,255,.98) 0 17%,
+      rgba(191,216,245,.28) 30%,
+      rgba(104,160,225,.12) 48%,
+      transparent 69%);
+  filter:blur(3px);
+}
+
+.hero-inner{
+  display:flex;
+  flex-direction:column;
+  max-width:1320px;
+  padding:0 38px;
+  gap:72px;
+  align-items:stretch;
+}
+
+.hero-content{
+  max-width:850px;
+  padding:0;
+  position:relative;
+  z-index:3;
+}
+
+.hero-eyebrow{
+  padding:0;
+  margin:0 0 30px;
+  border:0;
+  background:none;
+  box-shadow:none;
+  color:#858990;
+  font-size:10px;
+  letter-spacing:.16em;
+  font-weight:500;
+  text-transform:uppercase;
+}
+
+.hero-eyebrow-dot{
+  width:4px;
+  height:4px;
+  box-shadow:none;
+  background:#303238;
+}
+
+.hero-title{
+  max-width:880px;
+  font-size:clamp(62px,8.2vw,118px);
+  line-height:.91;
+  letter-spacing:-.075em;
+  font-weight:350;
+  color:#2f3237;
+  text-wrap:balance;
+}
+
+.hero-title .highlight{
+  color:#2f3237;
+  background:none;
+  -webkit-text-fill-color:initial;
+  font-weight:350;
+}
+
+.hero-sub{
+  max-width:500px;
+  margin-top:35px;
+  font-size:16px;
+  line-height:1.75;
+  color:#777b82;
+}
+
+.hero-actions{
+  margin-top:30px;
+}
+
+.hero-actions .btn-primary{
+  background:#292d33;
+  border:1px solid #292d33;
+  border-radius:999px;
+  box-shadow:none;
+}
+
+.hero-actions .btn-secondary{
+  border-radius:999px;
+  background:transparent;
+  border-color:#c9cbd0;
+  color:#454950;
+}
+
+/* PRODUCT VISUAL BECOMES AN IMAGE, NOT A CARD */
+.cc-recovery-visual{
+  width:min(1120px,100%);
+  margin:-15px auto 0;
+  align-self:center;
+  perspective:none;
+  filter:none;
+  position:relative;
+}
+
+.cc-recovery-visual::before{
+  display:none;
+}
+
+.cc-recovery-window{
+  border-radius:18px;
+  border:1px solid rgba(255,255,255,.92);
+  background:rgba(246,249,253,.76);
+  box-shadow:
+    0 70px 130px rgba(53,75,103,.16),
+    0 20px 55px rgba(53,75,103,.08);
+  transform:none;
+  overflow:hidden;
+  backdrop-filter:blur(12px);
+}
+
+.cc-window-bar{
+  min-height:38px;
+  padding:0 14px;
+  background:rgba(239,243,248,.78);
+  border-bottom:1px solid rgba(100,116,139,.08);
+}
+
+.cc-recovery-body{
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.94),rgba(238,244,250,.86));
+}
+
+/* Desaturate the dashboard */
+.cc-recovery-window *{
+  --cc-blue:#4c6f9e;
+}
+
+.cc-main-metric,
+.cc-hot-notification,
+.cc-recovery-signal{
+  box-shadow:0 20px 45px rgba(40,55,75,.09);
+}
+
+.cc-main-metric{
+  border-color:rgba(100,116,139,.12);
+}
+
+.cc-hot-notification{
+  right:-15px;
+}
+
+.cc-recovery-signal{
+  left:-15px;
+}
+
+/* ---------- REMOVE VISUAL NOISE FROM LOWER SECTIONS ---------- */
+.section{
+  padding-top:190px;
+  padding-bottom:190px;
+}
+
+.section-label{
+  color:#8b8f95;
+  font-size:10px;
+  letter-spacing:.16em;
+  font-weight:500;
+}
+
+.section-title{
+  font-size:clamp(48px,6vw,82px);
+  line-height:.98;
+  letter-spacing:-.07em;
+  font-weight:350;
+  color:#303238;
+}
+
+.section-title em{
+  color:#303238;
+  font-style:normal;
+}
+
+.section-sub{
+  max-width:560px;
+  font-size:16px;
+  line-height:1.8;
+  color:#7b7f86;
+}
+
+/* ---------- PROBLEM: MASSIVE WHITE SPACE + ONE OBJECT ---------- */
+.cc-problem{
+  background:#f8f8f7;
+}
+
+.cc-problem-grid{
+  grid-template-columns:.7fr 1.3fr;
+  gap:120px;
+}
+
+.cc-problem-copy{
+  padding-top:80px;
+}
+
+.cc-problem-signals{
+  margin-top:60px;
+}
+
+.cc-problem-signal{
+  padding:20px 0;
+  border:0;
+  border-top:1px solid #dedfdf;
+  border-radius:0;
+  background:none;
+  box-shadow:none;
+}
+
+.cc-problem-signal:last-child{
+  border-bottom:1px solid #dedfdf;
+}
+
+.cc-signal-icon{
+  border:0;
+  background:none;
+  color:#a0a3a8;
+}
+
+.cc-problem-signal strong{
+  color:#464a50;
+  font-weight:400;
+}
+
+.cc-problem-signal p{
+  color:#8b8f95;
+}
+
+/* Scanner becomes an editorial object */
+.cc-lead-scanner{
+  transform:none;
+  opacity:.92;
+}
+
+.cc-scanner-window{
+  border-radius:4px;
+  border:0;
+  box-shadow:0 45px 100px rgba(45,60,80,.10);
+  background:#f4f6f8;
+}
+
+.cc-scanner-top{
+  background:#eceff2;
+}
+
+.cc-scan-area{
+  min-height:430px;
+  background:
+    radial-gradient(circle at 50% 50%,rgba(151,182,216,.17),transparent 45%),
+    #f4f6f8;
+}
+
+/* ---------- SOLUTION: TURN IT INTO A PRODUCT FILM ---------- */
+.cc-solution{
+  background:#f1f3f5;
+}
+
+.cc-solution-grid{
+  grid-template-columns:.55fr 1.45fr;
+  gap:100px;
+}
+
+.cc-solution-copy{
+  padding-top:80px;
+}
+
+.cc-solution-point{
+  padding:19px 0;
+  border-color:#d7d9dc;
+}
+
+.cc-point-icon{
+  background:none !important;
+  border:0 !important;
+  color:#7b7f86 !important;
+}
+
+.cc-solution-point h3{
+  font-size:14px;
+  font-weight:400;
+  color:#4b4f55;
+}
+
+.cc-solution-point p{
+  color:#858990;
+}
+
+.cc-solution-btn{
+  border-radius:999px;
+}
+
+/* The recovery engine should dominate */
+.cc-solution-visual .cc-recovery-canvas{
+  filter:drop-shadow(0 55px 100px rgba(38,53,73,.12));
+}
+
+/* ---------- FEATURES = QUIET EDITORIAL GRID ---------- */
+.cc-features{
+  background:#f8f8f7;
+}
+
+.cc-features-top{
+  display:block;
+  margin-bottom:85px;
+}
+
+.cc-features-intro{
+  margin-top:28px;
+  max-width:470px;
+}
+
+.cc-feature-stats{
+  margin-top:40px;
+}
+
+.cc-feature-stats > div{
+  border:0;
+  border-top:1px solid #dfe0e1;
+  border-radius:0;
+  background:none;
+  padding:13px 22px 13px 0;
+}
+
+.cc-feature-hero{
+  border-radius:3px !important;
+  border:0 !important;
+  box-shadow:none !important;
+  background:#eef1f4 !important;
+  min-height:560px;
+}
+
+.cc-feature-row{
+  border-radius:0 !important;
+  border:0 !important;
+  border-top:1px solid #d9dbde !important;
+  background:transparent !important;
+  box-shadow:none !important;
+}
+
+.cc-feature-row:hover{
+  transform:none;
+  background:rgba(255,255,255,.35) !important;
+  box-shadow:none;
+}
+
+/* ---------- CHANNELS: ALMOST MAGAZINE-LIKE ---------- */
+.cc-channels{
+  background:#f8f8f7;
+}
+
+.cc-channel-list{
+  border-top:1px solid #d9dbde;
+}
+
+.cc-channel-item{
+  border-bottom:1px solid #d9dbde !important;
+  padding:28px 0 !important;
+  background:none !important;
+}
+
+.cc-channel-item:hover{
+  padding-left:16px !important;
+  background:none !important;
+}
+
+.cc-channel-visual{
+  border-radius:3px !important;
+  border:0 !important;
+  box-shadow:0 45px 100px rgba(45,60,80,.10) !important;
+}
+
+/* ---------- RECOVERY: CINEMATIC DARK BREAK ---------- */
+.cc-recovery-section{
+  padding:200px 0 !important;
+  background:#121417 !important;
+  color:#fff;
+}
+
+.cc-recovery-section .cc-recovery-label{
+  color:#a9c5e8;
+}
+
+.cc-recovery-title{
+  color:#f4f5f6 !important;
+  font-size:clamp(52px,6vw,86px) !important;
+  font-weight:350 !important;
+}
+
+.cc-recovery-title span{
+  color:#d9e7f8 !important;
+}
+
+.cc-recovery-description{
+  color:#a6abb3 !important;
+}
+
+.cc-recovery-step{
+  background:rgba(255,255,255,.035) !important;
+  border-color:rgba(255,255,255,.10) !important;
+}
+
+.cc-step-number{
+  background:transparent !important;
+  border-color:rgba(255,255,255,.13) !important;
+  color:#a6abb3 !important;
+}
+
+.cc-step-title{
+  color:#e9eaec !important;
+  font-weight:400 !important;
+}
+
+.cc-step-description{
+  color:#898f98 !important;
+}
+
+.cc-recovery-panel{
+  background:#e9eef3 !important;
+  border:0 !important;
+  box-shadow:0 50px 120px rgba(0,0,0,.35) !important;
+}
+
+/* ---------- CTA: EXTREME SIMPLICITY ---------- */
+.cta-section{
+  padding:180px 0;
+  background:#f8f8f7;
+}
+
+.cta-box{
+  min-height:500px;
+  border-radius:0;
+  padding:100px !important;
+  background:
+    radial-gradient(circle at 75% 50%,rgba(90,145,215,.25),transparent 35rem),
+    #15181c;
+  box-shadow:none;
+}
+
+.cta-title{
+  max-width:800px;
+  font-size:clamp(48px,6vw,84px) !important;
+  font-weight:350 !important;
+  line-height:.98 !important;
+}
+
+.cta-sub{
+  color:#999fa8 !important;
+}
+
+/* ---------- FOOTER ---------- */
+footer{
+  background:#f8f8f7;
+  border-top:1px solid #dedfe1;
+}
+
+/* ---------- KILL THE EXCESSIVE "AI" MOTION ---------- */
+.cc-pipeline-progress,
+.cc-hot-notification,
+.cc-recovery-signal,
+.cc-floating-signal,
+.cc-lead-card,
+.cc-ai-card,
+.cc-decision,
+.cc-message-card,
+.cc-response{
+  animation-duration:8s;
+}
+
+@media(max-width:760px){
+  .hero.cc-hero{
+    min-height:auto;
+    padding:75px 0 100px;
+  }
+
+  .hero-inner{
+    padding:0 20px;
+    gap:55px;
+  }
+
+  .hero-title{
+    font-size:clamp(48px,13vw,70px);
+  }
+
+  .section{
+    padding-top:120px;
+    padding-bottom:120px;
+  }
+
+  .cc-problem-grid,
+  .cc-solution-grid{
+    gap:65px;
+  }
+
+  .cc-problem-copy,
+  .cc-solution-copy{
+    padding-top:0;
+  }
+
+  .cc-recovery-section{
+    padding:120px 0 !important;
+  }
+
+  .cta-section{
+    padding:100px 20px;
+  }
+
+  .cta-box{
+    padding:65px 28px !important;
+    min-height:420px;
+  }
+}
