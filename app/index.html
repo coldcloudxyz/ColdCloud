@@ -116,7 +116,9 @@ h1{font-size:27px;letter-spacing:-.045em;line-height:1.1;margin-bottom:6px}
 .detail-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:20px}.detail-name{font-size:24px;font-weight:650;letter-spacing:-.04em}.detail-meta{font-size:12px;color:var(--muted);margin-top:5px}
 .detail-actions{display:flex;gap:8px}.detail-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:16px}.detail-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px}.detail-card h3{font-size:12px;margin-bottom:14px}.detail-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin:-4px -18px 18px;padding:0 18px}.detail-tab{border:0;background:none;padding:10px 12px;font-size:11px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}.detail-tab.active{color:var(--text);border-color:#111}.detail-panel{display:none}.detail-panel.active{display:block}.context-box{font-size:12px;line-height:1.65;color:var(--muted);white-space:pre-wrap}.info-row{display:flex;justify-content:space-between;gap:15px;padding:9px 0;border-bottom:1px solid #f0eeeb;font-size:11px}.info-row:last-child{border-bottom:0}.info-label{color:var(--faint)}.activity-item{padding:12px 0;border-bottom:1px solid #f0eeeb;font-size:11px}.activity-item:last-child{border-bottom:0}.activity-time{color:var(--faint);margin-top:4px}.detail-empty{padding:28px 5px;color:var(--muted);font-size:12px}
 @media(max-width:800px){.detail-grid{grid-template-columns:1fr}.detail-head{flex-direction:column}}
-</style></style></style>
+<style>
+.ai-modal{width:min(100%,650px)}.ai-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--faint);font-weight:700;margin-bottom:7px}.ai-preview{border:1px solid var(--border);border-radius:9px;padding:15px;background:#fafaf9;line-height:1.65;font-size:13px;white-space:pre-wrap;min-height:125px;outline:none}.ai-preview:focus{background:#fff;border-color:#93b4f8}.ai-context{font-size:11px;color:var(--muted);line-height:1.55;margin-bottom:14px;padding:11px;background:#f6f6f4;border-radius:8px}.ai-status{font-size:11px;color:var(--muted);min-height:16px;margin-top:8px}.ai-actions{display:flex;justify-content:space-between;gap:8px;margin-top:16px}.ai-right{display:flex;gap:8px}
+</style></style></style></style>
 </head>
 <body>
 <div class="app">
@@ -242,7 +244,7 @@ function openLeadDetail(id){
  d.innerHTML='<button class="back-link" id="back-leads">← Back to leads</button><div class="detail-head"><div><div class="eyebrow">Lead</div><div class="detail-name">'+esc(l.name)+'</div><div class="detail-meta">'+esc(l.company||'No company')+' · '+esc(l.email||l.phone||'No contact')+'</div></div><div class="detail-actions"><button class="ghost" id="detail-status">Status: '+esc(l.status)+'</button><button class="primary" id="detail-followup">Generate follow-up</button></div></div><div class="detail-grid"><div class="detail-card"><div class="detail-tabs"><button class="detail-tab active" data-tab="overview">Overview</button><button class="detail-tab" data-tab="conversation">Conversation</button><button class="detail-tab" data-tab="sequence">Sequence</button><button class="detail-tab" data-tab="activity">Activity</button></div><div class="detail-panel active" id="panel-overview"><h3>Lead context</h3><div class="context-box">'+esc(l.context||'No context has been added yet.')+'</div></div><div class="detail-panel" id="panel-conversation"><h3>Conversation</h3><div class="detail-empty">No conversation yet. Messages will appear here once a channel is connected and a follow-up is sent.</div></div><div class="detail-panel" id="panel-sequence"><h3>Sequence</h3><div class="detail-empty">No sequence attached to this lead.</div></div><div class="detail-panel" id="panel-activity"><h3>Activity</h3><div class="activity-item">Lead added<div class="activity-time">'+new Date(l.createdAt).toLocaleString()+'</div></div></div></div><div class="detail-card"><h3>Lead information</h3><div class="info-row"><span class="info-label">Status</span><span>'+esc(l.status)+'</span></div><div class="info-row"><span class="info-label">Email</span><span>'+esc(l.email||'—')+'</span></div><div class="info-row"><span class="info-label">Phone</span><span>'+esc(l.phone||'—')+'</span></div><div class="info-row"><span class="info-label">Company</span><span>'+esc(l.company||'—')+'</span></div><div class="info-row"><span class="info-label">Source</span><span>'+esc(l.source||'Manual')+'</span></div></div></div>';
  document.getElementById('back-leads').onclick=closeLeadDetail;
  d.querySelectorAll('.detail-tab').forEach(t=>t.onclick=()=>{d.querySelectorAll('.detail-tab').forEach(x=>x.classList.remove('active'));d.querySelectorAll('.detail-panel').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('panel-'+t.dataset.tab).classList.add('active')});
- document.getElementById('detail-followup').onclick=()=>alert('AI follow-up generation will connect here next.');
+ document.getElementById('detail-followup').onclick=()=>openAIModal(l);
 }
 function closeLeadDetail(){
  document.getElementById('lead-detail').className='lead-detail';
@@ -267,5 +269,40 @@ document.getElementById('lead-status').onchange=renderLeads;
 document.getElementById('import-leads').onclick=()=>alert('CSV import is the next Leads capability.');
 document.getElementById('lead-modal').onclick=e=>{if(e.target.id==='lead-modal')closeLeadModal()};
 renderLeads();
+</script><div class="modal-backdrop" id="ai-modal"><div class="modal ai-modal">
+<div class="modal-head"><div><h2>AI follow-up</h2><div class="detail-meta">Create a personalized message for this lead.</div></div><button class="close" id="close-ai">×</button></div>
+<div class="ai-context" id="ai-context"></div>
+<div class="ai-label">Message preview</div>
+<div class="ai-preview" id="ai-message" contenteditable="true"></div>
+<div class="ai-status" id="ai-status"></div>
+<div class="ai-actions"><button class="ghost" id="regen-ai">↻ Regenerate</button><div class="ai-right"><button class="ghost" id="cancel-ai">Cancel</button><button class="primary" id="approve-ai">Approve & Send</button></div></div>
+</div></div><script>
+let activeAILead=null;
+function buildAIMessage(l){
+ const company=l.company?l.company:'your team';
+ const context=l.context?l.context:'our earlier conversation';
+ return 'Hi '+l.name.split(' ')[0]+',\\n\\nJust following up on '+(l.context?'what we discussed about '+l.context.toLowerCase(): 'our earlier conversation')+'. I wanted to see if this is still something '+company+' is exploring.\\n\\nIf it is, happy to pick this back up and help with the next step.\\n\\nBest,\\nColdCloud';
+}
+function openAIModal(l){
+ activeAILead=l;
+ document.getElementById('ai-context').textContent='Using lead context: '+(l.context||'No context added.')+' '+(l.company?'· Company: '+l.company:'');
+ document.getElementById('ai-message').textContent=buildAIMessage(l);
+ document.getElementById('ai-status').textContent='AI draft ready. Edit it before approving.';
+ document.getElementById('ai-modal').classList.add('open');
+}
+function closeAIModal(){document.getElementById('ai-modal').classList.remove('open');activeAILead=null}
+document.getElementById('close-ai').onclick=closeAIModal;
+document.getElementById('cancel-ai').onclick=closeAIModal;
+document.getElementById('ai-modal').onclick=e=>{if(e.target.id==='ai-modal')closeAIModal()};
+document.getElementById('regen-ai').onclick=()=>{
+ if(!activeAILead)return;
+ document.getElementById('ai-message').textContent=buildAIMessage(activeAILead);
+ document.getElementById('ai-status').textContent='Draft regenerated. You can edit it before approving.';
+};
+document.getElementById('approve-ai').onclick=()=>{
+ const msg=document.getElementById('ai-message').innerText.trim();
+ if(!msg)return;
+ document.getElementById('ai-status').textContent='Approved. Sending will be enabled when a messaging channel is connected.';
+};
 </script></body>
 </html>
