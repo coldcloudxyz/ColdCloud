@@ -899,6 +899,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
         Create one free
       </span>
     </div>
+    <button type="button" class="demo-access-btn" onclick="enterDemoMode()">Preview ColdCloud</button>
 
   </div>
 
@@ -4026,6 +4027,13 @@ function doLogout(){
   })
 }
 
+function enterDemoMode(){
+  S.user={id:'demo',name:'Demo Workspace',email:'demo@coldcloud.local',company:'Demo Company'}
+  S.token=''
+  loadDB()
+  showApp()
+}
+
 function checkSession(){
   try{
     const u=sessionStorage.getItem('cc_session')
@@ -5421,6 +5429,7 @@ async function doForgotPassword(){
 ;(function boot(){
   if(checkSession()){ showApp(); return }
   const params = new URLSearchParams(window.location.search)
+  if(params.get('demo') === '1'){ enterDemoMode(); if(window.history.replaceState) window.history.replaceState({},'',window.location.pathname); return }
   const mode = params.get('mode')
   if(mode === 'signup') showPage('signup')
   else showPage('login')
@@ -5854,3 +5863,5 @@ async function doForgotPassword(){
 .recovery-meta{font-size:10px;color:var(--subtle);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .recovery-arrow{color:#98a2b3;font-size:14px;padding-left:4px}
 @media(max-width:600px){.recovery-row{padding:12px}.recovery-row .pill{display:none}}
+
+<style>.demo-access-btn{display:block;width:100%;margin-top:12px;padding:10px;border:1px solid var(--border);border-radius:var(--radius);background:#fff;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer}.demo-access-btn:hover{background:#f8fafc;border-color:#c7cbd2}</style>
