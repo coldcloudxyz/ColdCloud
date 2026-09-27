@@ -80,7 +80,37 @@ h1{font-size:27px;letter-spacing:-.045em;line-height:1.1;margin-bottom:6px}
 .section-title{font-size:20px;font-weight:700;letter-spacing:-.03em;margin-bottom:6px}.section-sub{font-size:13px;color:var(--muted)}
 @media(max-width:900px){:root{--sidebar:68px}.sidebar{padding:18px 8px}.brand span,.nav-section,.nav-btn span:not(.nav-icon){display:none}.brand{justify-content:center;padding:4px 0 22px}.nav-btn{justify-content:center}.main{margin-left:var(--sidebar);width:calc(100% - var(--sidebar))}.metrics{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}}
 @media(max-width:600px){.content{padding:18px}.metrics{grid-template-columns:1fr 1fr}.hero{align-items:flex-start;gap:15px;flex-direction:column}.pipeline{grid-template-columns:1fr 1fr}.topbar{padding:0 16px}.status{display:none}.row{grid-template-columns:32px 1fr auto}.row .time{display:none}}
-</style>
+<style>
+.leads-toolbar{display:flex;gap:8px;align-items:center;margin:22px 0 14px;flex-wrap:wrap}
+.search{flex:1;min-width:220px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;font-size:12px;outline:none}
+.search:focus{border-color:#93b4f8;box-shadow:0 0 0 3px #eff6ff}
+.select,.ghost{padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--muted);font-size:12px}
+.ghost:hover{background:#fafaf9;color:var(--text)}
+.lead-table{background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.lead-table table{width:100%;border-collapse:collapse}
+.lead-table th{text-align:left;padding:10px 14px;background:#fafaf9;border-bottom:1px solid var(--border);font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint)}
+.lead-table td{padding:13px 14px;border-bottom:1px solid #f0eeeb;font-size:12px;color:var(--muted)}
+.lead-table tr:last-child td{border-bottom:0}
+.lead-table .lead-name{font-weight:600;color:var(--text)}
+.lead-empty{padding:70px 24px;text-align:center}
+.lead-empty-icon{width:44px;height:44px;border:1px dashed #cfcac3;border-radius:12px;display:grid;place-items:center;margin:0 auto 14px;color:var(--faint);font-size:20px}
+.lead-empty h3{font-size:15px;margin-bottom:6px}
+.lead-empty p{font-size:12px;color:var(--muted);margin-bottom:18px}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.28);display:none;align-items:center;justify-content:center;z-index:100;padding:20px}
+.modal-backdrop.open{display:flex}
+.modal{width:min(100%,520px);background:#fff;border-radius:14px;border:1px solid var(--border);box-shadow:0 25px 70px rgba(0,0,0,.16);padding:24px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.modal-head h2{font-size:17px;letter-spacing:-.02em}
+.close{font-size:20px;color:var(--faint);padding:2px 7px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.form-field.full{grid-column:1/-1}
+.form-field label{font-size:11px;font-weight:600;color:var(--muted)}
+.form-field input,.form-field textarea{width:100%;padding:10px 11px;border:1px solid var(--border);border-radius:7px;outline:none;font:inherit;font-size:12px;resize:vertical}
+.form-field input:focus,.form-field textarea:focus{border-color:#93b4f8;box-shadow:0 0 0 3px #eff6ff}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
+@media(max-width:650px){.lead-table{overflow-x:auto}.lead-table table{min-width:680px}.form-grid{grid-template-columns:1fr}.form-field.full{grid-column:auto}}
+</style></style>
 </head>
 <body>
 <div class="app">
@@ -137,7 +167,18 @@ h1{font-size:27px;letter-spacing:-.045em;line-height:1.1;margin-bottom:6px}
     <div class="stage"><div class="stage-name">Converted</div><div class="stage-value">0</div></div>
   </div></div>
 </section>
-<section id="leads" class="view"><div class="section-title">Leads</div><div class="section-sub">Manage and recover your leads.</div><div class="panel empty" style="margin-top:20px">Lead management is the next module we’ll build.</div></section>
+<section id="leads" class="view">
+  <div class="hero">
+    <div><div class="eyebrow">Workspace</div><h1>Leads</h1><p class="sub">Manage the leads ColdCloud can recover.</p></div>
+    <button class="primary" id="open-add-lead">+ Add lead</button>
+  </div>
+  <div class="leads-toolbar">
+    <input class="search" id="lead-search" placeholder="Search leads by name, email or company…">
+    <select class="select" id="lead-status"><option value="all">All statuses</option><option value="new">New</option><option value="active">In follow-up</option><option value="replied">Replied</option><option value="converted">Converted</option></select>
+    <button class="ghost" id="import-leads">Import CSV</button>
+  </div>
+  <div class="lead-table" id="lead-table"></div>
+</section>
 <section id="automations" class="view"><div class="section-title">Automations</div><div class="section-sub">Trigger actions when lead conditions change.</div><div class="panel empty" style="margin-top:20px">Automation builder is the next module we’ll build.</div></section>
 <section id="sequences" class="view"><div class="section-title">Sequences</div><div class="section-sub">Design the follow-up journeys your leads receive.</div><div class="panel empty" style="margin-top:20px">Sequence builder is the next module we’ll build.</div></section>
 <section id="activity" class="view"><div class="section-title">Activity</div><div class="section-sub">A timeline of everything happening in your workspace.</div><div class="panel empty" style="margin-top:20px">Activity timeline is the next module we’ll build.</div></section>
@@ -160,5 +201,45 @@ document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',
 document.querySelectorAll('[data-view-link]').forEach(btn=>btn.addEventListener('click',()=>showView(btn.dataset.viewLink)));
 document.getElementById('add-lead').addEventListener('click',()=>showView('leads'));
 </script>
-</body>
+<div class="modal-backdrop" id="lead-modal">
+  <div class="modal">
+    <div class="modal-head"><h2>Add a lead</h2><button class="close" id="close-lead">×</button></div>
+    <div class="form-grid">
+      <div class="form-field"><label>Name *</label><input id="lead-name" placeholder="John Smith"></div>
+      <div class="form-field"><label>Email</label><input id="lead-email" type="email" placeholder="john@company.com"></div>
+      <div class="form-field"><label>Phone</label><input id="lead-phone" placeholder="+91…"></div>
+      <div class="form-field"><label>Company</label><input id="lead-company" placeholder="Company name"></div>
+      <div class="form-field full"><label>Context</label><textarea id="lead-context" rows="3" placeholder="What were they interested in? What happened before the lead went cold?"></textarea></div>
+    </div>
+    <div class="modal-actions"><button class="ghost" id="cancel-lead">Cancel</button><button class="primary" id="save-lead">Add lead</button></div>
+  </div>
+</div><script>
+const leads=JSON.parse(localStorage.getItem('coldcloud_leads')||'[]');
+const saveLeads=()=>localStorage.setItem('coldcloud_leads',JSON.stringify(leads));
+function esc(v){return String(v||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function renderLeads(){
+ const q=(document.getElementById('lead-search')?.value||'').toLowerCase();
+ const status=document.getElementById('lead-status')?.value||'all';
+ const rows=leads.filter(l=>(status==='all'||l.status===status)&&[l.name,l.email,l.company].join(' ').toLowerCase().includes(q));
+ const box=document.getElementById('lead-table'); if(!box)return;
+ if(!rows.length){box.innerHTML='<div class="lead-empty"><div class="lead-empty-icon">+</div><h3>'+ (leads.length?'No matching leads':'No leads yet') +'</h3><p>'+ (leads.length?'Try another search or status filter.':'Add your first lead and ColdCloud will have something to recover.') +'</p><button class="primary" id="empty-add">+ Add lead</button></div>';document.getElementById('empty-add').onclick=openLeadModal;return}
+ box.innerHTML='<table><thead><tr><th>Lead</th><th>Company</th><th>Contact</th><th>Status</th><th>Added</th></tr></thead><tbody>'+rows.map(l=>'<tr><td><div class="lead-name">'+esc(l.name)+'</div><div>'+esc(l.context||'No context added')+'</div></td><td>'+esc(l.company||'—')+'</td><td>'+esc(l.email||l.phone||'—')+'</td><td>'+esc(l.status)+'</td><td>'+new Date(l.createdAt).toLocaleDateString()+'</td></tr>').join('')+'</tbody></table>';
+}
+function openLeadModal(){document.getElementById('lead-modal').classList.add('open');document.getElementById('lead-name').focus()}
+function closeLeadModal(){document.getElementById('lead-modal').classList.remove('open')}
+function addLead(){
+ const name=document.getElementById('lead-name').value.trim();if(!name){document.getElementById('lead-name').focus();return}
+ leads.unshift({id:crypto.randomUUID(),name,email:document.getElementById('lead-email').value.trim(),phone:document.getElementById('lead-phone').value.trim(),company:document.getElementById('lead-company').value.trim(),context:document.getElementById('lead-context').value.trim(),status:'new',createdAt:new Date().toISOString()});
+ saveLeads();closeLeadModal();['lead-name','lead-email','lead-phone','lead-company','lead-context'].forEach(id=>document.getElementById(id).value='');renderLeads();showView('leads');
+}
+document.getElementById('open-add-lead').onclick=openLeadModal;
+document.getElementById('close-lead').onclick=closeLeadModal;
+document.getElementById('cancel-lead').onclick=closeLeadModal;
+document.getElementById('save-lead').onclick=addLead;
+document.getElementById('lead-search').oninput=renderLeads;
+document.getElementById('lead-status').onchange=renderLeads;
+document.getElementById('import-leads').onclick=()=>alert('CSV import is the next Leads capability.');
+document.getElementById('lead-modal').onclick=e=>{if(e.target.id==='lead-modal')closeLeadModal()};
+renderLeads();
+</script></body>
 </html>
