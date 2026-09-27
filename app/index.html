@@ -287,8 +287,9 @@ async function api(method,path,body,token){
   if(!BACKEND_URL)return null;
   try{const res=await fetch(BACKEND_URL+path,{method,headers:{'Content-Type':'application/json',...(token?{Authorization:'Bearer '+token}:{})},body:body?JSON.stringify(body):undefined});return await res.json()}catch(err){console.warn('[API]',path,err.message);return null}
 }
-let S={user:null,token:null};
+let S={user:null,token:null,settings:{name:'',company:'',bizDesc:'',senderName:'',senderPhone:'',senderEmail:'',signOff:'',twilioSid:'',twilioPhone:'',twilioWa:''}};
 function g(id){return document.getElementById(id)}
+function loadDB(){}
 function getUsers(){try{return JSON.parse(localStorage.getItem('cc_users')||'[]')}catch(e){return[]}}
 function saveUsers(u){try{localStorage.setItem('cc_users',JSON.stringify(u))}catch(e){}}
 function togglePassword(id,btn){const el=g(id);if(!el)return;el.type=el.type==='password'?'text':'password';if(btn)btn.textContent=el.type==='password'?'◉':'◌'}
@@ -428,56 +429,15 @@ function doSignup(){
   }
 }
 
-function loginSuccess(user, token){
+async function loginSuccess(user, token){
   try{
-    S.user  = user
-    if(token) S.token = token
-
-    try{
-      sessionStorage.setItem('cc_session', JSON.stringify(user))
-      if(token) sessionStorage.setItem('cc_token', token)
-    }catch(e){}
-
-    // Fetch full profile — senderName, signOff, etc.
-    if(token && BACKEND_URL){
-      try{
-        const data = await api('GET', '/auth/me', null, token)
-        if(data && data.ok && data.user){
-          const u = data.user
-          S.user = { ...S.user, ...u }
-          S.settings.name        = u.name        || S.settings.name
-          S.settings.company     = u.company     || S.settings.company
-          S.settings.bizDesc     = u.bizDesc     || S.settings.bizDesc
-          S.settings.senderName  = u.senderName  || S.settings.senderName
-          S.settings.senderPhone = u.senderPhone || S.settings.senderPhone
-          S.settings.senderEmail = u.senderEmail || S.settings.senderEmail
-          S.settings.signOff     = u.signOff     || S.settings.signOff
-          S.settings.twilioSid   = u.twilioSid   || S.settings.twilioSid
-          S.settings.twilioPhone = u.twilioPhone || S.settings.twilioPhone
-          S.settings.twilioWa    = u.twilioWa    || S.settings.twilioWa
-          // Note: twilioToken is never returned from backend for security
-          try{ sessionStorage.setItem('cc_session', JSON.stringify(S.user)) }catch(e){}
-        }
-      }catch(e){ console.warn('[loginSuccess] Could not fetch user profile:', e.message) }
-    }
-
-    loadDB()
-    await showApp()
-
-  }catch(e){
-    console.error('[loginSuccess] Error:', e)
-    // Even if something fails, try to show the app
-    try{ showPage('app'); startScheduler() }catch(_){}
-  }
+    S.user=user;if(token)S.token=token;
+    try{sessionStorage.setItem('cc_session',JSON.stringify(user));if(token)sessionStorage.setItem('cc_token',token)}catch(e){}
+    if(token&&BACKEND_URL){try{const data=await api('GET','/auth/me',null,token);if(data&&data.ok&&data.user){S.user={...S.user,...data.user};try{sessionStorage.setItem('cc_session',JSON.stringify(S.user))}catch(e){}}}catch(e){console.warn('[loginSuccess]',e.message)}}
+    loadDB();showApp();
+  }catch(e){console.error('[loginSuccess]',e);showApp()}
 }
-
-function doLogout(){
-  openModal('Sign out?','You will be returned to the sign-in page.',null,()=>{
-    saveDB(); S.user=null; S.leads=[]; S.activity=[]
-    try{ sessionStorage.removeItem('cc_session') }catch(e){}
-    showPage('login')
-  })
-}
+function doLogout(){S.user=null;S.token=null;try{sessionStorage.removeItem('cc_session');sessionStorage.removeItem('cc_token')}catch(e){}showPage('login')}
 
 function checkSession(){
   try{
