@@ -5423,3 +5423,376 @@ async function doForgotPassword(){
 </script>
 </body>
 </html>
+
+
+/* ==========================================================
+   COLDCloud — AUTH EXPERIENCE
+   Premium product-design treatment.
+   Auth logic and copy remain untouched.
+   ========================================================== */
+
+/* Auth canvas */
+#page-login,
+#page-signup,
+#page-forgot{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  padding:48px;
+  background:
+    radial-gradient(circle at 12% 18%,rgba(37,99,235,.10),transparent 25rem),
+    radial-gradient(circle at 88% 82%,rgba(34,211,238,.09),transparent 27rem),
+    linear-gradient(135deg,#f5f9ff 0%,#fbfdff 48%,#f3f8ff 100%);
+}
+
+/* Fine grid gives the page the same designed language as the landing page */
+#page-login::before,
+#page-signup::before,
+#page-forgot::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:-2;
+  opacity:.28;
+  background-image:
+    linear-gradient(rgba(15,23,42,.035) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(15,23,42,.035) 1px,transparent 1px);
+  background-size:54px 54px;
+  mask-image:linear-gradient(90deg,#000 0%,rgba(0,0,0,.75) 55%,transparent 100%);
+}
+
+/* Large atmospheric product shape */
+#page-login::after,
+#page-signup::after,
+#page-forgot::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  width:720px;
+  height:720px;
+  right:-230px;
+  top:50%;
+  transform:translateY(-50%);
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 42% 42%,
+      rgba(255,255,255,.95) 0 14%,
+      rgba(96,165,250,.20) 29%,
+      rgba(37,99,235,.12) 47%,
+      rgba(34,211,238,.06) 62%,
+      transparent 73%);
+  filter:blur(1px);
+  pointer-events:none;
+}
+
+/* Auth card */
+.auth-card{
+  position:relative;
+  width:min(100%,430px);
+  padding:42px 40px 36px;
+  border:1px solid rgba(255,255,255,.90);
+  border-radius:20px;
+  background:rgba(255,255,255,.88);
+  backdrop-filter:blur(24px) saturate(125%);
+  -webkit-backdrop-filter:blur(24px) saturate(125%);
+  box-shadow:
+    0 38px 90px rgba(15,23,42,.12),
+    0 10px 28px rgba(37,99,235,.055),
+    inset 0 1px 0 rgba(255,255,255,.95);
+  animation:authReveal .55s cubic-bezier(.22,1,.36,1);
+}
+
+.auth-card::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:12%;
+  right:12%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(37,99,235,.28),transparent);
+}
+
+@keyframes authReveal{
+  from{opacity:0;transform:translateY(14px) scale(.985)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* Brand */
+.auth-brand{
+  gap:10px;
+  margin-bottom:34px;
+}
+
+.auth-logo-img{
+  width:38px;
+  height:38px;
+  border-radius:10px;
+  filter:drop-shadow(0 6px 12px rgba(37,99,235,.14));
+}
+
+.auth-brand-name{
+  font-size:18px;
+  font-weight:500;
+  letter-spacing:-.035em;
+  color:#30343a;
+}
+
+/* Headings — same editorial typography as landing page */
+.auth-h{
+  font-family:
+    "Helvetica Neue",
+    "SF Pro Display",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Arial,
+    sans-serif;
+  font-size:30px;
+  line-height:1.08;
+  font-weight:450;
+  letter-spacing:-.055em;
+  color:#30343a;
+  margin-bottom:9px;
+}
+
+.auth-sub{
+  font-family:
+    "Helvetica Neue",
+    "SF Pro Text",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Arial,
+    sans-serif;
+  font-size:14px;
+  line-height:1.65;
+  font-weight:400;
+  color:#707782;
+  margin-bottom:26px;
+}
+
+/* Google */
+.google-auth-btn{
+  min-height:46px;
+  border-radius:9px;
+  background:#fff;
+  border:1px solid #d8dee7;
+  color:#3f4650;
+  font-size:13px;
+  font-weight:500;
+  box-shadow:0 2px 5px rgba(15,23,42,.025);
+  transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease;
+}
+
+.google-auth-btn:hover{
+  background:#fff;
+  border-color:#bfc8d5;
+  box-shadow:0 9px 22px rgba(15,23,42,.06);
+  transform:translateY(-1px);
+}
+
+/* Divider */
+.auth-divider{
+  margin:22px 0;
+  color:#a0a7b1;
+  font-size:11px;
+  letter-spacing:.01em;
+}
+
+.auth-divider::before,
+.auth-divider::after{
+  background:#e4e8ee;
+}
+
+/* Form */
+.frow{
+  gap:12px;
+}
+
+.fg{
+  gap:7px;
+  margin-bottom:15px;
+}
+
+.fl{
+  font-size:11px;
+  font-weight:500;
+  color:#59616d;
+  letter-spacing:.01em;
+}
+
+.fi{
+  min-height:45px;
+  padding:11px 13px;
+  border:1px solid #d9dfe7;
+  border-radius:9px;
+  background:rgba(255,255,255,.92);
+  color:#30343a;
+  font-size:13px;
+  box-shadow:inset 0 1px 2px rgba(15,23,42,.015);
+  transition:border-color .2s ease,box-shadow .2s ease,background .2s ease;
+}
+
+.fi:hover{
+  border-color:#c5ceda;
+}
+
+.fi:focus{
+  border-color:#7da5ee;
+  background:#fff;
+  box-shadow:
+    0 0 0 3px rgba(37,99,235,.09),
+    0 5px 15px rgba(37,99,235,.035);
+}
+
+.fi::placeholder{
+  color:#a3aab4;
+}
+
+.password-label-row{
+  margin-bottom:7px;
+}
+
+.forgot-link{
+  font-size:11px;
+  font-weight:400;
+  color:#315fc4;
+}
+
+/* Primary auth CTA */
+.btn-auth{
+  min-height:47px;
+  margin-top:5px;
+  border-radius:9px;
+  background:linear-gradient(135deg,#2563eb,#1557d6);
+  color:#fff;
+  font-size:13px;
+  font-weight:500;
+  box-shadow:
+    0 10px 24px rgba(37,99,235,.16),
+    inset 0 1px 0 rgba(255,255,255,.12);
+  transition:transform .2s ease,box-shadow .2s ease,background .2s ease;
+}
+
+.btn-auth:hover{
+  background:linear-gradient(135deg,#2563eb,#0e46b7);
+  box-shadow:
+    0 15px 30px rgba(37,99,235,.22),
+    inset 0 1px 0 rgba(255,255,255,.12);
+  transform:translateY(-1px);
+}
+
+.btn-auth:active{
+  transform:translateY(0);
+}
+
+/* Bottom navigation */
+.auth-alt{
+  margin-top:22px;
+  font-size:12px;
+  color:#7b838e;
+}
+
+.auth-alt span{
+  color:#315fc4;
+  font-weight:500;
+}
+
+.auth-alt span:hover{
+  text-decoration:underline;
+}
+
+/* Status messages */
+.auth-err,
+.auth-ok{
+  border-radius:9px;
+  font-size:12px;
+  line-height:1.5;
+}
+
+.auth-err{
+  background:#fff7f7;
+  border-color:#f2caca;
+}
+
+.auth-ok{
+  background:#f3fbf6;
+}
+
+/* Password icon */
+.password-toggle{
+  color:#98a0ab;
+  transition:color .15s;
+}
+
+.password-toggle:hover{
+  color:#4f5967;
+}
+
+/* Signup is naturally taller — keep its proportions elegant */
+#page-signup .auth-card{
+  padding-top:38px;
+}
+
+#page-signup .auth-brand{
+  margin-bottom:28px;
+}
+
+#page-signup .auth-sub{
+  margin-bottom:21px;
+}
+
+/* Forgot password gets a little more breathing room */
+#page-forgot .auth-card{
+  max-width:410px;
+}
+
+/* Small decorative shine */
+.auth-card::after{
+  content:"";
+  position:absolute;
+  width:170px;
+  height:170px;
+  top:-95px;
+  right:-80px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(37,99,235,.10),transparent 68%);
+  pointer-events:none;
+}
+
+@media(max-width:700px){
+  #page-login,
+  #page-signup,
+  #page-forgot{
+    padding:22px 16px;
+  }
+
+  #page-login::after,
+  #page-signup::after,
+  #page-forgot::after{
+    width:450px;
+    height:450px;
+    right:-230px;
+  }
+
+  .auth-card{
+    padding:32px 24px 28px;
+    border-radius:17px;
+  }
+
+  .auth-h{
+    font-size:27px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .auth-card,
+  .google-auth-btn,
+  .btn-auth{
+    animation:none !important;
+    transition:none !important;
+  }
+}
