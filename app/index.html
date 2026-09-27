@@ -1222,6 +1222,21 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
   </div>
 
 
+  <!-- RECOVERY QUEUE -->
+  <div class="card recovery-queue-card">
+    <div class="card-h">
+      <div>
+        <div class="card-title">Recovery Queue</div>
+        <div class="card-subtitle">Leads currently worth following up with</div>
+      </div>
+      <button class="text-btn" onclick="sv('leads',document.querySelector('[data-v=leads]'))">View all →</button>
+    </div>
+    <div id="recovery-queue">
+      <div class="empty-state"><div class="empty-icon">◎</div><div class="empty-title">No recovery opportunities yet</div><div class="empty-text">Add leads to start building your recovery queue.</div></div>
+    </div>
+  </div>
+
+
   <!-- PIPELINE -->
   <div class="card pipeline-card">
 
@@ -5009,6 +5024,35 @@ function animNum(id,target){
   nA[id]=requestAnimationFrame(tick)
 }
 
+function renderRecoveryQueue(){
+  const el=g('recovery-queue')
+  if(!el) return
+  const leads=S.leads
+    .filter(l=>l.status==='active'||l.status==='replied'||l.status==='followup')
+    .sort((a,b)=>{
+      const ad=a.nextFollowUpAt?new Date(a.nextFollowUpAt).getTime():Infinity
+      const bd=b.nextFollowUpAt?new Date(b.nextFollowUpAt).getTime():Infinity
+      return ad-bd
+    })
+    .slice(0,5)
+  if(!leads.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">◎</div><div class="empty-title">No recovery opportunities yet</div><div class="empty-text">Add leads to start building your recovery queue.</div></div>'
+    return
+  }
+  el.innerHTML=leads.map(l=>{
+    const initials=(l.name||'?').split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase()
+    const state=l.status==='replied'?'Replied':(l.nextFollowUpAt?'Follow-up due':'Active sequence')
+    const when=l.nextFollowUpAt?formatDate(l.nextFollowUpAt):'In sequence'
+    const id=l._id||l.id
+    return '<div class="recovery-row" onclick="openDetailPanel(S.leads.find(x=>(x._id||x.id)==='+JSON.stringify(id)+'))">'+
+      '<div class="recovery-avatar">'+initials+'</div>'+
+      '<div class="recovery-main"><div class="recovery-name">'+l.name+'</div><div class="recovery-meta">'+state+' · '+when+'</div></div>'+
+      '<span class="pill p-'+(l.status||'active')+'">'+(l.status||'active')+'</span>'+
+      '<span class="recovery-arrow">→</span>'+
+    '</div>'
+  }).join('')
+}
+
 async function renderDashboard(){
   if(BACKEND_URL){
     const data = await api('GET','/dashboard',null,S.token)
@@ -5024,11 +5068,12 @@ async function renderDashboard(){
       g('nb-leads').textContent = s.totalLeads
       renderChartFromData(data.leadsOverTime)
       renderChBreakdownFromData(data.channelBreakdown, s.totalSent)
+      renderRecoveryQueue()
       renderRecentAct()
       return
     }
   }
-  updateMetrics(); renderChart(); renderChBreakdown(); renderRecentAct()
+  updateMetrics(); renderChart(); renderChBreakdown(); renderRecentAct(); renderRecoveryQueue()
 }
 
 function renderChartFromData(leadsOverTime){
@@ -5794,3 +5839,18 @@ async function doForgotPassword(){
     transition:none !important;
   }
 }
+
+/* ================================================================
+   DASHBOARD — RECOVERY QUEUE
+   ================================================================ */
+.recovery-queue-card{margin-bottom:16px}
+.recovery-queue-card .card-h{min-height:68px}
+.recovery-queue-card .text-btn{font-size:11px;font-weight:600;color:var(--brand);cursor:pointer}
+.recovery-row{display:flex;align-items:center;gap:12px;padding:13px 16px;border-top:1px solid var(--line);cursor:pointer;transition:background .15s ease}
+.recovery-row:hover{background:#f8fafc}
+.recovery-avatar{width:34px;height:34px;border-radius:9px;background:#eff6ff;color:#2563eb;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:750;flex-shrink:0}
+.recovery-main{flex:1;min-width:0}
+.recovery-name{font-size:12px;font-weight:650;color:var(--text);margin-bottom:3px}
+.recovery-meta{font-size:10px;color:var(--subtle);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recovery-arrow{color:#98a2b3;font-size:14px;padding-left:4px}
+@media(max-width:600px){.recovery-row{padding:12px}.recovery-row .pill{display:none}}
