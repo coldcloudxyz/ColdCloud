@@ -110,7 +110,13 @@ h1{font-size:27px;letter-spacing:-.045em;line-height:1.1;margin-bottom:6px}
 .form-field input:focus,.form-field textarea:focus{border-color:#93b4f8;box-shadow:0 0 0 3px #eff6ff}
 .modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:8px}
 @media(max-width:650px){.lead-table{overflow-x:auto}.lead-table table{min-width:680px}.form-grid{grid-template-columns:1fr}.form-field.full{grid-column:auto}}
-</style></style>
+<style>
+.lead-detail{display:none}.lead-detail.open{display:block}
+.back-link{border:0;background:none;color:var(--muted);font-size:12px;padding:0;cursor:pointer;margin-bottom:18px}.back-link:hover{color:var(--text)}
+.detail-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:20px}.detail-name{font-size:24px;font-weight:650;letter-spacing:-.04em}.detail-meta{font-size:12px;color:var(--muted);margin-top:5px}
+.detail-actions{display:flex;gap:8px}.detail-grid{display:grid;grid-template-columns:minmax(0,2fr) minmax(260px,1fr);gap:16px}.detail-card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px}.detail-card h3{font-size:12px;margin-bottom:14px}.detail-tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin:-4px -18px 18px;padding:0 18px}.detail-tab{border:0;background:none;padding:10px 12px;font-size:11px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent}.detail-tab.active{color:var(--text);border-color:#111}.detail-panel{display:none}.detail-panel.active{display:block}.context-box{font-size:12px;line-height:1.65;color:var(--muted);white-space:pre-wrap}.info-row{display:flex;justify-content:space-between;gap:15px;padding:9px 0;border-bottom:1px solid #f0eeeb;font-size:11px}.info-row:last-child{border-bottom:0}.info-label{color:var(--faint)}.activity-item{padding:12px 0;border-bottom:1px solid #f0eeeb;font-size:11px}.activity-item:last-child{border-bottom:0}.activity-time{color:var(--faint);margin-top:4px}.detail-empty{padding:28px 5px;color:var(--muted);font-size:12px}
+@media(max-width:800px){.detail-grid{grid-template-columns:1fr}.detail-head{flex-direction:column}}
+</style></style></style>
 </head>
 <body>
 <div class="app">
@@ -178,6 +184,7 @@ h1{font-size:27px;letter-spacing:-.045em;line-height:1.1;margin-bottom:6px}
     <button class="ghost" id="import-leads">Import CSV</button>
   </div>
   <div class="lead-table" id="lead-table"></div>
+<div class="lead-detail" id="lead-detail"></div>
 </section>
 <section id="automations" class="view"><div class="section-title">Automations</div><div class="section-sub">Trigger actions when lead conditions change.</div><div class="panel empty" style="margin-top:20px">Automation builder is the next module we’ll build.</div></section>
 <section id="sequences" class="view"><div class="section-title">Sequences</div><div class="section-sub">Design the follow-up journeys your leads receive.</div><div class="panel empty" style="margin-top:20px">Sequence builder is the next module we’ll build.</div></section>
@@ -223,7 +230,26 @@ function renderLeads(){
  const rows=leads.filter(l=>(status==='all'||l.status===status)&&[l.name,l.email,l.company].join(' ').toLowerCase().includes(q));
  const box=document.getElementById('lead-table'); if(!box)return;
  if(!rows.length){box.innerHTML='<div class="lead-empty"><div class="lead-empty-icon">+</div><h3>'+ (leads.length?'No matching leads':'No leads yet') +'</h3><p>'+ (leads.length?'Try another search or status filter.':'Add your first lead and ColdCloud will have something to recover.') +'</p><button class="primary" id="empty-add">+ Add lead</button></div>';document.getElementById('empty-add').onclick=openLeadModal;return}
- box.innerHTML='<table><thead><tr><th>Lead</th><th>Company</th><th>Contact</th><th>Status</th><th>Added</th></tr></thead><tbody>'+rows.map(l=>'<tr><td><div class="lead-name">'+esc(l.name)+'</div><div>'+esc(l.context||'No context added')+'</div></td><td>'+esc(l.company||'—')+'</td><td>'+esc(l.email||l.phone||'—')+'</td><td>'+esc(l.status)+'</td><td>'+new Date(l.createdAt).toLocaleDateString()+'</td></tr>').join('')+'</tbody></table>';
+ box.innerHTML='<table><thead><tr><th>Lead</th><th>Company</th><th>Contact</th><th>Status</th><th>Added</th></tr></thead><tbody>'+rows.map(l=>'<tr data-lead-id="'+l.id+'" class="lead-row"><td><div class="lead-name">'+esc(l.name)+'</div><div>'+esc(l.context||'No context added')+'</div></td><td>'+esc(l.company||'—')+'</td><td>'+esc(l.email||l.phone||'—')+'</td><td>'+esc(l.status)+'</td><td>'+new Date(l.createdAt).toLocaleDateString()+'</td></tr>').join('')+'</tbody></table>';
+ box.querySelectorAll('.lead-row').forEach(row=>row.onclick=()=>openLeadDetail(row.dataset.leadId));
+}
+function openLeadDetail(id){
+ const l=leads.find(x=>x.id===id);if(!l)return;
+ document.getElementById('lead-table').style.display='none';
+ document.querySelector('.leads-toolbar').style.display='none';
+ document.querySelector('#leads .hero').style.display='none';
+ const d=document.getElementById('lead-detail');d.className='lead-detail open';
+ d.innerHTML='<button class="back-link" id="back-leads">← Back to leads</button><div class="detail-head"><div><div class="eyebrow">Lead</div><div class="detail-name">'+esc(l.name)+'</div><div class="detail-meta">'+esc(l.company||'No company')+' · '+esc(l.email||l.phone||'No contact')+'</div></div><div class="detail-actions"><button class="ghost" id="detail-status">Status: '+esc(l.status)+'</button><button class="primary" id="detail-followup">Generate follow-up</button></div></div><div class="detail-grid"><div class="detail-card"><div class="detail-tabs"><button class="detail-tab active" data-tab="overview">Overview</button><button class="detail-tab" data-tab="conversation">Conversation</button><button class="detail-tab" data-tab="sequence">Sequence</button><button class="detail-tab" data-tab="activity">Activity</button></div><div class="detail-panel active" id="panel-overview"><h3>Lead context</h3><div class="context-box">'+esc(l.context||'No context has been added yet.')+'</div></div><div class="detail-panel" id="panel-conversation"><h3>Conversation</h3><div class="detail-empty">No conversation yet. Messages will appear here once a channel is connected and a follow-up is sent.</div></div><div class="detail-panel" id="panel-sequence"><h3>Sequence</h3><div class="detail-empty">No sequence attached to this lead.</div></div><div class="detail-panel" id="panel-activity"><h3>Activity</h3><div class="activity-item">Lead added<div class="activity-time">'+new Date(l.createdAt).toLocaleString()+'</div></div></div></div><div class="detail-card"><h3>Lead information</h3><div class="info-row"><span class="info-label">Status</span><span>'+esc(l.status)+'</span></div><div class="info-row"><span class="info-label">Email</span><span>'+esc(l.email||'—')+'</span></div><div class="info-row"><span class="info-label">Phone</span><span>'+esc(l.phone||'—')+'</span></div><div class="info-row"><span class="info-label">Company</span><span>'+esc(l.company||'—')+'</span></div><div class="info-row"><span class="info-label">Source</span><span>'+esc(l.source||'Manual')+'</span></div></div></div>';
+ document.getElementById('back-leads').onclick=closeLeadDetail;
+ d.querySelectorAll('.detail-tab').forEach(t=>t.onclick=()=>{d.querySelectorAll('.detail-tab').forEach(x=>x.classList.remove('active'));d.querySelectorAll('.detail-panel').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('panel-'+t.dataset.tab).classList.add('active')});
+ document.getElementById('detail-followup').onclick=()=>alert('AI follow-up generation will connect here next.');
+}
+function closeLeadDetail(){
+ document.getElementById('lead-detail').className='lead-detail';
+ document.getElementById('lead-table').style.display='';
+ document.querySelector('.leads-toolbar').style.display='';
+ document.querySelector('#leads .hero').style.display='';
+ renderLeads();
 }
 function openLeadModal(){document.getElementById('lead-modal').classList.add('open');document.getElementById('lead-name').focus()}
 function closeLeadModal(){document.getElementById('lead-modal').classList.remove('open')}
