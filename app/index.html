@@ -308,5 +308,23 @@ const oldRenderLeads=renderLeads;renderLeads=function(){oldRenderLeads();ccRende
 const oldSaveLeads=saveLeads;saveLeads=function(){oldSaveLeads();const l=leads[0];if(l)ccLog('Lead added: '+l.name,l.id);ccSave();ccRenderDashboard()};
 window.leads=leads;window.esc=esc;
 ccWire();ccRenderDashboard();ccRenderSeq();ccRenderAuto();ccRenderActivity();ccRenderAnalytics();
+</script><script>
+const ccOriginalOpenLeadDetail=openLeadDetail;
+openLeadDetail=function(lid){
+ ccOriginalOpenLeadDetail(lid);
+ const l=leads.find(x=>x.id===lid);const panel=document.getElementById('panel-sequence');if(!l||!panel)return;
+ if(CC.seq.length){
+  panel.innerHTML='<h3>Sequence</h3><div style="display:flex;gap:8px;margin-bottom:14px"><select class="select" id="cc-seq-select">'+CC.seq.map(s=>'<option value="'+s.id+'" '+(s.id===l.sequenceId?'selected':'')+'>'+esc(s.name)+'</option>').join('')+'</select><button class="primary" id="cc-attach">Attach</button></div>'+((l.sequenceId?CC.seq.find(s=>s.id===l.sequenceId)?.steps:[])||[]).map((x,i)=>'<div class="step"><b>Step '+(i+1)+'</b> · Day '+x.day+' · AI personalized message</div>').join('');
+  document.getElementById('cc-attach').onclick=()=>{l.sequenceId=document.getElementById('cc-seq-select').value;l.status='active';ccLog('Sequence attached to '+l.name,l.id);saveLeads();ccSave();openLeadDetail(l.id)}
+ }else panel.innerHTML='<h3>Sequence</h3><div class="detail-empty">No sequences yet. Create one in Sequences.</div>';
+};
+const ccOriginalOpenAI=openAIModal;
+openAIModal=function(lid){
+ const l=leads.find(x=>x.id===lid);if(!l)return;
+ document.getElementById('ai-modal').dataset.lead=lid;
+ const msg=document.getElementById('ai-message');if(msg)msg.textContent='AI provider is not connected yet. Once the backend API key is configured, ColdCloud will analyze this lead\'s context and conversation and generate the personalized follow-up here.';
+ const ctx=document.getElementById('ai-context');if(ctx)ctx.textContent='Lead: '+l.name+' · Context: '+(l.context||'No context available.');
+ document.getElementById('ai-modal').classList.add('open');
+};
 </script></body>
 </html>
