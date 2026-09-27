@@ -8752,3 +8752,254 @@ body{
     transform:none;
   }
 }
+
+
+/* ==========================================================
+   COLDCloud — PRODUCT-DESIGN VISUAL DIRECTION
+   Inspired by polished SaaS product showcase layouts.
+   Copy + functionality untouched.
+   ========================================================== */
+
+/* HERO ATMOSPHERE */
+.hero.cc-hero{
+  min-height:820px;
+  padding:78px 0 92px;
+  background:
+    radial-gradient(ellipse 55% 65% at 78% 48%, rgba(37,99,235,.18), transparent 70%),
+    radial-gradient(ellipse 42% 45% at 95% 5%, rgba(34,211,238,.12), transparent 70%),
+    linear-gradient(180deg,#f3f8ff 0%,#f8fbff 48%,#ffffff 100%);
+}
+
+.hero.cc-hero::before{
+  opacity:.18;
+  background-size:54px 54px;
+  mask-image:linear-gradient(to bottom,#000 0%,rgba(0,0,0,.7) 35%,transparent 80%);
+}
+
+/* Make the hero copy feel like a product launch */
+.hero-inner{
+  grid-template-columns:minmax(360px,.72fr) minmax(600px,1.28fr);
+  max-width:1320px;
+  gap:55px;
+  align-items:center;
+}
+
+.hero-content{
+  max-width:560px;
+  padding-left:12px;
+}
+
+.hero-eyebrow{
+  display:inline-flex;
+  padding:8px 13px;
+  margin-bottom:22px;
+  border:1px solid rgba(37,99,235,.15);
+  border-radius:999px;
+  background:rgba(255,255,255,.72);
+  color:#2563eb;
+  box-shadow:0 8px 24px rgba(37,99,235,.08);
+}
+
+.hero-title{
+  font-size:clamp(48px,5.4vw,74px);
+  line-height:1.01;
+  letter-spacing:-.055em;
+  font-weight:680;
+}
+
+.hero-title .highlight{
+  background:linear-gradient(105deg,#1557d6 10%,#2563eb 52%,#06b6d4 100%);
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+}
+
+.hero-title .highlight::after{
+  display:none;
+}
+
+.hero-sub{
+  font-size:17px;
+  max-width:510px;
+  color:#52647b;
+  line-height:1.72;
+  margin-top:22px;
+}
+
+.hero-actions{
+  margin-top:28px;
+}
+
+.hero-trust{
+  margin-top:25px;
+}
+
+/* THE HERO PRODUCT — large, glossy, dimensional */
+.cc-recovery-visual{
+  width:100%;
+  margin-right:-45px;
+  perspective:1800px;
+  filter:drop-shadow(0 35px 60px rgba(37,99,235,.12));
+}
+
+.cc-recovery-window{
+  width:100%;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,.88);
+  background:rgba(247,250,255,.94);
+  box-shadow:
+    0 55px 110px rgba(15,23,42,.16),
+    0 20px 45px rgba(37,99,235,.11),
+    inset 0 1px 0 rgba(255,255,255,1);
+  transform:perspective(1500px) rotateY(-2deg) rotateX(1.5deg);
+}
+
+.cc-recovery-window::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:5;
+  pointer-events:none;
+  border-radius:inherit;
+  background:linear-gradient(
+    125deg,
+    rgba(255,255,255,.34),
+    transparent 20%,
+    transparent 68%,
+    rgba(37,99,235,.055)
+  );
+}
+
+.cc-window-bar{
+  min-height:48px;
+  padding-inline:18px;
+  background:rgba(238,244,252,.9);
+  border-bottom:1px solid rgba(148,163,184,.16);
+}
+
+.cc-recovery-body{
+  background:
+    radial-gradient(circle at 90% 0%,rgba(37,99,235,.09),transparent 24rem),
+    linear-gradient(135deg,#ffffff 0%,#f7faff 100%);
+}
+
+/* Give dashboard components the visual language from the reference */
+.cc-main-metric{
+  border-radius:18px;
+  border:1px solid rgba(148,163,184,.16);
+  background:rgba(255,255,255,.84);
+  box-shadow:0 14px 38px rgba(15,23,42,.055);
+}
+
+.cc-lead-row{
+  border-radius:12px;
+}
+
+.cc-hot-notification,
+.cc-recovery-signal{
+  border-radius:14px;
+  background:rgba(255,255,255,.91);
+  box-shadow:
+    0 25px 55px rgba(15,23,42,.13),
+    0 5px 15px rgba(37,99,235,.06);
+}
+
+/* Floating decorative glow behind the product */
+.cc-recovery-visual::before{
+  content:"";
+  position:absolute;
+  width:520px;
+  height:520px;
+  right:5%;
+  top:50%;
+  transform:translateY(-50%);
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 50% 48%,rgba(37,99,235,.18),rgba(34,211,238,.08) 35%,transparent 70%);
+  filter:blur(18px);
+  z-index:-1;
+  pointer-events:none;
+}
+
+/* More visual, less generic card-grid feeling */
+.solution-grid,
+.features-grid{
+  gap:22px;
+}
+
+.solution-card,
+.feature-card{
+  border-radius:18px;
+  padding:32px;
+  background:
+    linear-gradient(145deg,rgba(255,255,255,.98),rgba(248,251,255,.92));
+  border:1px solid #e0e7f0;
+  box-shadow:0 12px 35px rgba(15,23,42,.045);
+}
+
+.solution-card:hover,
+.feature-card:hover{
+  transform:translateY(-5px);
+  border-color:#cbd8ea;
+  box-shadow:0 25px 55px rgba(15,23,42,.09);
+}
+
+/* Section visual rhythm */
+.section-alt{
+  background:
+    radial-gradient(circle at 10% 30%,rgba(37,99,235,.045),transparent 25rem),
+    #f7faff;
+}
+
+/* CTA gets the same product-showcase atmosphere */
+.cta-box{
+  border-radius:26px;
+  background:
+    radial-gradient(circle at 82% 20%,rgba(34,211,238,.22),transparent 23rem),
+    radial-gradient(circle at 12% 85%,rgba(37,99,235,.25),transparent 25rem),
+    linear-gradient(135deg,#07152b,#0c2b62 58%,#123d82);
+  box-shadow:
+    0 45px 100px rgba(7,21,43,.22),
+    inset 0 1px 0 rgba(255,255,255,.10);
+}
+
+/* MOBILE */
+@media(max-width:1050px){
+  .hero.cc-hero{
+    padding-top:60px;
+  }
+
+  .hero-inner{
+    grid-template-columns:1fr;
+    gap:52px;
+  }
+
+  .hero-content{
+    max-width:720px;
+    padding-left:0;
+  }
+
+  .cc-recovery-visual{
+    margin-right:0;
+  }
+}
+
+@media(max-width:700px){
+  .hero.cc-hero{
+    padding:45px 0 65px;
+  }
+
+  .hero-title{
+    font-size:clamp(43px,11vw,61px);
+  }
+
+  .cc-recovery-window{
+    border-radius:17px;
+    transform:none;
+  }
+
+  .cc-recovery-visual::before{
+    width:320px;
+    height:320px;
+  }
+}
