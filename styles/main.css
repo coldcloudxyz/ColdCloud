@@ -8439,3 +8439,316 @@ a:focus-visible,button:focus-visible{
 @media(prefers-reduced-motion:reduce){
   .cc-recovery-window,.cc-analysis-ring,.cc-lead-row,.proof-stat,.btn{transition:none!important}
 }
+
+
+/* ==========================================================
+   COLDCloud — ART-DIRECTED TYPOGRAPHY & COMPOSITION
+   Design-only refinement. Existing copy/functionality untouched.
+   ========================================================== */
+
+:root{
+  --cc-cream:#fbfcfe;
+  --cc-black:#0a0f18;
+  --cc-muted:#667085;
+}
+
+/* A quieter, more editorial type system */
+body{
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background:var(--cc-cream);
+  letter-spacing:-.005em;
+}
+
+.nav-logo-name,
+.nav-links a,
+.btn,
+.section-label,
+.trust-item,
+.proof-label,
+.proof-stat{
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.nav{
+  height:68px;
+  background:rgba(251,252,254,.88);
+  border-bottom:1px solid rgba(10,15,24,.10);
+  backdrop-filter:blur(14px);
+}
+
+.nav-inner{
+  min-height:68px;
+}
+
+.nav-links{
+  gap:18px;
+}
+
+.nav-links a{
+  padding:5px 0;
+  border-radius:0;
+  color:#505b6d;
+}
+
+.nav-links a:hover{
+  background:none;
+  color:var(--cc-black);
+  transform:none;
+}
+
+.nav-actions .btn-primary{
+  box-shadow:none;
+  border-radius:8px;
+}
+
+/* HERO — less template-like, more composed */
+.hero.cc-hero{
+  min-height:760px;
+  background:
+    radial-gradient(circle at 82% 42%,rgba(37,99,235,.07),transparent 27rem),
+    #fbfcfe;
+}
+
+.hero.cc-hero::before{
+  opacity:.22;
+  background-size:64px 64px;
+  mask-image:linear-gradient(to bottom,#000 0%,transparent 65%);
+}
+
+.hero-inner{
+  grid-template-columns:minmax(0,.86fr) minmax(500px,1.14fr);
+  gap:86px;
+}
+
+.hero-content{
+  max-width:640px;
+}
+
+.hero-eyebrow{
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  padding:0;
+  border-radius:0;
+  color:#526277;
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  margin-bottom:25px;
+}
+
+.hero-eyebrow-dot{
+  width:5px;
+  height:5px;
+  box-shadow:0 0 0 4px rgba(37,99,235,.08);
+}
+
+.hero-title{
+  font-size:clamp(50px,5.8vw,76px);
+  font-weight:650;
+  letter-spacing:-.065em;
+  line-height:.99;
+  max-width:690px;
+}
+
+.hero-title .highlight{
+  color:#1557d6;
+  background:none;
+  -webkit-text-fill-color:initial;
+  position:relative;
+}
+
+.hero-title .highlight::after{
+  display:block;
+  height:5px;
+  bottom:1px;
+  background:#bcd2ff;
+  border-radius:0;
+  opacity:.75;
+}
+
+.hero-sub{
+  margin-top:25px;
+  max-width:525px;
+  font-size:17px;
+  color:#596579;
+  line-height:1.72;
+}
+
+.hero-actions{
+  margin-top:30px;
+}
+
+.btn{
+  border-radius:8px;
+  font-weight:600;
+  letter-spacing:-.01em;
+}
+
+.btn-primary{
+  background:#1557d6;
+  box-shadow:none;
+}
+
+.btn-primary:hover{
+  background:#0e46b7;
+  box-shadow:0 10px 24px rgba(21,87,214,.16);
+}
+
+.btn-secondary{
+  background:transparent;
+  border-color:#cbd2dc;
+}
+
+.btn-secondary:hover{
+  background:#fff;
+  border-color:#8e99a9;
+  color:var(--cc-black);
+}
+
+.hero-trust{
+  margin-top:8px;
+  gap:20px;
+}
+
+.trust-item{
+  color:#8791a1;
+  font-size:12px;
+}
+
+/* PRODUCT VISUAL — make it feel like an actual product, not a floating AI card */
+.cc-recovery-visual{
+  margin-top:16px;
+}
+
+.cc-recovery-window{
+  border-radius:14px;
+  border-color:#d8dee7;
+  background:#fff;
+  box-shadow:
+    0 34px 80px rgba(15,23,42,.12),
+    0 2px 5px rgba(15,23,42,.04);
+  transform:perspective(1400px) rotateY(-1.2deg) rotateX(.5deg);
+}
+
+.cc-recovery-window:hover{
+  transform:perspective(1400px) rotateY(0) rotateX(0) translateY(-3px);
+  box-shadow:0 40px 90px rgba(15,23,42,.14);
+}
+
+.cc-window-bar{
+  min-height:42px;
+  background:#f7f8fa;
+}
+
+.cc-recovery-body{
+  background:#fff;
+}
+
+.cc-hot-notification,
+.cc-recovery-signal{
+  border-radius:10px;
+  box-shadow:0 16px 35px rgba(15,23,42,.10);
+}
+
+/* Proof strip becomes a quiet brand divider */
+.proof-bar.cc-proof-bar{
+  background:#fff;
+  padding-block:19px;
+}
+
+.proof-stat{
+  background:#f8f9fb;
+  border-color:#e1e5eb;
+  border-radius:7px;
+  box-shadow:none;
+}
+
+.proof-stat:hover{
+  transform:none;
+  box-shadow:none;
+  border-color:#c8d0db;
+}
+
+/* Sections: editorial rhythm instead of giant generic SaaS blocks */
+.section{
+  padding-top:clamp(100px,10vw,150px);
+  padding-bottom:clamp(100px,10vw,150px);
+}
+
+.section::before{
+  width:min(1180px,88%);
+  background:linear-gradient(90deg,transparent,rgba(10,15,24,.10),transparent);
+}
+
+.section-title{
+  font-size:clamp(39px,4.5vw,60px);
+  font-weight:650;
+  letter-spacing:-.06em;
+}
+
+.section-sub{
+  font-size:16px;
+  color:#687386;
+}
+
+/* Cards lose the 'AI template' softness */
+.solution-card,
+.feature-card,
+.problem-item{
+  border-radius:10px;
+  border-color:#dde2e9;
+  box-shadow:none;
+}
+
+.solution-card{
+  padding:34px 30px;
+}
+
+.solution-card:hover,
+.feature-card:hover,
+.problem-item:hover{
+  transform:translateY(-2px);
+  box-shadow:0 16px 35px rgba(15,23,42,.055);
+  border-color:#cbd3de;
+}
+
+.sc-icon-wrap{
+  border-radius:9px;
+}
+
+.problem-stat-block{
+  border-radius:12px;
+  box-shadow:none;
+}
+
+/* CTA — stronger graphic ending */
+.cta-box{
+  border-radius:16px;
+  box-shadow:0 28px 70px rgba(7,17,31,.18);
+}
+
+@media(max-width:1050px){
+  .hero-inner{
+    gap:55px;
+  }
+}
+
+@media(max-width:700px){
+  .hero.cc-hero{
+    min-height:auto;
+  }
+
+  .hero-title{
+    font-size:clamp(43px,11vw,60px);
+  }
+
+  .hero-eyebrow{
+    margin-bottom:20px;
+  }
+
+  .cc-recovery-window{
+    transform:none;
+  }
+}
