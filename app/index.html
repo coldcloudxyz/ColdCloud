@@ -484,10 +484,6 @@ function doForgotPassword(){
   }
 }
 (function boot(){
-  if(checkSession()){showApp();return}
-  const params=new URLSearchParams(window.location.search);
-  if(params.get('demo')==='1'){enterDemoMode();history.replaceState({},'',location.pathname);return}
-  const mode=params.get('mode');
-  showPage(mode==='signup'?'signup':'login');
-  if(mode)history.replaceState({},'',location.pathname);
+  // Authentication is temporarily bypassed while the new app is being built.
+  enterDemoMode();
 })();</script></body></html>
