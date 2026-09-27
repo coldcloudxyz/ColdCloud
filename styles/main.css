@@ -9003,3 +9003,415 @@ body{
     height:320px;
   }
 }
+
+
+/* ==========================================================
+   COLDCloud — HERO SHOWCASE / VISUAL POLISH v2
+   ========================================================== */
+
+/* Give the hero a designed, illustration-like backdrop */
+.hero.cc-hero{
+  overflow:visible;
+}
+
+.hero.cc-hero::after{
+  content:"";
+  position:absolute;
+  width:760px;
+  height:760px;
+  right:-250px;
+  top:50%;
+  transform:translateY(-48%);
+  border-radius:50%;
+  background:
+    radial-gradient(circle at 42% 42%,
+      rgba(255,255,255,.95) 0 18%,
+      rgba(96,165,250,.22) 31%,
+      rgba(37,99,235,.13) 49%,
+      rgba(34,211,238,.06) 61%,
+      transparent 72%);
+  filter:blur(1px);
+  pointer-events:none;
+  z-index:0;
+}
+
+.hero-inner{
+  z-index:2;
+}
+
+/* Dashboard gets a stronger "hero object" silhouette */
+.cc-recovery-window{
+  isolation:isolate;
+  overflow:visible;
+}
+
+.cc-recovery-window::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  inset:22px -26px -30px;
+  border-radius:30px;
+  background:
+    radial-gradient(ellipse at center,
+      rgba(37,99,235,.22),
+      rgba(34,211,238,.08) 38%,
+      transparent 70%);
+  filter:blur(25px);
+  opacity:.72;
+}
+
+/* Browser chrome */
+.cc-window-bar{
+  border-radius:24px 24px 0 0;
+  position:relative;
+}
+
+.cc-window-bar::after{
+  content:"";
+  position:absolute;
+  left:17%;
+  right:17%;
+  bottom:-1px;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(37,99,235,.24),transparent);
+}
+
+/* Dashboard header */
+.cc-recovery-header{
+  padding:24px 28px 18px;
+}
+
+.cc-mini-label{
+  letter-spacing:.14em;
+  font-size:9px;
+  font-weight:800;
+  color:#8b96a7;
+}
+
+.cc-recovery-name{
+  font-size:19px;
+  font-weight:700;
+  letter-spacing:-.035em;
+}
+
+/* Main metric becomes the focal UI card */
+.cc-main-metric{
+  margin:0 24px;
+  padding:24px 25px;
+  min-height:150px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:25px;
+  border-radius:18px;
+  background:
+    radial-gradient(circle at 100% 0%,rgba(37,99,235,.08),transparent 14rem),
+    linear-gradient(135deg,#fff,#f9fbff);
+  border:1px solid #e3e9f1;
+  box-shadow:
+    0 16px 40px rgba(15,23,42,.055),
+    inset 0 1px 0 #fff;
+}
+
+.cc-big-number{
+  font-size:43px;
+  letter-spacing:-.07em;
+  line-height:1;
+  font-weight:750;
+}
+
+.cc-metric-change{
+  margin-top:9px;
+  font-size:10px;
+  color:#6d7a8e;
+}
+
+.cc-metric-change span{
+  color:#16a34a;
+  font-weight:800;
+}
+
+/* Ring */
+.cc-analysis-ring{
+  width:112px;
+  height:112px;
+  flex:none;
+  border-radius:50%;
+  padding:7px;
+  background:conic-gradient(
+    #2563eb 0deg,
+    #22d3ee 74deg,
+    #dce7f8 74deg,
+    #dce7f8 360deg
+  );
+  box-shadow:0 10px 25px rgba(37,99,235,.13);
+}
+
+.cc-ring-inner{
+  width:100%;
+  height:100%;
+  border-radius:50%;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+}
+
+.cc-ring-inner strong{
+  font-size:24px;
+  line-height:1;
+  letter-spacing:-.05em;
+}
+
+.cc-ring-inner span{
+  margin-top:4px;
+  font-size:8px;
+  color:#8a95a5;
+}
+
+/* Pipeline */
+.cc-pipeline{
+  position:relative;
+  margin:26px 28px 23px;
+  padding:0 4px;
+  display:flex;
+  justify-content:space-between;
+}
+
+.cc-pipeline-line{
+  position:absolute;
+  left:18px;
+  right:18px;
+  top:17px;
+  height:2px;
+  border-radius:99px;
+  background:#e4eaf2;
+  overflow:hidden;
+}
+
+.cc-pipeline-progress{
+  width:68%;
+  height:100%;
+  background:linear-gradient(90deg,#2563eb,#22d3ee);
+  border-radius:inherit;
+  animation:cc-pipeline-flow 3.8s ease-in-out infinite;
+  transform-origin:left;
+}
+
+@keyframes cc-pipeline-flow{
+  0%,100%{transform:scaleX(.72);opacity:.7}
+  50%{transform:scaleX(1);opacity:1}
+}
+
+.cc-stage{
+  position:relative;
+  z-index:2;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  color:#8792a3;
+  font-size:8px;
+  font-weight:700;
+}
+
+.cc-stage-icon{
+  width:35px;
+  height:35px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#fff;
+  border:1px solid #dce4ee;
+  color:#607087;
+  font-size:8px;
+  box-shadow:0 5px 14px rgba(15,23,42,.055);
+}
+
+.cc-stage-2 .cc-stage-icon,
+.cc-stage-3 .cc-stage-icon{
+  color:#2563eb;
+  border-color:#cfe0ff;
+  background:#f4f8ff;
+}
+
+.cc-stage-icon.hot{
+  color:#fff;
+  border-color:#2563eb;
+  background:linear-gradient(135deg,#2563eb,#06b6d4);
+  box-shadow:0 8px 20px rgba(37,99,235,.22);
+}
+
+/* Lead list */
+.cc-section-title{
+  padding:0 28px 10px;
+  font-size:10px;
+  font-weight:750;
+  color:#5c687a;
+}
+
+.cc-lead-list{
+  padding:0 18px 22px;
+}
+
+.cc-lead-row{
+  min-height:55px;
+  padding:9px 11px;
+  margin-top:5px;
+  border:1px solid transparent;
+  background:rgba(255,255,255,.7);
+  box-shadow:0 1px 0 rgba(15,23,42,.025);
+}
+
+.cc-avatar{
+  width:31px;
+  height:31px;
+  font-size:9px;
+}
+
+.cc-lead-info strong{
+  font-size:11px;
+}
+
+.cc-lead-info span{
+  font-size:9px;
+  color:#8a95a5;
+}
+
+.cc-lead-status{
+  font-size:8px;
+  border-radius:999px;
+  padding:5px 8px;
+}
+
+/* Floating cards become part of the composition */
+.cc-hot-notification{
+  right:-34px;
+  bottom:35px;
+  min-width:245px;
+  padding:13px 15px;
+  border-radius:13px;
+  background:rgba(255,255,255,.96);
+  border:1px solid rgba(37,99,235,.10);
+  box-shadow:0 22px 50px rgba(15,23,42,.14);
+  animation:cc-float-card 5s ease-in-out infinite;
+}
+
+.cc-recovery-signal{
+  left:-31px;
+  top:34px;
+  padding:9px 13px;
+  border-radius:999px;
+  background:rgba(255,255,255,.95);
+  border:1px solid rgba(37,99,235,.12);
+  box-shadow:0 18px 38px rgba(15,23,42,.10);
+  animation:cc-float-card 4.5s ease-in-out infinite reverse;
+}
+
+@keyframes cc-float-card{
+  0%,100%{transform:translateY(0)}
+  50%{transform:translateY(-8px)}
+}
+
+/* Hero trust becomes a designed footer line */
+.hero-trust{
+  position:relative;
+  padding-top:18px;
+}
+
+.hero-trust::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:250px;
+  height:1px;
+  background:linear-gradient(90deg,#d7e1ef,transparent);
+}
+
+/* More intentional section transitions */
+.cc-problem{
+  background:
+    radial-gradient(circle at 90% 20%,rgba(37,99,235,.055),transparent 25rem),
+    #fff;
+}
+
+.cc-solution{
+  background:
+    radial-gradient(circle at 10% 70%,rgba(34,211,238,.055),transparent 27rem),
+    #f6f9fd;
+}
+
+/* Feature hero should feel like a product showcase */
+.cc-feature-hero{
+  border-radius:24px !important;
+  border:1px solid #dfe6ef !important;
+  box-shadow:0 25px 65px rgba(15,23,42,.075) !important;
+  overflow:hidden;
+  background:
+    radial-gradient(circle at 85% 10%,rgba(37,99,235,.08),transparent 22rem),
+    #fff !important;
+}
+
+.cc-feature-hero::before{
+  opacity:.7;
+}
+
+/* How-it-works gets a subtle visual stage */
+.cc-how-section{
+  background:
+    radial-gradient(circle at 50% 0%,rgba(37,99,235,.07),transparent 35rem),
+    #fbfdff;
+}
+
+/* CTA */
+.cta-box{
+  min-height:390px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+/* Mobile cleanup */
+@media(max-width:700px){
+  .hero.cc-hero::after{
+    width:450px;
+    height:450px;
+    right:-220px;
+    top:62%;
+  }
+
+  .cc-main-metric{
+    margin:0 14px;
+    padding:18px;
+  }
+
+  .cc-big-number{
+    font-size:34px;
+  }
+
+  .cc-analysis-ring{
+    width:88px;
+    height:88px;
+  }
+
+  .cc-hot-notification{
+    right:8px;
+    bottom:-22px;
+    min-width:220px;
+  }
+
+  .cc-recovery-signal{
+    left:8px;
+    top:-18px;
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .cc-pipeline-progress,
+  .cc-hot-notification,
+  .cc-recovery-signal{
+    animation:none !important;
+  }
+}
