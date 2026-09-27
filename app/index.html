@@ -191,7 +191,7 @@ function showView(name){
 }
 document.querySelectorAll('.nav-btn').forEach(btn=>btn.addEventListener('click',()=>showView(btn.dataset.view)));
 document.querySelectorAll('[data-view-link]').forEach(btn=>btn.addEventListener('click',()=>showView(btn.dataset.viewLink)));
-document.getElementById('add-lead').addEventListener('click',()=>showView('leads'));
+document.getElementById('dash-add')?.addEventListener('click',()=>showView('leads'));
 </script>
 <div class="modal-backdrop" id="lead-modal">
   <div class="modal">
@@ -243,12 +243,12 @@ function addLead(){
  leads.unshift({id:crypto.randomUUID(),name,email:document.getElementById('lead-email').value.trim(),phone:document.getElementById('lead-phone').value.trim(),company:document.getElementById('lead-company').value.trim(),context:document.getElementById('lead-context').value.trim(),status:'new',createdAt:new Date().toISOString()});
  saveLeads();closeLeadModal();['lead-name','lead-email','lead-phone','lead-company','lead-context'].forEach(id=>document.getElementById(id).value='');renderLeads();showView('leads');
 }
-document.getElementById('open-add-lead').onclick=openLeadModal;
+document.querySelector('#leads .primary').onclick=openLeadModal;
 document.getElementById('close-lead').onclick=closeLeadModal;
 document.getElementById('cancel-lead').onclick=closeLeadModal;
 document.getElementById('save-lead').onclick=addLead;
 document.getElementById('lead-search').oninput=renderLeads;
-document.getElementById('lead-status').onchange=renderLeads;
+document.getElementById('lead-filter').onchange=renderLeads;
 document.getElementById('import-leads').onclick=()=>alert('CSV import is the next Leads capability.');
 document.getElementById('lead-modal').onclick=e=>{if(e.target.id==='lead-modal')closeLeadModal()};
 renderLeads();
