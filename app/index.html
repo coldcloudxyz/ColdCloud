@@ -140,9 +140,27 @@ const KEY="coldcloud_state_v4";
 const emptyState={leads:[],sequences:[],automations:[],activity:[],settings:{name:"",email:"",company:"",timezone:"Asia/Kolkata",channel:"WhatsApp",defaultSequence:""},integrations:{WhatsApp:false,Email:false,CRM:false}};
 let state=load();
 let currentLeadId=null;
+state.leads.forEach(ensureLeadPlan);
 let chartRange=7;
 
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&x.leads?x:JSON.parse(JSON.stringify(emptyState))}catch{return JSON.parse(JSON.stringify(emptyState))}}
+function makeLeadPlan(sequenceId){
+ const s=state.sequences.find(x=>x.id===sequenceId);
+ if(!s)return [];
+ return s.steps.map((x,i)=>({id:uid(),day:Number(x.day)||0,channel:x.channel||"WhatsApp",enabled:true,aiInstructions:"",status:i===0?"scheduled":"waiting"}));
+}
+function ensureLeadPlan(l){
+ if(!l.sequencePlan&&l.sequenceId)l.sequencePlan=makeLeadPlan(l.sequenceId);
+ if(l.sequencePlan)l.sequencePlan.forEach((x,i)=>{x.id=x.id||uid();x.enabled=x.enabled!==false;x.aiInstructions=x.aiInstructions||"";x.status=x.status||(i<Number(l.sequenceProgress||0)?"sent":i===Number(l.sequenceProgress||0)?"scheduled":"waiting")});
+ return l.sequencePlan||[];
+}
+function assignSequenceToLead(l,sequenceId){
+ l.sequenceId=sequenceId||"";
+ l.sequencePlan=sequenceId?makeLeadPlan(sequenceId):[];
+ l.sequenceProgress=0;
+ l.status=sequenceId?"followup":"new";
+ l.updatedAt=new Date().toISOString();
+}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
@@ -207,7 +225,10 @@ function conversationHtml(l){
 }
 function sequenceHtml(l,seq){
  if(!seq)return '<h3 style="font-size:12px;margin:0 0 12px">Sequence</h3><div class="empty">No sequence assigned.</div><button class="primary" data-action="change-sequence">Assign Sequence</button>';
- return '<h3 style="font-size:12px;margin:0 0 12px">'+esc(seq.name)+'</h3>'+seq.steps.map((s,i)=>'<div class="step"><strong>Message '+(i+1)+'</strong> · Day '+s.day+' · '+esc(s.channel||"WhatsApp")+' · '+(i<l.sequenceProgress?"Sent ✓":i===l.sequenceProgress?"Scheduled":"Waiting")+'</div>').join("")+'<div style="margin-top:12px;display:flex;gap:7px"><button class="ghost" data-action="change-sequence">Change Sequence</button><button class="ghost" data-action="pause-lead">'+(l.paused?"Resume":"Pause")+'</button></div>'
+ const plan=ensureLeadPlan(l);
+ return '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px"><div><h3 style="font-size:12px;margin:0 0 4px">'+esc(seq.name)+'</h3><div class="muted">Independent plan for this lead · changes here do not edit the global template.</div></div><span class="pill '+(l.paused?"lost":"active")+'">'+(l.paused?"Paused":"Running")+'</span></div>'+
+ plan.map((s,i)=>'<div class="step"><div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start"><div><strong>Step '+(i+1)+'</strong> · Day '+s.day+' · '+esc(s.channel)+' · '+(s.status==="sent"?"Sent ✓":s.status==="scheduled"?"Scheduled":"Waiting")+(s.enabled?"":" · Disabled")+(s.aiInstructions?'<div class="muted" style="margin-top:4px">AI: '+esc(s.aiInstructions)+'</div>':'')+'</div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end"><button class="ghost" data-seq-step-edit="'+i+'">Edit</button><button class="ghost" data-seq-step-ai="'+i+'">AI</button><button class="ghost" data-seq-step-toggle="'+i+'">'+(s.enabled?"Disable":"Enable")+'</button><button class="ghost" data-seq-step-remove="'+i+'">Remove</button></div></div></div>').join("")+
+ '<div style="margin-top:12px;display:flex;gap:7px;flex-wrap:wrap"><button class="ghost" data-action="lead-add-step">+ Add Step</button><button class="ghost" data-action="lead-skip-step">Skip Next</button><button class="ghost" data-action="lead-send-next">Send Next Now</button><button class="ghost" data-action="change-sequence">Change Sequence</button><button class="ghost" data-action="pause-lead">'+(l.paused?"Resume":"Pause")+'</button></div>';
 }
 
 function editLead(){
@@ -222,7 +243,7 @@ function openForm(existing=null){
  document.getElementById("lead-form").dataset.edit=existing?.id||"";
 }
 document.getElementById("lead-form").onsubmit=e=>{e.preventDefault();const id=e.currentTarget.dataset.edit;const data={name:f("name"),company:f("company"),title:f("title"),businessType:f("business"),email:f("email"),phone:f("phone"),website:f("website"),industry:f("industry"),location:f("location"),source:f("source")||"Manual",interest:f("interest"),notes:f("notes"),sequenceId:document.getElementById("f-sequence").value,updatedAt:new Date().toISOString()};
- if(id){Object.assign(state.leads.find(x=>x.id===id),data);log("Lead updated: "+data.name,id)}else{const lead={...data,id:uid(),status:"new",createdAt:new Date().toISOString(),messages:[],sequenceProgress:0,paused:false};state.leads.unshift(lead);log("Lead added: "+lead.name,lead.id);if(lead.sequenceId){lead.status="followup";log("Sequence assigned: "+(state.sequences.find(s=>s.id===lead.sequenceId)?.name||""),lead.id)}}
+ if(id){const lead=state.leads.find(x=>x.id===id),oldSequence=lead.sequenceId;Object.assign(lead,data);if(oldSequence!==data.sequenceId)assignSequenceToLead(lead,data.sequenceId);log("Lead updated: "+data.name,id)}else{const lead={...data,id:uid(),status:"new",createdAt:new Date().toISOString(),messages:[],sequenceProgress:0,paused:false,sequencePlan:data.sequenceId?makeLeadPlan(data.sequenceId):[]};state.leads.unshift(lead);log("Lead added: "+lead.name,lead.id);if(lead.sequenceId){lead.status="followup";log("Sequence assigned: "+(state.sequences.find(s=>s.id===lead.sequenceId)?.name||""),lead.id)}}
  save();closeAll();renderLeads();renderDashboard();renderAnalytics();if(id)openLead(id);
 };
 
@@ -230,7 +251,7 @@ function renderSequences(){
  const box=document.getElementById("sequence-list");if(!state.sequences.length){box.innerHTML='<div class="panel empty">No sequences yet.<br><br>Create a reusable follow-up journey.</div>';return}
  box.innerHTML=state.sequences.map(s=>'<div class="panel sequence-card" style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:10px"><div><h3>'+esc(s.name)+'</h3><div class="sequence-meta">'+s.steps.length+' steps · '+esc(s.channels.join(" + "))+' · '+state.leads.filter(l=>l.sequenceId===s.id).length+' active leads</div></div><button class="switch '+(s.active?"on":"")+'" data-seq-toggle="'+s.id+'"><i></i></button></div>'+s.steps.map((x,i)=>'<div class="step">Step '+(i+1)+' · Day '+x.day+' · '+esc(x.channel)+' · AI personalized message</div>').join("")+'<div class="seq-actions" style="margin-top:12px"><button class="ghost" data-seq-edit="'+s.id+'">Edit</button><button class="ghost" data-seq-delete="'+s.id+'">Delete</button></div></div>').join("");
  box.querySelectorAll("[data-seq-toggle]").forEach(b=>b.onclick=()=>{let s=state.sequences.find(x=>x.id===b.dataset.seqToggle);s.active=!s.active;save();renderSequences()});
- box.querySelectorAll("[data-seq-delete]").forEach(b=>b.onclick=()=>{state.sequences=state.sequences.filter(x=>x.id!==b.dataset.seqDelete);state.leads.forEach(l=>{if(l.sequenceId===b.dataset.seqDelete)l.sequenceId=""});save();renderSequences();renderLeads()});
+ box.querySelectorAll("[data-seq-delete]").forEach(b=>b.onclick=()=>{state.sequences=state.sequences.filter(x=>x.id!==b.dataset.seqDelete);state.leads.forEach(l=>{if(l.sequenceId===b.dataset.seqDelete){l.sequenceId="";l.sequencePlan=[];l.sequenceProgress=0;l.status="new"}});save();renderSequences();renderLeads()});
 }
 let tempSteps=[{day:0,channel:"WhatsApp"},{day:2,channel:"WhatsApp"},{day:5,channel:"Email"},{day:9,channel:"WhatsApp"}];
 function renderStepForm(){document.getElementById("seq-steps").innerHTML=tempSteps.map((s,i)=>'<div class="field" style="border:1px solid #e5e2dd;border-radius:8px;padding:10px"><label>STEP '+(i+1)+'</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><input type="number" min="0" value="'+s.day+'" data-step-day="'+i+'"><select data-step-channel="'+i+'"><option '+(s.channel==="WhatsApp"?"selected":"")+'>WhatsApp</option><option '+(s.channel==="Email"?"selected":"")+'>Email</option></select></div><div class="muted" style="margin-top:5px">AI-generated message will be personalized per lead.</div></div>').join("")}
@@ -264,7 +285,7 @@ function renderSettings(){
 function openAI(){document.getElementById("ai-modal").classList.add("open");document.getElementById("ai-preview").value="";document.getElementById("ai-preview").placeholder="AI output will appear here when a provider is connected."}
 function editProfile(){const name=prompt("Name",state.settings.name||"");if(name!==null)state.settings.name=name;const email=prompt("Email",state.settings.email||"");if(email!==null)state.settings.email=email;const company=prompt("Company name",state.settings.company||"");if(company!==null)state.settings.company=company;save();renderSettings()}
 function csvParse(text){const rows=[];let row=[],cell="",q=false;for(let i=0;i<text.length;i++){let c=text[i],n=text[i+1];if(c==='"'&&q&&n==='"'){cell+='"';i++;continue}if(c==='"'){q=!q;continue}if(c===','&&!q){row.push(cell);cell="";continue}if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);cell="";if(row.some(x=>x.trim()!==''))rows.push(row);row=[];continue}cell+=c}if(cell||row.length){row.push(cell);rows.push(row)}return rows}
-function importCSV(file){const r=new FileReader();r.onload=()=>{const rows=csvParse(r.result),headers=(rows.shift()||[]).map(x=>x.trim().toLowerCase());let added=0;rows.forEach(row=>{const o={};headers.forEach((h,i)=>o[h]=row[i]||"");if(!o.name)return;state.leads.unshift({id:uid(),name:o.name,company:o.company||"",title:o.title||o.job_title||"",businessType:o.business_type||"",email:o.email||"",phone:o.phone||"",website:o.website||"",industry:o.industry||"",location:o.location||"",source:o.source||"CSV import",interest:o.interest||"",notes:o.notes||o.context||"",sequenceId:o.sequence_id||state.settings.defaultSequence||"",status:(o.sequence_id||state.settings.defaultSequence)?"followup":"new",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),messages:[],sequenceProgress:0,paused:false});added++});log("Imported "+added+" leads from CSV");save();closeAll();renderLeads();renderDashboard()};r.readAsText(file)}
+function importCSV(file){const r=new FileReader();r.onload=()=>{const rows=csvParse(r.result),headers=(rows.shift()||[]).map(x=>x.trim().toLowerCase());let added=0;rows.forEach(row=>{const o={};headers.forEach((h,i)=>o[h]=row[i]||"");if(!o.name)return;state.leads.unshift({id:uid(),name:o.name,company:o.company||"",title:o.title||o.job_title||"",businessType:o.business_type||"",email:o.email||"",phone:o.phone||"",website:o.website||"",industry:o.industry||"",location:o.location||"",source:o.source||"CSV import",interest:o.interest||"",notes:o.notes||o.context||"",sequenceId:o.sequence_id||state.settings.defaultSequence||"",status:(o.sequence_id||state.settings.defaultSequence)?"followup":"new",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),messages:[],sequenceProgress:0,paused:false,sequencePlan:(o.sequence_id||state.settings.defaultSequence)?makeLeadPlan(o.sequence_id||state.settings.defaultSequence):[]});added++});log("Imported "+added+" leads from CSV");save();closeAll();renderLeads();renderDashboard()};r.readAsText(file)}
 
 document.addEventListener("click",e=>{
  const a=e.target.closest("[data-action]");if(!a)return;const action=a.dataset.action;
@@ -277,7 +298,10 @@ document.addEventListener("click",e=>{
  if(action==="ai-lead"){openAI();return}
  if(action==="send-message"){switchTab("conversation");return}
  if(action==="send-composer"){const l=state.leads.find(x=>x.id===currentLeadId),t=document.getElementById("composer-text")?.value.trim();if(!l||!t)return;l.messages=l.messages||[];l.messages.push({id:uid(),direction:"out",channel:state.settings.channel,text:t,time:new Date().toISOString()});l.status="contacted";l.updatedAt=new Date().toISOString();log("Message sent: "+l.name,l.id);save();openLead(l.id);switchTab("conversation");return}
- if(action==="change-sequence"){const l=state.leads.find(x=>x.id===currentLeadId);const opts=state.sequences.map((s,i)=>(i+1)+". "+s.name).join("\n");if(!opts){openSequence();return}const n=prompt("Choose sequence number:\n"+opts);const idx=Number(n)-1;if(!Number.isNaN(idx)&&state.sequences[idx]){l.sequenceId=state.sequences[idx].id;l.status="followup";l.updatedAt=new Date().toISOString();log("Sequence changed for "+l.name,l.id);save();openLead(l.id)}}return;
+ if(action==="change-sequence"){const l=state.leads.find(x=>x.id===currentLeadId);const opts=state.sequences.map((s,i)=>(i+1)+". "+s.name).join("\n");if(!opts){openSequence();return}const n=prompt("Choose sequence number:\n"+opts);const idx=Number(n)-1;if(!Number.isNaN(idx)&&state.sequences[idx]){assignSequenceToLead(l,state.sequences[idx].id);log("Sequence changed for "+l.name,l.id);save();openLead(l.id)}}return;
+ if(action==="lead-add-step"){const l=state.leads.find(x=>x.id===currentLeadId);if(!l)return;const p=ensureLeadPlan(l),last=p[p.length-1];p.push({id:uid(),day:last?Number(last.day)+2:0,channel:state.settings.channel||"WhatsApp",enabled:true,aiInstructions:"",status:"waiting"});l.updatedAt=new Date().toISOString();save();openLead(l.id);switchTab("sequence");return}
+ if(action==="lead-skip-step"){const l=state.leads.find(x=>x.id===currentLeadId),p=ensureLeadPlan(l);const i=p.findIndex(x=>x.enabled&&x.status!=="sent");if(i<0)return;p[i].status="skipped";p[i].enabled=false;l.sequenceProgress=Math.min(i+1,p.length);l.updatedAt=new Date().toISOString();log("Skipped sequence step for "+l.name,l.id);save();openLead(l.id);switchTab("sequence");return}
+ if(action==="lead-send-next"){const l=state.leads.find(x=>x.id===currentLeadId),p=ensureLeadPlan(l);const i=p.findIndex(x=>x.enabled&&x.status!=="sent"&&x.status!=="skipped");if(i<0)return;const s=p[i];const text=prompt("Message to send now (AI can replace this later):","");if(text===null||!text.trim())return;l.messages=l.messages||[];l.messages.push({id:uid(),direction:"out",channel:s.channel,text:text.trim(),time:new Date().toISOString(),sequenceStep:i});s.status="sent";l.sequenceProgress=Math.min(i+1,p.length);l.status="contacted";l.updatedAt=new Date().toISOString();log("Sequence step sent: "+l.name,l.id);save();openLead(l.id);switchTab("sequence");return}
  if(action==="toggle-status"){const l=state.leads.find(x=>x.id===currentLeadId);l.status=l.status==="won"?"lost":"won";l.updatedAt=new Date().toISOString();log("Status changed to "+statusLabel(l.status)+": "+l.name,l.id);save();openLead(l.id);return}
  if(action==="delete-lead"){const l=state.leads.find(x=>x.id===currentLeadId);if(l&&confirm("Delete "+l.name+"?")){state.leads=state.leads.filter(x=>x.id!==l.id);log("Lead deleted: "+l.name,l.id);save();document.getElementById("lead-detail").className="detail";document.getElementById("lead-list-view").style.display="block";renderLeads();renderDashboard()}return}
  if(action==="close-ai"){closeAll();return}
@@ -286,6 +310,18 @@ document.addEventListener("click",e=>{
  if(action==="export-pdf"){window.print();return}
  if(action==="edit-profile"){editProfile();return}
  if(action==="connect-first"){showView("integrations");return}
+});
+document.addEventListener("click",e=>{
+ const b=e.target.closest("[data-seq-step-edit],[data-seq-step-ai],[data-seq-step-toggle],[data-seq-step-remove]");
+ if(!b)return;
+ const l=state.leads.find(x=>x.id===currentLeadId);if(!l)return;
+ const p=ensureLeadPlan(l),i=Number(b.dataset.seqStepEdit??b.dataset.seqStepAi??b.dataset.seqStepToggle??b.dataset.seqStepRemove);
+ if(!p[i])return;
+ if(b.dataset.seqStepEdit!==undefined){const s=p[i],day=prompt("Day",s.day);if(day===null)return;const ch=prompt("Channel (WhatsApp or Email)",s.channel);if(ch===null)return;s.day=Math.max(0,Number(day)||0);s.channel=ch.trim()||s.channel;log("Edited sequence step for "+l.name,l.id)}
+ else if(b.dataset.seqStepAi!==undefined){const v=prompt("AI instructions for this step",p[i].aiInstructions||"");if(v===null)return;p[i].aiInstructions=v.trim();log("Updated AI instructions for "+l.name,l.id)}
+ else if(b.dataset.seqStepToggle!==undefined){p[i].enabled=!p[i].enabled;log((p[i].enabled?"Enabled":"Disabled")+" sequence step for "+l.name,l.id)}
+ else if(b.dataset.seqStepRemove!==undefined){if(!confirm("Remove this step from this lead's sequence?"))return;p.splice(i,1);l.sequenceProgress=Math.min(l.sequenceProgress||0,p.length);log("Removed sequence step for "+l.name,l.id)}
+ l.updatedAt=new Date().toISOString();save();openLead(l.id);switchTab("sequence");
 });
 document.querySelectorAll(".integration-connect").forEach(b=>b.onclick=()=>{const p=b.dataset.provider;alert(p+" authorization requires the ColdCloud backend and official provider OAuth/API flow. No credentials are stored in this frontend.")});
 document.getElementById("csv-input").onchange=e=>{if(e.target.files[0])importCSV(e.target.files[0]);e.target.value=""};
