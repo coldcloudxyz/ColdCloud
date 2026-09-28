@@ -126,8 +126,8 @@
 </div></div>
 
 <div class="modal-bg" id="form-modal"><div class="modal">
-  <div class="modal-head"><div><h2>Manual Entry</h2><div class="muted">Add a real lead to your workspace.</div></div><button class="close" data-action="close-form">×</button></div>
-  <form id="lead-form"><div class="form-grid">
+  <div class="modal-head"><div><h2>Manual Entry</h2><div class="muted">Add a real lead to your workspace.</div></div><button type="button" class="close" data-action="close-form" onclick="closeAll();return false;">×</button></div>
+  <form id="lead-form" onsubmit="handleLeadSubmit(event)"><div class="form-grid">
     <div class="field"><label>Name *</label><input id="f-name" required></div><div class="field"><label>Company</label><input id="f-company"></div>
     <div class="field"><label>Job Title</label><input id="f-title"></div><div class="field"><label>Business Type</label><input id="f-business"></div>
     <div class="field"><label>Email</label><input id="f-email" type="email"></div><div class="field"><label>Phone</label><input id="f-phone"></div>
@@ -136,7 +136,7 @@
     <div class="field full"><label>What they're interested in</label><input id="f-interest"></div>
     <div class="field full"><label>Notes / context</label><textarea id="f-notes" rows="4"></textarea></div>
     <div class="field full"><label>Sequence</label><select id="f-sequence"></select></div>
-  </div><div class="modal-actions"><button type="button" class="ghost" data-action="close-form">Cancel</button><button class="primary">Create Lead</button></div></form>
+  </div><div class="modal-actions"><button type="button" class="ghost" data-action="close-form" onclick="closeAll();return false;">Cancel</button><button type="submit" class="primary">Create Lead</button></div></form>
 </div></div>
 
 <div class="modal-bg" id="sequence-modal"><div class="modal">
@@ -290,7 +290,7 @@ function openForm(existing=null){
  document.getElementById("f-sequence").value=existing?.sequenceId||state.settings.defaultSequence||"";
  document.getElementById("lead-form").dataset.edit=existing?.id||"";
 }
-document.getElementById("lead-form").onsubmit=async e=>{e.preventDefault();const form=e.currentTarget;const id=form.dataset.edit;const data={name:f("name"),company:f("company"),title:f("title"),businessType:f("business"),email:f("email"),phone:f("phone"),website:f("website"),industry:f("industry"),location:f("location"),source:f("source")||"Manual",interest:f("interest"),notes:f("notes"),sequenceId:document.getElementById("f-sequence").value,updatedAt:new Date().toISOString()};if(!data.name.trim())return;
+async function handleLeadSubmit(e){e.preventDefault();const form=e.currentTarget;const id=form.dataset.edit;const data={name:f("name"),company:f("company"),title:f("title"),businessType:f("business"),email:f("email"),phone:f("phone"),website:f("website"),industry:f("industry"),location:f("location"),source:f("source")||"Manual",interest:f("interest"),notes:f("notes"),sequenceId:document.getElementById("f-sequence").value,updatedAt:new Date().toISOString()};if(!data.name.trim())return;
  if(id){const lead=state.leads.find(x=>x.id===id);if(!lead)return;const oldSequence=lead.sequenceId;Object.assign(lead,data);if(oldSequence!==data.sequenceId)assignSequenceToLead(lead,data.sequenceId);log("Lead updated: "+data.name,id);apiRequest("/api/leads/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify(data)});}else{const lead={...data,id:uid(),status:"new",createdAt:new Date().toISOString(),messages:[],sequenceProgress:0,paused:false,sequencePlan:data.sequenceId?makeLeadPlan(data.sequenceId):[]};state.leads.unshift(lead);log("Lead added: "+lead.name,lead.id);if(lead.sequenceId){lead.status="followup";log("Sequence assigned: "+(state.sequences.find(s=>s.id===lead.sequenceId)?.name||""),lead.id)}apiRequest("/api/leads",{method:"POST",body:JSON.stringify(lead)});}
  save();closeAll();renderLeads();renderDashboard();renderAnalytics();if(id)openLead(id);
 };
