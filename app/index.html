@@ -296,7 +296,7 @@ window.coldCloudLeadFilter="all";
 document.getElementById("lead-search").oninput=renderLeads;
 document.querySelectorAll(".lead-filter").forEach(b=>b.onclick=()=>{window.coldCloudLeadFilter=b.dataset.leadFilter;renderLeads()});
 
-document.getElementById("lead-search").oninput=renderLeads;document.getElementById("lead-filter").onchange=renderLeads;
+
 
 function openLead(id){
  currentLeadId=id;const l=state.leads.find(x=>x.id===id);if(!l)return;
