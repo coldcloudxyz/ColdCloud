@@ -187,6 +187,28 @@ function assignSequenceToLead(l,sequenceId){
  l.status=sequenceId?"followup":"new";
  l.updatedAt=new Date().toISOString();
 }
+const API_BASE="https://api.usecoldcloud.xyz";
+function getApiToken(){
+ try{
+  const raw=localStorage.getItem("coldcloud_session")||localStorage.getItem("session");
+  if(!raw)return "";
+  const parsed=JSON.parse(raw);
+  return parsed?.token||parsed?.session?.token||"";
+ }catch{return ""}
+}
+async function apiRequest(path,options={}){
+ const token=getApiToken();
+ const headers={"Content-Type":"application/json",...(options.headers||{})};
+ if(token)headers.Authorization="Bearer "+token;
+ try{
+  const res=await fetch(API_BASE+path,{...options,headers});
+  if(!res.ok)throw new Error("API "+res.status);
+  return await res.json();
+ }catch(err){
+  console.warn("ColdCloud API unavailable:",err.message);
+  return null;
+ }
+}
 function save(){localStorage.setItem(KEY,JSON.stringify(state))}
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
@@ -268,8 +290,8 @@ function openForm(existing=null){
  document.getElementById("f-sequence").value=existing?.sequenceId||state.settings.defaultSequence||"";
  document.getElementById("lead-form").dataset.edit=existing?.id||"";
 }
-document.getElementById("lead-form").onsubmit=e=>{e.preventDefault();const id=e.currentTarget.dataset.edit;const data={name:f("name"),company:f("company"),title:f("title"),businessType:f("business"),email:f("email"),phone:f("phone"),website:f("website"),industry:f("industry"),location:f("location"),source:f("source")||"Manual",interest:f("interest"),notes:f("notes"),sequenceId:document.getElementById("f-sequence").value,updatedAt:new Date().toISOString()};
- if(id){const lead=state.leads.find(x=>x.id===id),oldSequence=lead.sequenceId;Object.assign(lead,data);if(oldSequence!==data.sequenceId)assignSequenceToLead(lead,data.sequenceId);log("Lead updated: "+data.name,id)}else{const lead={...data,id:uid(),status:"new",createdAt:new Date().toISOString(),messages:[],sequenceProgress:0,paused:false,sequencePlan:data.sequenceId?makeLeadPlan(data.sequenceId):[]};state.leads.unshift(lead);log("Lead added: "+lead.name,lead.id);if(lead.sequenceId){lead.status="followup";log("Sequence assigned: "+(state.sequences.find(s=>s.id===lead.sequenceId)?.name||""),lead.id)}}
+document.getElementById("lead-form").onsubmit=async e=>{e.preventDefault();const form=e.currentTarget;const id=form.dataset.edit;const data={name:f("name"),company:f("company"),title:f("title"),businessType:f("business"),email:f("email"),phone:f("phone"),website:f("website"),industry:f("industry"),location:f("location"),source:f("source")||"Manual",interest:f("interest"),notes:f("notes"),sequenceId:document.getElementById("f-sequence").value,updatedAt:new Date().toISOString()};if(!data.name.trim())return;
+ if(id){const lead=state.leads.find(x=>x.id===id);if(!lead)return;const oldSequence=lead.sequenceId;Object.assign(lead,data);if(oldSequence!==data.sequenceId)assignSequenceToLead(lead,data.sequenceId);log("Lead updated: "+data.name,id);apiRequest("/api/leads/"+encodeURIComponent(id),{method:"PATCH",body:JSON.stringify(data)});}else{const lead={...data,id:uid(),status:"new",createdAt:new Date().toISOString(),messages:[],sequenceProgress:0,paused:false,sequencePlan:data.sequenceId?makeLeadPlan(data.sequenceId):[]};state.leads.unshift(lead);log("Lead added: "+lead.name,lead.id);if(lead.sequenceId){lead.status="followup";log("Sequence assigned: "+(state.sequences.find(s=>s.id===lead.sequenceId)?.name||""),lead.id)}apiRequest("/api/leads",{method:"POST",body:JSON.stringify(lead)});}
  save();closeAll();renderLeads();renderDashboard();renderAnalytics();if(id)openLead(id);
 };
 
@@ -327,7 +349,7 @@ function importCSV(file){const r=new FileReader();r.onload=()=>{const rows=csvPa
 
 document.addEventListener("click",e=>{
  const a=e.target.closest("[data-action]");if(!a)return;const action=a.dataset.action;
- if(action==="add-lead"){openAdd();return}if(action==="close-modal"){closeAll();return}if(action==="manual-entry"){openForm();return}if(action==="import-file"){closeAll();document.getElementById("csv-input").click();return}if(action==="connect-crm"){closeAll();showView("integrations");return}
+ if(action==="add-lead"){openAdd();return}if(action==="close-modal"){closeAll();return}if(action==="close-form"){closeAll();return}if(action==="manual-entry"){openForm();return}if(action==="import-file"){closeAll();document.getElementById("csv-input").click();return}if(action==="connect-crm"){closeAll();showView("integrations");return}
  if(action==="new-sequence"){openSequence();return}if(action==="close-sequence"){closeAll();return}if(action==="add-step"){tempSteps.push({day:tempSteps.at(-1)?.day+2||0,channel:"WhatsApp"});renderStepForm();return}
  if(action==="new-automation"){openAutomation();return}if(action==="close-automation"){closeAll();return}if(action==="new-template"){openTemplate();return}if(action==="close-template"){closeAll();return}
  if(action==="back-leads"){currentLeadId=null;document.getElementById("lead-detail").className="detail";document.getElementById("lead-list-view").style.display="block";renderLeads();return}
@@ -341,7 +363,7 @@ document.addEventListener("click",e=>{
  if(action==="lead-skip-step"){const l=state.leads.find(x=>x.id===currentLeadId),p=ensureLeadPlan(l);const i=p.findIndex(x=>x.enabled&&x.status!=="sent");if(i<0)return;p[i].status="skipped";p[i].enabled=false;l.sequenceProgress=Math.min(i+1,p.length);l.updatedAt=new Date().toISOString();log("Skipped sequence step for "+l.name,l.id);save();openLead(l.id);switchTab("sequence");return}
  if(action==="lead-send-next"){const l=state.leads.find(x=>x.id===currentLeadId),p=ensureLeadPlan(l);const i=p.findIndex(x=>x.enabled&&x.status!=="sent"&&x.status!=="skipped");if(i<0)return;const s=p[i];const text=prompt("Message to send now (AI can replace this later):","");if(text===null||!text.trim())return;l.messages=l.messages||[];l.messages.push({id:uid(),direction:"out",channel:s.channel,text:text.trim(),time:new Date().toISOString(),sequenceStep:i});s.status="sent";l.sequenceProgress=Math.min(i+1,p.length);l.status="contacted";l.updatedAt=new Date().toISOString();log("Sequence step sent: "+l.name,l.id);save();openLead(l.id);switchTab("sequence");return}
  if(action==="toggle-status"){const l=state.leads.find(x=>x.id===currentLeadId);l.status=l.status==="won"?"lost":"won";l.updatedAt=new Date().toISOString();log("Status changed to "+statusLabel(l.status)+": "+l.name,l.id);save();openLead(l.id);return}
- if(action==="delete-lead"){const l=state.leads.find(x=>x.id===currentLeadId);if(l&&confirm("Delete "+l.name+"?")){state.leads=state.leads.filter(x=>x.id!==l.id);log("Lead deleted: "+l.name,l.id);save();document.getElementById("lead-detail").className="detail";document.getElementById("lead-list-view").style.display="block";renderLeads();renderDashboard()}return}
+ if(action==="delete-lead"){const l=state.leads.find(x=>x.id===currentLeadId);if(l&&confirm("Delete "+l.name+"? This permanently removes the lead from ColdCloud.")){state.leads=state.leads.filter(x=>x.id!==l.id);apiRequest("/api/leads/"+encodeURIComponent(l.id),{method:"DELETE"});log("Lead deleted: "+l.name,l.id);save();document.getElementById("lead-detail").className="detail";document.getElementById("lead-list-view").style.display="block";renderLeads();renderDashboard()}return}
  if(action==="close-ai"){closeAll();return}
  if(action==="toggle-export"){document.getElementById("export-menu").classList.toggle("open");return}
  if(action==="export-csv"){exportCSV();return}
