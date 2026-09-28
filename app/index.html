@@ -219,6 +219,7 @@ function statusLabel(s){return ({new:"New",contacted:"Contacted",replied:"Replie
 function showView(id){document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));document.getElementById("top-title").textContent=id[0].toUpperCase()+id.slice(1);if(id==="dashboard")renderDashboard();if(id==="leads")renderLeads();if(id==="automations")renderAutomations();if(id==="templates")renderTemplates();if(id==="sequences")renderSequences();if(id==="activity")renderActivity();if(id==="analytics")renderAnalytics();if(id==="settings")renderSettings()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 
+function f(k){const el=document.getElementById("f-"+k);return el?el.value.trim():""}
 function openAdd(){document.getElementById("add-modal").classList.add("open")}
 function closeAll(){document.querySelectorAll(".modal-bg").forEach(m=>m.classList.remove("open"))}
 function renderDashboard(){
