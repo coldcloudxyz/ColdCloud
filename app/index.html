@@ -739,11 +739,11 @@ async function generateBusinessFollowups(){
   if(!existingIds.has(String(t.id)))state.templates.push(t);
  });
 
- const byName=new Map(generated.map(t=>[String(t.name||"").toLowerCase(),t.id]));
+ const byUse=new Map(generated.map(t=>[String(t.use||"custom"),t.id]));
  const seq=state.sequences.find(s=>s.builtIn);
  if(seq){
-  const names=["first follow-up","value follow-up","objection follow-up","final follow-up"];
-  seq.steps=(seq.steps||[]).map((s,i)=>({...s,templateId:byName.get(names[i])||s.templateId||""}));
+  const uses=["first","second","custom","final"];
+  seq.steps=(seq.steps||[]).map((s,i)=>({...s,templateId:byUse.get(uses[i])||s.templateId||""}));
   if(getApiToken()&&seq.id){
    await apiRequest("/api/sequences/"+encodeURIComponent(seq.id),{
     method:"PATCH",
