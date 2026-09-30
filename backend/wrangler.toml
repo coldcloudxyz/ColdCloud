@@ -1,0 +1,11 @@
+name = "coldcloud-api"
+main = "worker.js"
+compatibility_date = "2026-09-30"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "coldcloud"
+database_id = "ffe99d15-778b-48f0-8aba-37eb223dbfad"
+
+[vars]
+FRONTEND_ORIGIN = "https://usecoldcloud.xyz"
