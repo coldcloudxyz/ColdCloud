@@ -247,6 +247,13 @@ async function ensureBuiltInSequence(env, workspaceId) {
   return sequence;
 }
 
+async function getWorkspaceSequence(env, workspaceId, sequenceId) {
+  if (!sequenceId || !(await tableExists(env, "sequences"))) return null;
+  return await env.DB.prepare(
+    "SELECT * FROM sequences WHERE id=? AND workspace_id=? LIMIT 1"
+  ).bind(sequenceId, workspaceId).first();
+}
+
 async function ensureDefaults(env, workspaceId) {
   await ensureBuiltInSequence(env, workspaceId);
 
@@ -645,6 +652,13 @@ export default {
         }
 
         const body = await read(req);
+        const sequenceId = body.sequenceId || null;
+
+        // Never accept a sequence from another workspace.
+        if (sequenceId && !(await getWorkspaceSequence(env, workspace.id, sequenceId))) {
+          return json({ ok: false, error: "Sequence not found in this workspace" }, 404);
+        }
+
         const id = uid();
         await insertDynamic(env, "automations", {
           id,
@@ -654,7 +668,7 @@ export default {
           action_text: body.action || body.actionText || "",
           trigger: body.trigger || "",
           action: body.action || "",
-          sequence_id: body.sequenceId || null,
+          sequence_id: sequenceId,
           enabled: body.enabled === false ? 0 : 1,
           is_builtin: 0,
           created_at: now(),
