@@ -886,7 +886,11 @@ export default {
       return json({ ok: false, error: "Not found" }, 404);
     } catch (error) {
       console.error("ColdCloud Worker error:", error);
-      return json({ ok: false, error: "Server error" }, 500);
+      const detail = error?.message || String(error);
+      return json({
+        ok: false,
+        error: env.DEV_MODE === "true" ? detail : "Server error"
+      }, 500);
     }
   }
 };
