@@ -456,7 +456,30 @@ export default {
         });
       }
 
-      const authUser = await userFrom(req, env);
+      let authUser = await userFrom(req, env);
+      if (!authUser && env.DEV_MODE === "true") {
+        const devEmail = "dev@usecoldcloud.xyz";
+        let devUser = await env.DB.prepare(
+          "SELECT * FROM users WHERE email=? LIMIT 1"
+        ).bind(devEmail).first();
+
+        if (!devUser) {
+          const pw = await passwordHash(crypto.randomUUID());
+          const devUserId = uid();
+          await insertDynamic(env, "users", {
+            id: devUserId,
+            email: devEmail,
+            password_hash: pw.hash,
+            password_salt: pw.salt,
+            name: "ColdCloud Development",
+            created_at: now(),
+            updated_at: now()
+          });
+          devUser = await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(devUserId).first();
+        }
+
+        authUser = { sub: devUser.id, email: devUser.email, dev: true };
+      }
       if (!authUser) return json({ ok: false, error: "Unauthorized" }, 401);
 
       const workspace = await ensureWorkspace(env, authUser.sub);
