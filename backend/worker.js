@@ -833,6 +833,42 @@ export default {
         }))});
       }
 
+      if (path[0] === "templates" && path[1] && req.method === "DELETE") {
+        if (!(await tableExists(env, "whatsapp_templates"))) return json({ok:false,error:"Template storage is not installed yet"},500);
+        const existing=await env.DB.prepare(
+          "SELECT * FROM whatsapp_templates WHERE id=? AND workspace_id=? LIMIT 1"
+        ).bind(path[1],workspace.id).first();
+        if(!existing)return json({ok:false,error:"Follow-up not found"},404);
+
+        if(existing.provider_template_name){
+          const connection=await env.DB.prepare(
+            "SELECT * FROM whatsapp_connections WHERE workspace_id=? AND status='connected' LIMIT 1"
+          ).bind(workspace.id).first();
+          if(connection?.access_token_encrypted){
+            try{
+              const graphVersion=env.META_GRAPH_VERSION||"v25.0";
+              const token=await decryptSecret(connection.access_token_encrypted,env.JWT_SECRET||env.META_APP_SECRET);
+              const metaRes=await fetch(
+                "https://graph.facebook.com/"+graphVersion+"/"+encodeURIComponent(connection.waba_id)+"/message_templates?name="+encodeURIComponent(existing.provider_template_name),
+                {method:"DELETE",headers:{Authorization:"Bearer "+token}}
+              );
+              if(!metaRes.ok){
+                const metaJson=await metaRes.json().catch(()=>({}));
+                return json({ok:false,error:metaJson?.error?.message||"WhatsApp could not delete this approved follow-up."},400);
+              }
+            }catch(err){
+              return json({ok:false,error:"Could not remove this follow-up from WhatsApp yet."},400);
+            }
+          }
+        }
+
+        await env.DB.prepare("DELETE FROM whatsapp_templates WHERE id=? AND workspace_id=?").bind(path[1],workspace.id).run();
+        if(await tableExists(env,"sequence_steps")){
+          try{await env.DB.prepare("UPDATE sequence_steps SET template_id=NULL WHERE template_id=?").bind(path[1]).run()}catch{}
+        }
+        return json({ok:true,deleted:true,id:path[1]});
+      }
+
       if (path[0] === "templates" && req.method === "POST") {
         if (!(await tableExists(env, "whatsapp_templates"))) return json({ ok:false,error:"Template storage is not installed yet" },500);
         const body = await read(req);
@@ -908,6 +944,73 @@ export default {
         });
         return json({ok:true,template:{id,name,category,language:"en_US",body:message,use:useType,useLabel,
           providerId:String(metaJson.id),providerStatus:String(metaJson.status||"PENDING").toLowerCase(),rejectionReason:""}},201);
+      }
+
+      if (path[0] === "templates" && path[1] && req.method === "POST" && path[2] === "submit") {
+        if (!(await tableExists(env, "whatsapp_templates"))) return json({ok:false,error:"Template storage is not installed yet"},500);
+        const existing = await env.DB.prepare(
+          "SELECT * FROM whatsapp_templates WHERE id=? AND workspace_id=? LIMIT 1"
+        ).bind(path[1],workspace.id).first();
+        if (!existing) return json({ok:false,error:"Follow-up not found"},404);
+        if (String(existing.provider_status||"").toLowerCase()==="approved") {
+          return json({ok:true,template:{
+            id:existing.id,name:existing.name,category:existing.category,language:existing.language,
+            body:existing.body_text,use:existing.use_type,useLabel:existing.use_label,
+            providerId:existing.provider_template_id||"",providerStatus:"approved",
+            rejectionReason:existing.rejection_reason||""
+          }});
+        }
+
+        const connection = await env.DB.prepare(
+          "SELECT * FROM whatsapp_connections WHERE workspace_id=? AND status='connected' LIMIT 1"
+        ).bind(workspace.id).first();
+        if (!connection?.access_token_encrypted) {
+          return json({ok:false,error:"Connect WhatsApp first. ColdCloud needs the connected business number to submit this follow-up."},400);
+        }
+
+        const graphVersion=env.META_GRAPH_VERSION||"v25.0";
+        const token=await decryptSecret(connection.access_token_encrypted,env.JWT_SECRET||env.META_APP_SECRET);
+        const providerName=(existing.provider_template_name ||
+          existing.name.toLowerCase().replace(/[^a-z0-9_]+/g,"_").replace(/^_+|_+$/g,"").slice(0,60) ||
+          ("coldcloud_followup_"+Date.now()));
+
+        const variableMap={}; let n=0;
+        const metaBody=String(existing.body_text||"").replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g,(_,key)=>{
+          if(!variableMap[key])variableMap[key]=String(++n);
+          return "{{"+variableMap[key]+"}}";
+        });
+
+        const payload={
+          name:providerName,
+          language:existing.language||"en_US",
+          category:String(existing.category||"MARKETING").toUpperCase()==="UTILITY"?"UTILITY":"MARKETING",
+          parameter_format:"POSITIONAL",
+          components:[{type:"BODY",text:metaBody}]
+        };
+
+        const metaRes=await fetch(
+          "https://graph.facebook.com/"+graphVersion+"/"+encodeURIComponent(connection.waba_id)+"/message_templates",
+          {method:"POST",headers:{"content-type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify(payload)}
+        );
+        const metaJson=await metaRes.json().catch(()=>({}));
+        if(!metaRes.ok||!metaJson.id){
+          return json({ok:false,error:metaJson?.error?.message||"WhatsApp could not accept this follow-up for approval."},400);
+        }
+
+        await updateDynamic(env,"whatsapp_templates",{
+          provider_template_id:String(metaJson.id),
+          provider_template_name:providerName,
+          provider_status:String(metaJson.status||"PENDING").toLowerCase(),
+          rejection_reason:null,
+          updated_at:now()
+        },"id=? AND workspace_id=?",[existing.id,workspace.id]);
+
+        return json({ok:true,template:{
+          id:existing.id,name:existing.name,category:payload.category,language:existing.language,
+          body:existing.body_text,use:existing.use_type,useLabel:existing.use_label,
+          providerId:String(metaJson.id),providerStatus:String(metaJson.status||"PENDING").toLowerCase(),
+          rejectionReason:""
+        }});
       }
 
       if (path[0] === "templates" && path[1] && req.method === "PATCH") {
