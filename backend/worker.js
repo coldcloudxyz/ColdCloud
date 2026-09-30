@@ -570,9 +570,15 @@ export default {
 
         if (duplicate) return json({ ok: false, error: "Lead already exists" }, 409);
 
-        const sequenceId = body.sequenceId || null;
+        let sequenceId = body.sequenceId || null;
         if (sequenceId && !(await getWorkspaceSequence(env, workspace.id, sequenceId))) {
-          return json({ ok: false, error: "Sequence not found in this workspace" }, 404);
+          // During MVP/dev, stale browser localStorage can reference a sequence
+          // that no longer exists in D1. Do not block lead creation for that.
+          if (env.DEV_MODE === "true") {
+            sequenceId = null;
+          } else {
+            return json({ ok: false, error: "Sequence not found in this workspace" }, 404);
+          }
         }
         const leadId = uid();
         const lead = {
@@ -598,7 +604,7 @@ export default {
           sequence_paused: 0,
           sequence_id: sequenceId,
           sequence_progress: 0,
-          sequence_plan: body.sequencePlan ? JSON.stringify(body.sequencePlan) : "[]",
+          sequence_plan: sequenceId && body.sequencePlan ? JSON.stringify(body.sequencePlan) : "[]",
           created_at: now(),
           updated_at: now()
         };
