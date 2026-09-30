@@ -333,6 +333,21 @@ document.querySelectorAll(".lead-filter").forEach(b=>b.onclick=()=>{window.coldC
 
 
 
+function deleteCurrentLead(){
+ const l=state.leads.find(x=>x.id===currentLeadId);
+ if(!l)return;
+ if(!confirm("Delete "+l.name+"? This permanently removes the lead from ColdCloud."))return;
+ const id=l.id;
+ state.leads=state.leads.filter(x=>x.id!==id);
+ state.activity.unshift({id:uid(),text:"Lead deleted: "+l.name,leadId:id,time:new Date().toISOString()});
+ currentLeadId=null;
+ save();
+ document.getElementById("lead-detail").className="detail";
+ document.getElementById("lead-list-view").style.display="block";
+ renderLeads();
+ renderDashboard();
+ apiRequest("/api/leads/"+encodeURIComponent(id),{method:"DELETE"});
+}
 function openLead(id){
  currentLeadId=id;const l=state.leads.find(x=>x.id===id);if(!l)return;
  document.getElementById("lead-list-view").style.display="none";
@@ -344,7 +359,7 @@ function openLead(id){
  const nextDay=next?"Day "+next.day:"Sequence complete";
  d.innerHTML='<div class="lead-workspace"><button class="back" data-action="back-leads">← Back to Leads</button>'+
  '<div class="lead-topbar"><div class="lead-identity"><div class="lead-avatar">'+esc(initials(l.name))+'</div><div><h2>'+esc(l.name)+'</h2><div class="lead-meta">'+esc(l.company||"No company")+' · '+esc(l.phone||l.email||"No contact")+'</div><div class="lead-statusline"><span class="lead-status-dot '+(l.paused?"paused":"")+'"></span><span class="pill '+esc(l.paused?"lost":l.status)+'">'+esc(l.paused?"Paused":statusLabel(l.status))+'</span><span class="muted">'+(seq?esc(seq.name):"No sequence assigned")+'</span></div></div></div>'+
- '<div class="lead-actions"><button class="ghost" data-action="edit-lead">Edit</button><button class="ghost" data-action="pause-lead">'+(l.paused?"Resume":"Pause")+'</button><button class="primary" data-action="ai-lead">AI Generate</button><button class="ghost danger-link" data-action="delete-lead">Delete</button></div></div>'+
+ '<div class="lead-actions"><button class="ghost" data-action="edit-lead">Edit</button><button class="ghost" data-action="pause-lead">'+(l.paused?"Resume":"Pause")+'</button><button class="primary" data-action="ai-lead">AI Generate</button><button type="button" class="ghost danger-link" onclick="deleteCurrentLead();return false;">Delete</button></div></div>'+
  '<div class="lead-summary"><div class="summary-card"><div class="summary-label">Sequence</div><div class="summary-value">'+(seq?esc(seq.name):"Not assigned")+'</div></div><div class="summary-card"><div class="summary-label">Progress</div><div class="summary-value">'+sent+' / '+plan.length+' steps sent</div></div><div class="summary-card"><div class="summary-label">Next action</div><div class="summary-value">'+esc(nextText)+'</div></div><div class="summary-card"><div class="summary-label">Next follow-up</div><div class="summary-value">'+(l.nextFollowUp?esc(new Date(l.nextFollowUp).toLocaleString()):next?nextDay:"—")+'</div></div></div>'+
  '<div class="lead-main-grid"><div class="workspace-panel"><div class="tabs"><button class="tab active" data-tab="overview">Overview</button><button class="tab" data-tab="conversation">Conversation</button><button class="tab" data-tab="sequence">Sequence</button><button class="tab" data-tab="activity">Activity</button></div>'+
  '<div id="tab-overview"><div class="workspace-panel-head"><h3>What ColdCloud is doing</h3><span class="muted">'+(l.paused?"Automation paused":"Automation active")+'</span></div>'+
