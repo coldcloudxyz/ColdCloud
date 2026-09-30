@@ -10,3 +10,8 @@ database_id = "ffe99d15-778b-48f0-8aba-37eb223dbfad"
 [vars]
 FRONTEND_ORIGIN = "https://usecoldcloud.xyz"
 DEV_MODE = "true"
+META_GRAPH_VERSION = "v25.0"
+# Set these to your Meta App ID and Embedded Signup configuration ID.
+# META_APP_SECRET must be stored as a Worker secret, not here.
+META_APP_ID = ""
+META_CONFIG_ID = ""
