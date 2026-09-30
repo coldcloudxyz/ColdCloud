@@ -767,6 +767,8 @@ document.addEventListener("click",e=>{
 let waConfig=null;
 let waSessionData=null;
 let waPendingAuth=null;
+let waPendingTimer=null;
+let waConnectInFlight=false;
 
 async function loadWhatsAppStatus(){
  const remote=await apiRequest("/api/whatsapp/status");
@@ -816,30 +818,45 @@ function initFacebookSDK(appId, version){
 }
 
 async function finishWhatsAppSignup(code, accessToken){
+ if(waConnectInFlight)return;
  const data=waSessionData||{};
- if(!data.waba_id){
+ if(!data.waba_id && !code && !accessToken)return;
+ if(!data.waba_id && !waPendingAuth){
    waPendingAuth={code,accessToken};
+ }
+ if(!data.waba_id && waPendingAuth && waPendingTimer===null){
+   waPendingTimer=setTimeout(()=>{
+     waPendingTimer=null;
+     const pending=waPendingAuth;
+     if(pending)finishWhatsAppSignup(pending.code,pending.accessToken);
+   },8000);
    return;
  }
- const remote=await apiRequest("/api/whatsapp/connect",{
-   method:"POST",
-   body:JSON.stringify({
-     code:code||"",
-     accessToken:accessToken||"",
-     wabaId:data.waba_id||"",
-     phoneNumberId:data.phone_number_id||"",
-     businessId:data.business_id||"",
-     event:data.event||"FINISH"
-   })
- });
- if(!remote){
-   alert("WhatsApp connection failed: "+(apiLastError||"Unknown error"));
-   return;
+ waConnectInFlight=true;
+ try{
+   const remote=await apiRequest("/api/whatsapp/connect",{
+     method:"POST",
+     body:JSON.stringify({
+       code:code||waPendingAuth?.code||"",
+       accessToken:accessToken||waPendingAuth?.accessToken||"",
+       wabaId:data.waba_id||"",
+       phoneNumberId:data.phone_number_id||"",
+       businessId:data.business_id||"",
+       event:data.event||"FINISH"
+     })
+   });
+   if(!remote){
+     alert("WhatsApp connection failed: "+(apiLastError||"Unknown error"));
+     return;
+   }
+   if(waPendingTimer){clearTimeout(waPendingTimer);waPendingTimer=null}
+   waPendingAuth=null;
+   waSessionData=null;
+   await loadWhatsAppStatus();
+   alert("WhatsApp connected successfully.");
+ }finally{
+   waConnectInFlight=false;
  }
- waPendingAuth=null;
- waSessionData=null;
- await loadWhatsAppStatus();
- alert("WhatsApp connected successfully.");
 }
 
 window.addEventListener("message",function(event){
@@ -847,6 +864,14 @@ window.addEventListener("message",function(event){
  try{
    const data=typeof event.data==="string"?JSON.parse(event.data):event.data;
    if(data?.type!=="WA_EMBEDDED_SIGNUP")return;
+   const eventName=String(data.event||"").toUpperCase();
+   if(eventName==="ERROR"){
+     alert("WhatsApp setup failed: "+(data.data?.error_message||data.data?.error_id||"Meta reported an error."));
+     return;
+   }
+   if(!["FINISH","FINISH_ONLY_WABA","FINISH_WHATSAPP_BUSINESS_APP_ONBOARDING"].includes(eventName)){
+     return;
+   }
    waSessionData={...(data.data||{}),event:data.event,version:data.version};
    if(waPendingAuth)finishWhatsAppSignup(waPendingAuth.code,waPendingAuth.accessToken);
  }catch(err){}
@@ -873,7 +898,8 @@ async function launchWhatsAppSignup(){
      override_default_response_type:true,
      extras:{
        setup:{},
-       featureType:"whatsapp_business_app_onboarding"
+       featureType:"whatsapp_business_app_onboarding",
+       sessionInfoVersion:"3"
      }
    });
  }catch(err){
