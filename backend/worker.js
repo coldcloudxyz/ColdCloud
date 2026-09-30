@@ -820,6 +820,60 @@ export default {
         return json({ok:true,model,templates:created});
       }
 
+      if (path[0] === "ai" && path[1] === "reply" && req.method === "POST") {
+        if (!env.OPENAI_API_KEY) return json({ok:false,error:"AI is not configured yet. Add OPENAI_API_KEY to the ColdCloud Worker."},503);
+        const body=await read(req);
+        const lead=body.lead||{};
+        const business=body.businessInfo||{};
+        const messages=Array.isArray(body.messages)?body.messages.slice(-12):[];
+        const instruction=String(body.instruction||"").trim();
+
+        if(!String(lead.name||"").trim()){
+          return json({ok:false,error:"Lead information is missing."},400);
+        }
+        if(!String(business.name||business.description||business.offer||"").trim()){
+          return json({ok:false,error:"Complete Business Information before using AI reply generation."},400);
+        }
+
+        const context={
+          business:{
+            name:business.name||"",type:business.type||"",description:business.description||"",
+            offer:business.offer||"",target:business.target||"",market:business.market||"",
+            problem:business.problem||"",difference:business.difference||"",goal:business.goal||"",
+            tone:business.tone||"",rules:business.rules||""
+          },
+          lead:{
+            name:lead.name||"",company:lead.company||"",interest:lead.interest||"",
+            status:lead.status||"",notes:lead.notes||""
+          },
+          conversation:messages.map(m=>({direction:m.direction,text:m.text})),
+          instruction
+        };
+
+        const aiRes=await fetch("https://api.openai.com/v1/responses",{
+          method:"POST",
+          headers:{"content-type":"application/json","authorization":"Bearer "+env.OPENAI_API_KEY},
+          body:JSON.stringify({
+            model:env.OPENAI_MODEL||"gpt-5.6-luna",
+            input:[
+              {
+                role:"system",
+                content:"You are ColdCloud's AI sales follow-up assistant. Write one natural WhatsApp reply for a business lead. Use only facts provided in the context. Never invent prices, discounts, guarantees, results, policies, credentials, availability, or product details. Do not pressure the lead. If the lead asks a question, answer only from the supplied facts; if the information is unavailable, say the business should confirm it. Keep the reply concise and human. Do not use markdown, quotation marks, or emojis unless the business rules explicitly request them."
+              },
+              {role:"user",content:"Generate the next WhatsApp reply for this lead. Return only the reply text.\n\nCONTEXT:\n"+JSON.stringify(context)}
+            ],
+            max_output_tokens:400,
+            store:false
+          })
+        });
+        const aiJson=await aiRes.json().catch(()=>({}));
+        if(!aiRes.ok) return json({ok:false,error:aiJson?.error?.message||"AI reply generation failed."},502);
+        const reply=String(aiJson.output_text||"").trim() ||
+          String((aiJson.output||[]).flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text||"").trim();
+        if(!reply) return json({ok:false,error:"AI returned an empty reply."},502);
+        return json({ok:true,model:env.OPENAI_MODEL||"gpt-5.6-luna",reply});
+      }
+
       if (path[0] === "templates" && req.method === "GET") {
         if (!(await tableExists(env, "whatsapp_templates"))) return json({ ok: true, templates: [] });
         const rows = (await env.DB.prepare(
