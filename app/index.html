@@ -702,102 +702,65 @@ async function generateBusinessFollowups(){
  }
 
  const btn=document.getElementById("generate-followups-btn");
- if(btn){btn.disabled=true;btn.textContent="Generating…"}
+ if(btn){btn.disabled=true;btn.textContent="Generating with AI…"}
 
- // Always keep the business profile locally before generating anything.
- // If a backend session exists, also persist it to the workspace.
- const businessPayload={...b};
- save();
+ // Persist the profile first. The AI endpoint uses this workspace context.
  if(getApiToken()){
-  const remoteBusiness=await apiRequest("/api/business",{method:"PUT",body:JSON.stringify(businessPayload)});
-  if(!remoteBusiness) console.warn("Business profile backend save failed; keeping local copy.");
- }
-
- const goal=b.goal.toLowerCase().replace(/^other$/,"take the next step");
- const target=b.target;
- const offer=b.offer;
- const difference=b.difference;
- const problem=b.problem;
- const business=b.name;
- const tone=b.tone.toLowerCase();
- const style=tone==="casual"||tone==="friendly"?"":tone==="direct"?"Just a quick follow-up: ":"";
-
- const base=[
-  {
-   name:"First Follow-up",
-   use:"first",
-   category:"MARKETING",
-   body:"Hi {{name}}, "+style+"following up about {{interest}}. At "+business+", we help "+target+" with "+offer+". Would you like to "+goal+"?"
-  },
-  {
-   name:"Value Follow-up",
-   use:"second",
-   category:"MARKETING",
-   body:"Hi {{name}}, "+style+"just checking in about {{interest}}. "+difference+". If this is still relevant, would you like to "+goal+"?"
-  },
-  {
-   name:"Objection Follow-up",
-   use:"custom",
-   category:"MARKETING",
-   body:"Hi {{name}}, I understand that "+problem+". If you have any questions about "+offer+", just reply here and I'll help. No pressure."
-  },
-  {
-   name:"Final Follow-up",
-   use:"final",
-   category:"MARKETING",
-   body:"Hi {{name}}, I'll close the loop on {{interest}} for now. If you'd still like to "+goal+", just reply here and we'll take it from there."
+  const saved=await apiRequest("/api/business",{method:"PUT",body:JSON.stringify(b)});
+  if(!saved){
+   if(btn){btn.disabled=false;btn.textContent="Generate Follow-ups"}
+   alert("Business information could not be synced to your workspace: "+(apiLastError||"Unknown error"));
+   return;
   }
- ];
-
- const existingNames=new Set((state.templates||[]).map(t=>String(t.name||"").trim().toLowerCase()));
- const created=[];
- for(const t of base){
-  if(existingNames.has(t.name.toLowerCase())) continue;
-
-  let remote=null;
-  if(getApiToken()){
-   remote=await apiRequest("/api/templates",{method:"POST",body:JSON.stringify({...t,draft:true})});
-  }
-
-  if(remote?.template){
-   created.push(remote.template);
-  }else{
-   // A failed backend request must never make the button appear to do nothing.
-   const local={
-    id:uid(),name:t.name,category:t.category,body:t.body,channel:"WhatsApp",
-    source:"ColdCloud",use:t.use,
-    useLabel:({first:"First follow-up",second:"Second follow-up",final:"Final follow-up",custom:"Whenever needed"})[t.use],
-    providerStatus:"not_submitted",providerId:""
-   };
-   state.templates.push(local);
-   created.push(local);
-  }
- }
-
- if(created.length){
-  const byName=new Map(created.map(t=>[String(t.name||"").toLowerCase(),t.id]));
-  const seq=state.sequences.find(s=>s.builtIn);
-  if(seq){
-   const names=["first follow-up","value follow-up","objection follow-up","final follow-up"];
-   seq.steps=(seq.steps||[]).map((s,i)=>({...s,templateId:byName.get(names[i])||s.templateId||""}));
-   if(getApiToken()&&seq.id){
-    await apiRequest("/api/sequences/"+encodeURIComponent(seq.id),{
-     method:"PATCH",
-     body:JSON.stringify({name:seq.name,active:seq.active,steps:seq.steps})
-    });
-   }
-  }
-
-  save();
-  renderTemplates();
-  if(btn){btn.disabled=false;btn.textContent="Generate Follow-ups"}
-  showView("templates");
-  alert(created.length+" follow-up drafts created. Review them in Template Library before submitting them to WhatsApp.");
  }else{
-  renderTemplates();
+  save();
+ }
+
+ const remote=await apiRequest("/api/ai/followups",{
+  method:"POST",
+  body:JSON.stringify({businessInfo:b})
+ });
+
+ if(!remote?.templates){
   if(btn){btn.disabled=false;btn.textContent="Generate Follow-ups"}
-  showView("templates");
-  alert("Your follow-up drafts are already in Template Library.");
+  alert("AI generation failed: "+(apiLastError||"Please configure the AI provider and try again."));
+  return;
+ }
+
+ const generated=remote.templates.map(t=>({
+  id:t.id,name:t.name,category:t.category||"MARKETING",body:t.body||"",
+  channel:"WhatsApp",source:"ColdCloud",use:t.use||"custom",
+  useLabel:t.useLabel||"Follow-up",providerId:t.providerId||"",
+  providerStatus:t.providerStatus||"not_submitted",rejectionReason:t.rejectionReason||""
+ }));
+
+ const existingIds=new Set((state.templates||[]).map(t=>String(t.id)));
+ generated.forEach(t=>{
+  if(!existingIds.has(String(t.id)))state.templates.push(t);
+ });
+
+ const byName=new Map(generated.map(t=>[String(t.name||"").toLowerCase(),t.id]));
+ const seq=state.sequences.find(s=>s.builtIn);
+ if(seq){
+  const names=["first follow-up","value follow-up","objection follow-up","final follow-up"];
+  seq.steps=(seq.steps||[]).map((s,i)=>({...s,templateId:byName.get(names[i])||s.templateId||""}));
+  if(getApiToken()&&seq.id){
+   await apiRequest("/api/sequences/"+encodeURIComponent(seq.id),{
+    method:"PATCH",
+    body:JSON.stringify({name:seq.name,active:seq.active,steps:seq.steps})
+   });
+  }
+ }
+
+ save();
+ renderTemplates();
+ if(btn){btn.disabled=false;btn.textContent="Generate Follow-ups"}
+ showView("templates");
+
+ if(generated.length){
+  alert(generated.length+" AI follow-up drafts created. Review them before submitting to WhatsApp.");
+ }else{
+  alert("The AI-generated follow-ups already exist in your Template Library.");
  }
 }
 document.getElementById("generate-followups-btn").onclick=generateBusinessFollowups;
