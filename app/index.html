@@ -149,11 +149,17 @@
 </section>
 
 <section id="settings" class="view">
-  <div class="hero"><div><h1>Settings</h1><p class="sub">Manage your ColdCloud workspace preferences.</p></div></div>
-  <div class="panel settings-section"><h3>Profile</h3><div class="setting-row"><div><div class="setting-label">Name</div><div class="setting-help" id="setting-name">Not set</div></div><button class="ghost" data-action="edit-profile">Edit</button></div><div class="setting-row"><div><div class="setting-label">Email</div><div class="setting-help" id="setting-email">Not set</div></div></div><div class="setting-row"><div><div class="setting-label">Company name</div><div class="setting-help" id="setting-company">Not set</div></div></div><div class="setting-row"><div><div class="setting-label">Profile picture</div><div class="setting-help">Not set</div></div></div></div>
-  <div class="panel settings-section"><h3>Account</h3><div class="setting-row"><div><div class="setting-label">Change password</div><div class="setting-help">Authentication is not enabled in the current workspace.</div></div><button class="ghost" disabled>Change</button></div><div class="setting-row"><div><div class="setting-label">Logout</div><div class="setting-help">Authentication is not enabled in the current workspace.</div></div><button class="ghost" disabled>Logout</button></div></div>
-  <div class="panel settings-section"><h3>Preferences</h3><div class="setting-row"><div class="setting-label">Time zone</div><select class="select" id="pref-timezone"><option value="Asia/Kolkata">Asia/Kolkata</option><option value="UTC">UTC</option></select></div><div class="setting-row"><div class="setting-label">Default messaging channel</div><select class="select" id="pref-channel"><option>WhatsApp</option><option>Email</option></select></div><div class="setting-row"><div class="setting-label">Default sequence</div><select class="select" id="pref-sequence"><option value="">None</option></select></div></div>
-  <div class="panel settings-section danger"><h3>Danger Zone</h3><div class="setting-row"><div><div class="setting-label">Delete account</div><div class="setting-help">Delete account is unavailable until authentication/backend account storage is connected.</div></div><button class="ghost" disabled>Delete account</button></div></div>
+  <div class="hero"><div><h1>Settings</h1><p class="sub">Manage your account settings.</p></div></div>
+  <div class="panel settings-section">
+    <h3>Account</h3>
+    <div class="setting-row"><div><div class="setting-label">Change password</div><div class="setting-help">Update your account password.</div></div><button class="ghost" data-action="change-password">Change</button></div>
+    <div class="setting-row"><div><div class="setting-label">Reset password</div><div class="setting-help">Reset your password if you cannot access your current one.</div></div><button class="ghost" data-action="reset-password">Reset</button></div>
+    <div class="setting-row"><div><div class="setting-label">Log out</div><div class="setting-help">Sign out of this ColdCloud workspace.</div></div><button class="ghost" data-action="logout">Log out</button></div>
+  </div>
+  <div class="panel settings-section danger">
+    <h3>Danger Zone</h3>
+    <div class="setting-row"><div><div class="setting-label">Delete account</div><div class="setting-help">Permanently delete your ColdCloud account and workspace data.</div></div><button class="ghost" data-action="delete-account">Delete account</button></div>
+  </div>
 </section>
 
 </div></main></div>
@@ -522,7 +528,11 @@ document.addEventListener("click",e=>{
  if(action==="toggle-export"){document.getElementById("export-menu").classList.toggle("open");return}
  if(action==="export-csv"){exportCSV();return}
  if(action==="export-pdf"){window.print();return}
- if(action==="edit-profile"){editProfile();return}
+ if(action==="edit-profile"){editProfile();return}if(action==="change-password"){alert("Password change will be connected to authentication.");return}
+ if(action==="reset-password"){alert("Password reset will be connected to authentication.");return}
+ if(action==="logout"){if(confirm("Log out of ColdCloud?")){localStorage.removeItem("coldcloud_session");localStorage.removeItem("session");location.reload()}return}
+ if(action==="delete-account"){if(confirm("Delete your ColdCloud account? This action is permanent.")){alert("Account deletion will be connected to the backend.");}return}
+ 
  if(action==="connect-first"){showView("integrations");return}
 });
 document.addEventListener("click",e=>{
