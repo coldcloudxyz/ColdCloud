@@ -680,6 +680,127 @@ export default {
         });
       }
 
+      if (path[0] === "whatsapp" && path[1] === "send" && req.method === "POST") {
+        const body = await read(req);
+        const leadId = String(body.leadId || "").trim();
+        const type = String(body.type || "text").toLowerCase();
+        const text = String(body.text || "").trim();
+        if (!leadId) return json({ok:false,error:"Lead is required."},400);
+        if (type === "text" && !text) return json({ok:false,error:"Message text is required."},400);
+
+        const lead = await getWorkspaceLead(env, workspace.id, leadId);
+        if (!lead) return json({ok:false,error:"Lead not found."},404);
+
+        if (!(await tableExists(env,"whatsapp_connections"))) {
+          return json({ok:false,error:"WhatsApp connection storage is not installed yet."},500);
+        }
+        const connection = await env.DB.prepare(
+          "SELECT * FROM whatsapp_connections WHERE workspace_id=? AND status='connected' LIMIT 1"
+        ).bind(workspace.id).first();
+        if (!connection?.access_token_encrypted || !connection?.phone_number_id) {
+          return json({ok:false,error:"Connect a WhatsApp Business number first."},400);
+        }
+
+        const graphVersion = env.META_GRAPH_VERSION || "v25.0";
+        const token = await decryptSecret(
+          connection.access_token_encrypted,
+          env.JWT_SECRET || env.META_APP_SECRET
+        );
+        const to = String(lead.phone || "").replace(/[^+0-9]/g,"");
+        if (!/^\+[1-9]\d{6,14}$/.test(to)) {
+          return json({ok:false,error:"Lead phone must be in international format, for example +919876543210."},400);
+        }
+
+        let payload;
+        let sentText = text;
+        let templateId = null;
+
+        if (type === "template") {
+          templateId = String(body.templateId || "").trim();
+          if (!templateId) return json({ok:false,error:"Approved WhatsApp template is required."},400);
+          if (!(await tableExists(env,"whatsapp_templates"))) {
+            return json({ok:false,error:"Template storage is not installed yet."},500);
+          }
+          const template = await env.DB.prepare(
+            "SELECT * FROM whatsapp_templates WHERE id=? AND workspace_id=? LIMIT 1"
+          ).bind(templateId,workspace.id).first();
+          if (!template) return json({ok:false,error:"Follow-up template not found."},404);
+          if (String(template.provider_status||"").toLowerCase() !== "approved") {
+            return json({ok:false,error:"This follow-up is not approved by WhatsApp yet."},400);
+          }
+
+          const values = Array.isArray(body.variables) ? body.variables.map(v=>String(v ?? "")) : [];
+          const variableMap = {};
+          let n = 0;
+          String(template.body_text || "").replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_,key) => {
+            if (!variableMap[key]) variableMap[key] = String(++n);
+            return _;
+          });
+          const ordered = Object.entries(variableMap).sort((a,c)=>Number(a[1])-Number(c[1])).map(([key]) => {
+            if (body.variableValues && body.variableValues[key] !== undefined) return String(body.variableValues[key] ?? "");
+            if (key === "name") return String(lead.name || "");
+            if (key === "company") return String(lead.company || "");
+            if (key === "interest") return String(lead.interest || "");
+            return "";
+          });
+          if (ordered.some(v=>!v.trim())) return json({ok:false,error:"A template variable is missing."},400);
+
+          payload = {
+            messaging_product:"whatsapp",
+            to,
+            type:"template",
+            template:{
+              name:String(template.provider_template_name || ""),
+              language:{code:String(template.language || "en_US")},
+              components: ordered.length ? [{
+                type:"body",
+                parameters:ordered.map(v=>({type:"text",text:v}))
+              }] : []
+            }
+          };
+          sentText = String(template.body_text || "").replace(/\{\{\s*name\s*\}\}/gi,lead.name||"").replace(/\{\{\s*company\s*\}\}/gi,lead.company||"").replace(/\{\{\s*interest\s*\}\}/gi,lead.interest||"");
+        } else {
+          payload = {
+            messaging_product:"whatsapp",
+            to,
+            type:"text",
+            text:{preview_url:false,body:text}
+          };
+        }
+
+        const metaRes = await fetch(
+          "https://graph.facebook.com/"+graphVersion+"/"+encodeURIComponent(connection.phone_number_id)+"/messages",
+          {
+            method:"POST",
+            headers:{"content-type":"application/json",Authorization:"Bearer "+token},
+            body:JSON.stringify(payload)
+          }
+        );
+        const metaJson = await metaRes.json().catch(()=>({}));
+        if (!metaRes.ok) {
+          return json({ok:false,error:metaJson?.error?.message||"WhatsApp could not send the message."},400);
+        }
+
+        const providerMessageId = String(metaJson?.messages?.[0]?.id || "");
+        const createdAt = now();
+
+        if (await tableExists(env,"messages")) {
+          try {
+            await insertDynamic(env,"messages",{
+              id:uid(),workspace_id:workspace.id,user_id:authUser.sub,lead_id:leadId,
+              conversation_id:body.conversationId || null,direction:"out",channel:"WhatsApp",
+              body:sentText,status:"sent",provider_message_id:providerMessageId,
+              sequence_step_id:body.sequenceStepId || null,created_at:createdAt
+            });
+          } catch(err) { console.warn("Message log skipped:",err?.message||err); }
+        }
+
+        await updateDynamic(env,"leads",{last_outbound_at:createdAt,updated_at:createdAt},"id=? AND workspace_id=?",[leadId,workspace.id]);
+        await logActivity(env,workspace.id,leadId,"WhatsApp message sent to "+(lead.name||"lead"));
+
+        return json({ok:true,messageId:providerMessageId,to,type,text:sentText});
+      }
+
       if (path[0] === "ai" && path[1] === "followups" && req.method === "POST") {
         if (!env.OPENAI_API_KEY) {
           return json({ ok:false, error:"AI is not configured yet. Add OPENAI_API_KEY to the ColdCloud Worker." },503);
