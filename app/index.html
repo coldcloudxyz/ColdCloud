@@ -493,12 +493,7 @@ document.getElementById("business-info-form").onsubmit=e=>{
  if(missing.length){err.textContent="Please complete all required business information before saving.";err.classList.add("open");return}
  err.classList.remove("open");state.businessInfo=data;save();log("Business information updated");renderBusinessInfo();
 };
-function renderSettings(){
- document.getElementById("setting-name").textContent=state.settings.name||"Not set";document.getElementById("setting-email").textContent=state.settings.email||"Not set";document.getElementById("setting-company").textContent=state.settings.company||"Not set";
- document.getElementById("pref-timezone").value=state.settings.timezone;document.getElementById("pref-channel").value=state.settings.channel;document.getElementById("pref-sequence").innerHTML='<option value="">None</option>'+state.sequences.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join("");document.getElementById("pref-sequence").value=state.settings.defaultSequence||"";
-}
-["pref-timezone","pref-channel","pref-sequence"].forEach(id=>document.getElementById(id).onchange=()=>{state.settings.timezone=document.getElementById("pref-timezone").value;state.settings.channel=document.getElementById("pref-channel").value;state.settings.defaultSequence=document.getElementById("pref-sequence").value;save()});
-
+function renderSettings(){ return; }
 function openAI(){document.getElementById("ai-modal").classList.add("open");document.getElementById("ai-preview").value="";document.getElementById("ai-preview").placeholder="AI output will appear here when a provider is connected."}
 function editProfile(){const name=prompt("Name",state.settings.name||"");if(name!==null)state.settings.name=name;const email=prompt("Email",state.settings.email||"");if(email!==null)state.settings.email=email;const company=prompt("Company name",state.settings.company||"");if(company!==null)state.settings.company=company;save();renderSettings()}
 function csvParse(text){const rows=[];let row=[],cell="",q=false;for(let i=0;i<text.length;i++){let c=text[i],n=text[i+1];if(c==='"'&&q&&n==='"'){cell+='"';i++;continue}if(c==='"'){q=!q;continue}if(c===','&&!q){row.push(cell);cell="";continue}if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);cell="";if(row.some(x=>x.trim()!==''))rows.push(row);row=[];continue}cell+=c}if(cell||row.length){row.push(cell);rows.push(row)}return rows}
