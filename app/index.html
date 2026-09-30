@@ -143,7 +143,7 @@
         <div class="field full"><label>Extra business context</label><textarea id="bi-extra" rows="3" placeholder="FAQs, offers, policies, opening hours, qualification questions, or anything else ColdCloud should know."></textarea></div>
       </div>
       <div id="business-info-error" class="form-error"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px"><span id="business-info-status" class="saved-state"></span><button type="submit" class="primary">Save Business Information</button></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px"><span id="business-info-status" class="saved-state"></span><div style="display:flex;gap:7px;align-items:center"><button type="button" class="ghost" id="generate-followups-btn">Generate My Follow-ups</button><button type="submit" class="primary">Save Business Information</button></div></div>
     </form>
   </div>
   <div class="notice" style="margin-top:14px">WhatsApp connection and business information are separate: WhatsApp handles messaging; Business Information tells ColdCloud what the business is and how its recovery conversations should behave.</div>
@@ -669,6 +669,45 @@ async function loadBusinessInfo(){
  renderBusinessInfo();
  return true;
 }
+async function generateBusinessFollowups(){
+ const b=state.businessInfo||{};
+ if(!businessInfoComplete()){alert("Save your complete business information first.");return}
+ const btn=document.getElementById("generate-followups-btn");
+ if(btn){btn.disabled=true;btn.textContent="Generating…"}
+ const base=[
+  {name:"First Follow-up",use:"first",category:"MARKETING",body:"Hi {{name}}, just following up about {{interest}}. We help {{target}} with {{offer}}. Would you like me to share the next steps?"},
+  {name:"Value Follow-up",use:"second",category:"MARKETING",body:"Hi {{name}}, wanted to quickly follow up. {{difference}}. If {{interest}} is still relevant, I can help you with {{goal}}."},
+  {name:"Objection Follow-up",use:"custom",category:"MARKETING",body:"Hi {{name}}, I know deciding on {{interest}} can take some time. If you have any questions about {{offer}}, just reply here and I'll help."},
+  {name:"Final Follow-up",use:"final",category:"MARKETING",body:"Hi {{name}}, I'll close the loop for now regarding {{interest}}. If you'd still like to {{goal}}, just reply here and we'll take it from there."}
+ ];
+ const existingNames=new Set((state.templates||[]).map(t=>String(t.name||"").toLowerCase()));
+ const created=[];
+ for(const t of base){
+   if(existingNames.has(t.name.toLowerCase())) continue;
+   const remote=await apiRequest("/api/templates",{method:"POST",body:JSON.stringify({...t,draft:true})});
+   if(remote?.template) created.push(remote.template);
+   else if(!getApiToken()) {
+     const local={id:uid(),name:t.name,category:t.category,body:t.body,channel:"WhatsApp",source:"ColdCloud",use:t.use,useLabel:({first:"First follow-up",second:"Second follow-up",final:"Final follow-up",custom:"Whenever needed"})[t.use],providerStatus:"not_submitted",providerId:""};
+     state.templates.push(local);created.push(local);
+   }
+ }
+ if(created.length){
+   const mapped=created.map(t=>t.id);
+   const seq=state.sequences.find(s=>s.builtIn);
+   if(seq){
+     seq.steps=(seq.steps||[]).map((s,i)=>({...s,templateId:mapped[i]||s.templateId||""}));
+     if(getApiToken()&&seq.id) await apiRequest("/api/sequences/"+encodeURIComponent(seq.id),{method:"PATCH",body:JSON.stringify({name:seq.name,active:seq.active,steps:seq.steps})});
+   }
+   save();renderTemplates();
+   alert(created.length+" follow-up drafts created from your business information. Review them in Follow-ups, then submit the ones you want to WhatsApp.");
+ }else{
+   renderTemplates();
+   alert("Your follow-up system is already created. Review the existing drafts in Follow-ups.");
+ }
+ if(btn){btn.disabled=false;btn.textContent="Generate My Follow-ups"}
+}
+document.getElementById("generate-followups-btn").onclick=generateBusinessFollowups;
+
 document.getElementById("business-info-form").onsubmit=async e=>{
  e.preventDefault();
  const ids=["name","type","description","offer","target","market","problem","difference","goal","tone","rules"];
