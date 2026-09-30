@@ -475,9 +475,7 @@ function splitLeadName(name){const parts=String(name||"").trim().split(/\s+/).fi
 function leadContext(data){return [data.interest?("Interested in: "+data.interest):"",data.notes||"",data.businessType?("Business type: "+data.businessType):"",data.source?("Source: "+data.source):"",data.company?("Company: "+data.company):""].filter(Boolean).join("\n")}
 async function openForm(existing=null){
  closeAll();clearLeadFieldErrors();document.getElementById("form-modal").classList.add("open");
- if(getApiToken()){
-   await loadBackendSequences();
- }
+ await loadBackendSequences();
  const nameParts=splitLeadName(existing?.name||"");
  document.getElementById("f-first-name").value=existing?.firstName||nameParts.first||"";
  document.getElementById("f-last-name").value=existing?.lastName||nameParts.last||"";
