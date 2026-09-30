@@ -728,6 +728,52 @@ export default {
         return json({ ok: true, id }, 201);
       }
 
+      if (path[0] === "automations" && path[1] && (req.method === "PATCH" || req.method === "DELETE")) {
+        if (!(await tableExists(env, "automations"))) {
+          return json({ ok: false, error: "Automations table is unavailable" }, 500);
+        }
+
+        const existing = await env.DB.prepare(
+          "SELECT * FROM automations WHERE id=? AND workspace_id=? LIMIT 1"
+        ).bind(path[1], workspace.id).first();
+
+        if (!existing) return json({ ok: false, error: "Automation not found" }, 404);
+
+        if (req.method === "DELETE") {
+          if (existing.is_builtin) {
+            return json({ ok: false, error: "Built-in automation cannot be deleted" }, 400);
+          }
+          await env.DB.prepare(
+            "DELETE FROM automations WHERE id=? AND workspace_id=?"
+          ).bind(path[1], workspace.id).run();
+          return json({ ok: true });
+        }
+
+        const body = await read(req);
+        const sequenceId = body.sequenceId === undefined ? existing.sequence_id : (body.sequenceId || null);
+
+        if (sequenceId && !(await getWorkspaceSequence(env, workspace.id, sequenceId))) {
+          return json({ ok: false, error: "Sequence not found in this workspace" }, 404);
+        }
+
+        await updateDynamic(env, "automations", {
+          name: body.name,
+          trigger_text: body.trigger,
+          action_text: body.action,
+          trigger: body.trigger,
+          action: body.action,
+          sequence_id: sequenceId,
+          enabled: body.enabled === undefined ? undefined : (body.enabled ? 1 : 0),
+          updated_at: now()
+        }, "id=? AND workspace_id=?", [path[1], workspace.id]);
+
+        const updated = await env.DB.prepare(
+          "SELECT * FROM automations WHERE id=? AND workspace_id=? LIMIT 1"
+        ).bind(path[1], workspace.id).first();
+
+        return json({ ok: true, automation: updated });
+      }
+
       if (path[0] === "activity" && req.method === "GET") {
         if (!(await tableExists(env, "activities"))) return json({ ok: true, activities: [] });
 
