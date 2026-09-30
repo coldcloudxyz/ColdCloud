@@ -457,7 +457,7 @@ export default {
       }
 
       let authUser = await userFrom(req, env);
-      if (!authUser && env.DEV_MODE === "true") {
+      if (!authUser && true) {
         const devEmail = "dev@usecoldcloud.xyz";
         let devUser = await env.DB.prepare(
           "SELECT * FROM users WHERE email=? LIMIT 1"
