@@ -360,7 +360,222 @@ async function sequenceOutput(env, sequence) {
   return result;
 }
 
+async function getBusinessInfoForWorkspace(env, workspaceId, userId) {
+  const table = await businessTable(env);
+  if (!table) return {};
+  const cols = await tableColumns(env, table);
+  const ownerCol = cols.has("workspace_id") ? "workspace_id" : "user_id";
+  return await env.DB.prepare("SELECT * FROM " + table + " WHERE " + ownerCol + "=? LIMIT 1")
+    .bind(ownerCol === "workspace_id" ? workspaceId : userId).first() || {};
+}
+
+function recoveryWindowOpen(lead) {
+  if (!lead?.last_inbound_at) return false;
+  const t = Date.parse(lead.last_inbound_at);
+  return Number.isFinite(t) && (Date.now() - t) >= 0 && (Date.now() - t) < 24 * 60 * 60 * 1000;
+}
+
+function parseLeadPlan(row) {
+  if (!row?.sequence_plan) return [];
+  try { const plan = JSON.parse(row.sequence_plan); return Array.isArray(plan) ? plan : []; } catch { return []; }
+}
+
+async function generateAutomaticReply(env, workspaceId, lead, businessInfo, step) {
+  if (!env.OPENAI_API_KEY) throw new Error("AI is not configured");
+  const messages = (await env.DB.prepare(
+    "SELECT direction,body,created_at FROM messages WHERE workspace_id=? AND lead_id=? ORDER BY created_at DESC LIMIT 12"
+  ).bind(workspaceId, lead.id).all()).results || [];
+  const model = env.OPENAI_MODEL || "gpt-5.6-luna";
+  const input = [
+    "Write the next ColdCloud lead-recovery WhatsApp message.",
+    "This is an automatic follow-up, not a chatbot greeting.",
+    "Use only facts in the business and lead context. Never invent price, discount, result, guarantee, policy, credential, availability, or other business facts.",
+    "Keep it concise, natural and human. No markdown. Do not mention that AI wrote it.",
+    "If the lead has replied previously, use the conversation context. If there is no reply, make this a useful recovery follow-up rather than repeating the same message.",
+    "Respect the business tone and rules.",
+    step?.aiInstructions ? "STEP INSTRUCTIONS: " + String(step.aiInstructions) : "",
+    "BUSINESS:", JSON.stringify({
+      name:businessInfo.name || "", type:businessInfo.type || "", description:businessInfo.description || "",
+      offer:businessInfo.offer || "", target:businessInfo.target || "", market:businessInfo.market || "",
+      problem:businessInfo.problem || "", difference:businessInfo.difference || "", goal:businessInfo.goal || "",
+      tone:businessInfo.tone || "", rules:businessInfo.rules || ""
+    }),
+    "LEAD:", JSON.stringify({
+      name:lead.name || "", company:lead.company || "", interest:lead.interest || "",
+      businessType:lead.business_type || "", source:lead.source || "", notes:lead.notes || ""
+    }),
+    "RECENT CONVERSATION:", JSON.stringify(messages.reverse())
+  ].filter(Boolean).join("\n");
+
+  const res = await fetch("https://api.openai.com/v1/responses", {
+    method:"POST",
+    headers:{"content-type":"application/json","authorization":"Bearer "+env.OPENAI_API_KEY},
+    body:JSON.stringify({
+      model,
+      input:[
+        {role:"system",content:"You are ColdCloud's automatic lead-recovery assistant. Produce one truthful WhatsApp message."},
+        {role:"user",content:input}
+      ],
+      max_output_tokens:500,
+      store:false
+    })
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data?.error?.message || "AI reply failed");
+  const text=String(data?.output_text || (data?.output||[]).flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text || "").trim();
+  if(!text) throw new Error("AI returned an empty message");
+  return text;
+}
+
+function templateVariableValues(template, lead) {
+  const keys=[];
+  String(template?.body_text || "").replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g,(_,key)=>{ if(!keys.includes(key)) keys.push(key); return _; });
+  return keys.map(key=>{
+    if(key==="name") return String(lead.name||"");
+    if(key==="company") return String(lead.company||"");
+    if(key==="interest") return String(lead.interest||"");
+    return "";
+  });
+}
+
+async function sendAutomaticWhatsApp(env, workspace, lead, type, text, templateId, sequenceStepId) {
+  const connection=await env.DB.prepare("SELECT * FROM whatsapp_connections WHERE workspace_id=? AND status='connected' LIMIT 1").bind(workspace.id).first();
+  if(!connection?.access_token_encrypted || !connection?.phone_number_id) throw new Error("Connect a WhatsApp Business number first");
+  const to=String(lead.phone||"").replace(/[^+0-9]/g,"");
+  if(!/^\+[1-9]\d{6,14}$/.test(to)) throw new Error("Lead phone must be in international format");
+  const token=await decryptSecret(connection.access_token_encrypted,env.JWT_SECRET||env.META_APP_SECRET);
+  let payload, sentText=String(text||"").trim();
+  if(type==="template"){
+    const template=await env.DB.prepare("SELECT * FROM whatsapp_templates WHERE id=? AND workspace_id=? LIMIT 1").bind(templateId,workspace.id).first();
+    if(!template) throw new Error("Follow-up template not found");
+    if(String(template.provider_status||"").toLowerCase()!=="approved") throw new Error("Follow-up template is not approved");
+    const values=templateVariableValues(template,lead);
+    if(values.some(v=>!v.trim())) throw new Error("A template variable is missing");
+    payload={messaging_product:"whatsapp",to,type:"template",template:{
+      name:String(template.provider_template_name||""),language:{code:String(template.language||"en_US")},
+      components:values.length?[{type:"body",parameters:values.map(v=>({type:"text",text:v}))}]:[]
+    }};
+    sentText=String(template.body_text||"").replace(/\{\{\s*name\s*\}\}/gi,lead.name||"").replace(/\{\{\s*company\s*\}\}/gi,lead.company||"").replace(/\{\{\s*interest\s*\}\}/gi,lead.interest||"");
+  }else{
+    if(!sentText) throw new Error("Message text is required");
+    payload={messaging_product:"whatsapp",to,type:"text",text:{preview_url:false,body:sentText}};
+  }
+  const graphVersion=env.META_GRAPH_VERSION||"v25.0";
+  const metaRes=await fetch("https://graph.facebook.com/"+graphVersion+"/"+encodeURIComponent(connection.phone_number_id)+"/messages",{
+    method:"POST",headers:{"content-type":"application/json",Authorization:"Bearer "+token},body:JSON.stringify(payload)
+  });
+  const metaJson=await metaRes.json().catch(()=>({}));
+  if(!metaRes.ok) throw new Error(metaJson?.error?.message||"WhatsApp could not send the message");
+  const providerMessageId=String(metaJson?.messages?.[0]?.id||"");
+  const createdAt=now();
+  if(await tableExists(env,"messages")){
+    try{ await insertDynamic(env,"messages",{
+      id:uid(),workspace_id:workspace.id,user_id:workspace.owner_user_id,lead_id:lead.id,
+      direction:"out",channel:"WhatsApp",body:sentText,status:"sent",provider_message_id:providerMessageId,
+      sequence_step_id:sequenceStepId||null,created_at:createdAt
+    }); }catch(err){ console.warn("Automatic message log skipped:",err?.message||err); }
+  }
+  await updateDynamic(env,"leads",{last_outbound_at:createdAt,updated_at:createdAt},"id=? AND workspace_id=?",[lead.id,workspace.id]);
+  await logActivity(env,workspace.id,lead.id,"Automatic WhatsApp recovery message sent");
+  return {providerMessageId,sentText};
+}
+
+async function runRecoveryForWorkspace(env, workspace) {
+  if(!workspace?.id || !(await tableExists(env,"leads"))) return {checked:0,sent:0,skipped:0};
+  const rows=(await env.DB.prepare(
+    "SELECT * FROM leads WHERE workspace_id=? AND sequence_id IS NOT NULL AND COALESCE(sequence_paused,0)=0 AND COALESCE(whatsapp_opt_out,0)=0 AND next_follow_up_at IS NOT NULL AND next_follow_up_at<=? ORDER BY next_follow_up_at LIMIT 25"
+  ).bind(workspace.id,now()).all()).results || [];
+  let sent=0,skipped=0;
+  for(const row of rows){
+    try{
+      const latestInbound=await env.DB.prepare("SELECT created_at FROM messages WHERE workspace_id=? AND lead_id=? AND direction='in' ORDER BY created_at DESC LIMIT 1").bind(workspace.id,row.id).first();
+      if(latestInbound?.created_at && (!row.last_outbound_at || Date.parse(latestInbound.created_at)>Date.parse(row.last_outbound_at))){
+        await updateDynamic(env,"leads",{sequence_paused:1,status:"contacted",next_follow_up_at:null,updated_at:now()},"id=? AND workspace_id=?",[row.id,workspace.id]);
+        skipped++; continue;
+      }
+      const plan=parseLeadPlan(row);
+      const progress=Number(row.sequence_progress||0);
+      const step=plan[progress];
+      if(!step){
+        await updateDynamic(env,"leads",{next_follow_up_at:null,sequence_paused:1,updated_at:now()},"id=? AND workspace_id=?",[row.id,workspace.id]);
+        skipped++; continue;
+      }
+      if(step.enabled===false || step.status==="skipped"){
+        const nextIndex=progress+1, next=plan[nextIndex];
+        await updateDynamic(env,"leads",{sequence_progress:nextIndex,next_follow_up_at:next?new Date(Date.now()+Math.max(0,Number(next.day||0)-Number(step.day||0))*86400000).toISOString():null,updated_at:now()},"id=? AND workspace_id=?",[row.id,workspace.id]);
+        skipped++; continue;
+      }
+      const lead=leadOut(row);
+      if(!lead.whatsappOptIn) throw new Error("WhatsApp opt-in is required");
+      const business=await getBusinessInfoForWorkspace(env,workspace.id,workspace.owner_user_id);
+      let result;
+      if(recoveryWindowOpen(lead)){
+        const aiText=await generateAutomaticReply(env,workspace.id,row,business,step);
+        result=await sendAutomaticWhatsApp(env,workspace,row,"text",aiText,null,step.id||null);
+      }else{
+        if(!step.templateId) throw new Error("No approved follow-up template is assigned to this step");
+        result=await sendAutomaticWhatsApp(env,workspace,row,"template","",step.templateId,step.id||null);
+      }
+      const nextIndex=progress+1, next=plan[nextIndex], stepDay=Number(step.day||0), nextDay=next?Number(next.day||0):null;
+      const nextAt=next?new Date(Date.now()+Math.max(0,nextDay-stepDay)*86400000).toISOString():null;
+      const updatedPlan=plan.map((x,i)=>i===progress?{...x,status:"sent",sentAt:now(),providerMessageId:result.providerMessageId}:x);
+      await updateDynamic(env,"leads",{sequence_progress:nextIndex,sequence_plan:JSON.stringify(updatedPlan),next_follow_up_at:nextAt,status:"followup",updated_at:now(),...(next?{}:{sequence_paused:1})},"id=? AND workspace_id=?",[row.id,workspace.id]);
+      sent++;
+    }catch(err){
+      console.warn("Recovery send skipped for lead",row.id,err?.message||err);
+      await updateDynamic(env,"leads",{next_follow_up_at:new Date(Date.now()+30*60000).toISOString(),updated_at:now()},"id=? AND workspace_id=?",[row.id,workspace.id]);
+      skipped++;
+    }
+  }
+  return {checked:rows.length,sent,skipped};
+}
+
+async function runRecoveryScheduler(env) {
+  if(!(await tableExists(env,"workspaces"))) return;
+  const workspaces=(await env.DB.prepare("SELECT * FROM workspaces ORDER BY created_at").all()).results||[];
+  for(const workspace of workspaces) {
+    try { await runRecoveryForWorkspace(env,workspace); } catch(err){ console.warn("Workspace recovery scheduler failed:",workspace.id,err?.message||err); }
+  }
+}
+
+async function handleWhatsAppWebhook(req,env) {
+  const url=new URL(req.url);
+  if(req.method==="GET"){
+    const mode=url.searchParams.get("hub.mode"), token=url.searchParams.get("hub.verify_token"), challenge=url.searchParams.get("hub.challenge");
+    if(mode==="subscribe" && token && token===env.WHATSAPP_VERIFY_TOKEN) return new Response(challenge||"",{status:200});
+    return new Response("Forbidden",{status:403});
+  }
+  if(req.method!=="POST") return json({ok:false,error:"Method not allowed"},405);
+  const body=await read(req), entries=Array.isArray(body.entry)?body.entry:[];
+  for(const entry of entries){
+    for(const change of (entry.changes||[])){
+      const value=change.value||{}, phoneNumberId=String(value.metadata?.phone_number_id||"");
+      if(!phoneNumberId) continue;
+      const connection=await env.DB.prepare("SELECT * FROM whatsapp_connections WHERE phone_number_id=? AND status='connected' LIMIT 1").bind(phoneNumberId).first();
+      if(!connection) continue;
+      for(const message of (value.messages||[])){
+        const from=String(message.from||"").replace(/[^0-9]/g,"");
+        if(!from) continue;
+        const phone="+"+from;
+        const leads=(await env.DB.prepare("SELECT * FROM leads WHERE workspace_id=?").bind(connection.workspace_id).all()).results||[];
+        const lead=leads.find(x=>String(x.phone||"").replace(/[^0-9]/g,"")===from);
+        if(!lead) continue;
+        const bodyText=message.text?.body || message.button?.text || message.interactive?.button_reply?.title || message.interactive?.list_reply?.title || "[WhatsApp message]";
+        const createdAt=now();
+        if(await tableExists(env,"messages")){
+          try{ await insertDynamic(env,"messages",{id:uid(),workspace_id:connection.workspace_id,user_id:connection.workspace_id,lead_id:lead.id,direction:"in",channel:"WhatsApp",body:String(bodyText),status:"received",provider_message_id:String(message.id||""),created_at:createdAt}); }catch(err){console.warn("Inbound message log skipped:",err?.message||err);}
+        }
+        await updateDynamic(env,"leads",{last_inbound_at:createdAt,sequence_paused:1,status:"contacted",next_follow_up_at:null,updated_at:createdAt},"id=? AND workspace_id=?",[lead.id,connection.workspace_id]);
+        await logActivity(env,connection.workspace_id,lead.id,"Lead replied on WhatsApp — recovery sequence paused");
+      }
+    }
+  }
+  return json({ok:true});
+}
+
 export default {
+  async scheduled(event, env, ctx) { ctx.waitUntil(runRecoveryScheduler(env)); },
+
   async fetch(req, env) {
     if (req.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS });
@@ -492,6 +707,8 @@ export default {
           workspace
         });
       }
+
+      if (path[0] === "whatsapp" && path[1] === "webhook") return await handleWhatsAppWebhook(req, env);
 
       let authUser = await userFrom(req, env);
       if (!authUser && true) {
@@ -815,7 +1032,7 @@ export default {
 
         const model = env.OPENAI_MODEL || "gpt-5.6-luna";
         const prompt = [
-          "Create four WhatsApp lead-recovery follow-up templates for this business.",
+          "Create five WhatsApp lead-recovery follow-up templates for this business.",
           "These are reusable templates, not messages for one specific person.",
           "Use only the supplied business facts. Do not invent prices, guarantees, results, discounts, policies, credentials, or claims.",
           "Keep each message natural, concise, human, and suitable for WhatsApp.",
@@ -858,14 +1075,14 @@ export default {
                   properties:{
                     followups:{
                       type:"array",
-                      minItems:4,
-                      maxItems:4,
+                      minItems:5,
+                      maxItems:5,
                       items:{
                         type:"object",
                         additionalProperties:false,
                         properties:{
                           name:{type:"string"},
-                          use:{type:"string",enum:["first","second","custom","final"]},
+                          use:{type:"string",enum:["first","second","third","fourth","final"]},
                           body:{type:"string"}
                         },
                         required:["name","use","body"]
@@ -900,7 +1117,7 @@ export default {
           try { generated = JSON.parse(textPart); } catch {}
         }
 
-        if (!Array.isArray(generated?.followups) || generated.followups.length !== 4) {
+        if (!Array.isArray(generated?.followups) || generated.followups.length !== 5) {
           return json({ok:false,error:"AI returned an invalid follow-up set. Please try again."},502);
         }
 
@@ -921,7 +1138,7 @@ export default {
 
           const id=uid();
           const use=String(item.use||"custom");
-          const useLabel=({first:"First follow-up",second:"Second follow-up",final:"Final follow-up",custom:"Whenever needed"})[use] || "Follow-up";
+          const useLabel=({first:"First follow-up",second:"Second follow-up",third:"Third follow-up",fourth:"Fourth follow-up",final:"Final follow-up"})[use] || "Follow-up";
 
           await insertDynamic(env,"whatsapp_templates",{
             id,workspace_id:workspace.id,name,category:"MARKETING",language:"en_US",
@@ -1315,6 +1532,9 @@ export default {
           sequence_id: sequenceId,
           sequence_progress: 0,
           sequence_plan: sequenceId && body.sequencePlan ? JSON.stringify(body.sequencePlan) : "[]",
+          next_follow_up_at: sequenceId && Array.isArray(body.sequencePlan) && body.sequencePlan.length
+            ? new Date(Date.now() + Math.max(0, Number(body.sequencePlan[0]?.day || 0)) * 86400000).toISOString()
+            : null,
           created_at: now(),
           updated_at: now()
         };
@@ -1368,6 +1588,11 @@ export default {
           sequence_id: body.sequenceId === undefined ? undefined : (body.sequenceId || null),
           sequence_progress: body.sequenceProgress === undefined ? undefined : Number(body.sequenceProgress || 0),
           sequence_plan: body.sequencePlan === undefined ? undefined : JSON.stringify(body.sequencePlan || []),
+          next_follow_up_at: body.sequencePlan !== undefined
+            ? ((Array.isArray(body.sequencePlan) && body.sequencePlan.length && Number(body.sequenceProgress || 0) < body.sequencePlan.length)
+                ? new Date(Date.now() + Math.max(0, Number(body.sequencePlan[Number(body.sequenceProgress || 0)]?.day || 0)) * 86400000).toISOString()
+                : null)
+            : undefined,
           updated_at: now()
         };
 
