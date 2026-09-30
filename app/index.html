@@ -232,8 +232,8 @@ function ensureStarterSequence(){
 }
 let uiSyncing=false;
 let currentViewId="dashboard";
-ensureStarterSequence(); save();
 let currentLeadId=null;
+ensureStarterSequence(); save();
 state.leads.forEach(ensureLeadPlan);
 let chartRange=7;let sequenceReturnToLeadForm=false;
 
