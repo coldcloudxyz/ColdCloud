@@ -192,6 +192,9 @@ function leadOut(row) {
     whatsappOptOut: !!row.whatsapp_opt_out,
     lastInboundAt: row.last_inbound_at || null,
     sequencePaused: !!row.sequence_paused,
+    sequenceId: row.sequence_id || "",
+    sequenceProgress: Number(row.sequence_progress || 0),
+    sequencePlan: row.sequence_plan ? (()=>{try{return JSON.parse(row.sequence_plan)}catch{return []}})() : [],
     createdAt: row.created_at,
     updatedAt: row.updated_at
   };
@@ -488,8 +491,10 @@ export default {
 
         if (duplicate) return json({ ok: false, error: "Lead already exists" }, 409);
 
-        const sequence = await ensureBuiltInSequence(env, workspace.id);
-
+        const sequenceId = body.sequenceId || null;
+        if (sequenceId && !(await getWorkspaceSequence(env, workspace.id, sequenceId))) {
+          return json({ ok: false, error: "Sequence not found in this workspace" }, 404);
+        }
         const leadId = uid();
         const lead = {
           id: leadId,
@@ -512,6 +517,9 @@ export default {
           whatsapp_opt_in_source: body.whatsappOptInSource || null,
           whatsapp_opt_out: 0,
           sequence_paused: 0,
+          sequence_id: sequenceId,
+          sequence_progress: 0,
+          sequence_plan: body.sequencePlan ? JSON.stringify(body.sequencePlan) : "[]",
           created_at: now(),
           updated_at: now()
         };
@@ -537,6 +545,10 @@ export default {
         const firstName = body.firstName ?? body.first_name;
         const lastName = body.lastName ?? body.last_name;
 
+        if (body.sequenceId && !(await getWorkspaceSequence(env, workspace.id, body.sequenceId))) {
+          return json({ ok: false, error: "Sequence not found in this workspace" }, 404);
+        }
+
         const data = {
           name: firstName !== undefined
             ? [String(firstName).trim(), String(lastName || "").trim()].filter(Boolean).join(" ")
@@ -558,6 +570,9 @@ export default {
           whatsapp_opt_in_source: body.whatsappOptInSource,
           whatsapp_opt_out: body.whatsappOptOut === undefined ? undefined : (body.whatsappOptOut ? 1 : 0),
           sequence_paused: body.sequencePaused === undefined ? undefined : (body.sequencePaused ? 1 : 0),
+          sequence_id: body.sequenceId === undefined ? undefined : (body.sequenceId || null),
+          sequence_progress: body.sequenceProgress === undefined ? undefined : Number(body.sequenceProgress || 0),
+          sequence_plan: body.sequencePlan === undefined ? undefined : JSON.stringify(body.sequencePlan || []),
           updated_at: now()
         };
 
