@@ -1025,7 +1025,7 @@ document.addEventListener("click",async e=>{
  
  if(action==="connect-first"){showView("integrations");return}
 });
-document.addEventListener("click",e=>{
+document.addEventListener("click",async e=>{
  const b=e.target.closest("[data-seq-step-edit],[data-seq-step-ai],[data-seq-step-toggle],[data-seq-step-remove]");
  if(!b)return;
  const l=state.leads.find(x=>x.id===currentLeadId);if(!l)return;
