@@ -293,6 +293,18 @@ function refreshUI(){
  }catch(err){console.error("ColdCloud UI sync error:",err)}
  uiSyncing=false;
 }
+async function loadBackendLeads(){
+ if(!getApiToken())return false;
+ const remote=await apiRequest("/api/leads");
+ if(!remote?.leads)return false;
+ state.leads=remote.leads.map(l=>{
+   const local=state.leads.find(x=>x.id===l.id)||{};
+   return {...local,...l};
+ });
+ state.leads.forEach(ensureLeadPlan);
+ save();
+ return true;
+}
 function save(){
  localStorage.setItem(KEY,JSON.stringify(state));
  try{localStorage.setItem(KEY+"_updatedAt",Date.now().toString())}catch{}
@@ -586,6 +598,7 @@ document.addEventListener("DOMContentLoaded",function(){
  currentViewId="dashboard";
  try{
   renderDashboard();renderLeads();renderSequences();renderAutomations();renderTemplates();renderActivity();renderAnalytics();renderSettings();renderBusinessInfo();
+  loadBackendLeads().catch(err=>console.warn("ColdCloud backend sync failed:",err));
  }catch(err){console.error("ColdCloud init error:",err);}
 });
 document.addEventListener("click",e=>{
