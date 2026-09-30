@@ -264,18 +264,28 @@ function getApiToken(){
   return parsed?.token||parsed?.session?.token||"";
  }catch{return ""}
 }
+let apiLastError="";
 async function apiRequest(path,options={}){
  const token=getApiToken();
  const headers={"Content-Type":"application/json",...(options.headers||{})};
  if(token)headers.Authorization="Bearer "+token;
+ apiLastError="";
  try{
   const res=await fetch(API_BASE+path,{...options,headers});
-  if(!res.ok)throw new Error("API "+res.status);
-  return await res.json();
+  const text=await res.text();
+  let data=null;
+  try{data=text?JSON.parse(text):null}catch{}
+  if(!res.ok){
+    apiLastError=String(data?.error||data?.message||"API "+res.status);
+    console.warn("ColdCloud API error:",res.status,apiLastError);
+    return null;
+  }
+  return data;
  }catch(err){
-  console.warn("ColdCloud API unavailable:",err.message);
+  apiLastError=err?.message||"Network error";
+  console.warn("ColdCloud API unavailable:",apiLastError);
   return null;
- }
+ } 
 }
 function refreshUI(){
  if(uiSyncing)return;
@@ -462,8 +472,11 @@ function clearLeadFieldErrors(){document.querySelectorAll("#lead-form .field-err
 function normalizePhone(v){return String(v||"").replace(/[\s\-\(\)]/g,"")}
 function splitLeadName(name){const parts=String(name||"").trim().split(/\s+/).filter(Boolean);return {first:parts.shift()||"",last:parts.join(" ")}}
 function leadContext(data){return [data.interest?("Interested in: "+data.interest):"",data.notes||"",data.businessType?("Business type: "+data.businessType):"",data.source?("Source: "+data.source):"",data.company?("Company: "+data.company):""].filter(Boolean).join("\n")}
-function openForm(existing=null){
+async function openForm(existing=null){
  closeAll();clearLeadFieldErrors();document.getElementById("form-modal").classList.add("open");
+ if(getApiToken()){
+   await loadBackendSequences();
+ }
  const nameParts=splitLeadName(existing?.name||"");
  document.getElementById("f-first-name").value=existing?.firstName||nameParts.first||"";
  document.getElementById("f-last-name").value=existing?.lastName||nameParts.last||"";
@@ -474,8 +487,10 @@ function openForm(existing=null){
  document.getElementById("f-source").value=existing?.source||"";
  document.getElementById("f-interest").value=existing?.interest||"";
  document.getElementById("f-notes").value=existing?.notes||"";
+ const selectedSequence=existing?.sequenceId||state.settings.defaultSequence||"";
+ const validSequence=state.sequences.some(s=>s.id===selectedSequence);
  document.getElementById("f-sequence").innerHTML='<option value="">No sequence selected</option>'+state.sequences.map(s=>'<option value="'+esc(s.id)+'">'+esc(s.name)+'</option>').join("");
- document.getElementById("f-sequence").value=existing?.sequenceId||"";
+ document.getElementById("f-sequence").value=validSequence?selectedSequence:"";
  document.getElementById("lead-sequence-help").textContent=state.sequences.length?"You can assign or change the sequence later from the lead workspace.":"No sequence selected. Create a sequence to automate follow-ups.";
  document.getElementById("lead-form-title").textContent=existing?"Edit Lead":"Add Lead";
  document.getElementById("lead-submit").textContent=existing?"Save Changes":"Add Lead";
@@ -498,7 +513,13 @@ async function handleLeadSubmit(e){
  const duplicate=state.leads.find(l=>normalizePhone(l.phone)===cleanPhone&&l.id!==id&&l.status!=="lost");
  if(duplicate){setLeadFormError("This lead already exists.");setLeadFormError("This lead already exists. View the existing lead instead.");const box=document.getElementById("lead-form-error");box.innerHTML='This lead already exists. <button type="button" class="ghost" style="padding:3px 7px;margin-left:4px" data-action="view-duplicate-lead" data-duplicate-id="'+esc(duplicate.id)+'">View existing lead →</button>';return}
  const sequenceId=document.getElementById("f-sequence").value;
- const data={name,firstName:first,lastName:last,company,businessType,email,phone,source,interest,notes,sequenceId,context:leadContext({interest,notes,businessType,source,company}),updatedAt:new Date().toISOString()};
+ const selectedSequence=sequenceId?state.sequences.find(s=>s.id===sequenceId):null;
+ if(sequenceId&&getApiToken()&&!selectedSequence){
+   setLeadFormError("Please select a valid sequence and try again.");
+   return;
+ }
+ const sequencePlan=selectedSequence?makeLeadPlan(selectedSequence.id):[];
+ const data={name,firstName:first,lastName:last,company,businessType,email,phone,source,interest,notes,sequenceId,sequencePlan,context:leadContext({interest,notes,businessType,source,company}),updatedAt:new Date().toISOString()};
  if(!data.context)data.context="Lead added manually.";
  if(id){
    const lead=state.leads.find(x=>x.id===id);if(!lead)return;
@@ -509,10 +530,11 @@ async function handleLeadSubmit(e){
    if(!remote&&getApiToken()){Object.assign(lead,old);setLeadFormError("Couldn't save this lead. Please try again.");return}
    log("Lead updated: "+name,id);save();closeAll();renderLeads();renderDashboard();renderAnalytics();openLead(id);return
  }
- const payload={name,phone,context:data.context,notes,business:businessType,channels:["whatsapp","email"],firstName:first,lastName:last,company,source,interest,sequenceId};
+ const payload={name,phone,context:data.context,notes,business:businessType,channels:["whatsapp"],firstName:first,lastName:last,company,source,interest,sequenceId,sequencePlan};
  const remote=await apiRequest("/api/leads",{method:"POST",body:JSON.stringify(payload)});
  if(!remote){
-   setLeadFormError("ColdCloud couldn't create this lead. Check your connection or sign in again.");
+   const detail=apiLastError||"Check your connection or sign in again.";
+   setLeadFormError("Couldn't create this lead: "+detail);
    return
  }
  const serverLead=remote.lead||remote;
