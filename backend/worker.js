@@ -636,6 +636,56 @@ export default {
         return json({ ok: true, id: sequenceId }, 201);
       }
 
+      if (path[0] === "sequences" && path[1] && req.method === "PATCH") {
+        if (!(await tableExists(env, "sequences"))) return json({ ok: false, error: "Sequences table is unavailable" }, 500);
+        const existing = await getWorkspaceSequence(env, workspace.id, path[1]);
+        if (!existing) return json({ ok: false, error: "Sequence not found" }, 404);
+
+        const body = await read(req);
+        const data = {
+          name: body.name,
+          enabled: body.active === undefined ? undefined : (body.active ? 1 : 0),
+          status: body.active === undefined ? undefined : (body.active ? "active" : "disabled"),
+          updated_at: now()
+        };
+        await updateDynamic(env, "sequences", data, "id=? AND workspace_id=?", [path[1], workspace.id]);
+
+        const stepTable = await firstExistingTable(env, ["sequence_steps", "lead_sequence_steps"]);
+        if (stepTable && Array.isArray(body.steps)) {
+          const cols = await tableColumns(env, stepTable);
+          if (cols.has("sequence_id")) {
+            await env.DB.prepare("DELETE FROM " + stepTable + " WHERE sequence_id=?").bind(path[1]).run();
+            for (let i = 0; i < body.steps.length; i++) {
+              const step = body.steps[i] || {};
+              await insertDynamic(env, stepTable, {
+                id: uid(),
+                sequence_id: path[1],
+                position: i + 1,
+                step_order: i + 1,
+                day: Number(step.day) || 0,
+                delay_days: Number(step.day) || 0,
+                channel: "WhatsApp",
+                enabled: step.enabled === false ? 0 : 1,
+                ai_instructions: step.aiInstructions || "",
+                template_id: step.templateId || "",
+                created_at: now(),
+                updated_at: now()
+              });
+            }
+          }
+        }
+        return json({ ok: true, sequence: await sequenceOutput(env, await getWorkspaceSequence(env, workspace.id, path[1])) });
+      }
+
+      if (path[0] === "sequences" && path[1] && req.method === "DELETE") {
+        const existing = await getWorkspaceSequence(env, workspace.id, path[1]);
+        if (!existing) return json({ ok: false, error: "Sequence not found" }, 404);
+        if (existing.is_builtin) return json({ ok: false, error: "Built-in sequence cannot be deleted" }, 400);
+
+        await env.DB.prepare("DELETE FROM sequences WHERE id=? AND workspace_id=?").bind(path[1], workspace.id).run();
+        return json({ ok: true });
+      }
+
       if (path[0] === "automations" && req.method === "GET") {
         if (!(await tableExists(env, "automations"))) return json({ ok: true, automations: [] });
 
