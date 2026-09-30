@@ -221,7 +221,11 @@ async function logActivity(env, workspaceId, leadId, text) {
   };
   const entries = Object.entries(data).filter(([k, v]) => cols.has(k) && v !== undefined);
   if (!entries.length) return;
-  await insertDynamic(env, "activities", Object.fromEntries(entries));
+  try {
+    await insertDynamic(env, "activities", Object.fromEntries(entries));
+  } catch (err) {
+    console.warn("Activity logging skipped:", err?.message || err);
+  }
 }
 
 async function ensureBuiltInSequence(env, workspaceId) {
