@@ -576,6 +576,12 @@ function renderTemplates(){const box=document.getElementById("template-list"),ts
 function openTemplate(existing){var t=existing||{};document.getElementById("tpl-name").value=t.name||"";document.getElementById("tpl-use").value=t.use||"custom";document.getElementById("tpl-category").value=t.category||"MARKETING";document.getElementById("tpl-body").value=t.body||"";document.getElementById("tpl-preview").textContent=t.body||"Hi {{name}}, just checking if you'd still like help with {{interest}}...";document.getElementById("tpl-error").classList.remove("open");document.getElementById("template-modal-title").textContent=existing?"Edit Follow-up":"Create Follow-up";document.getElementById("tpl-submit").textContent=existing?"Save Changes":"Save & Send for Approval";document.querySelectorAll("[data-tpl-cat]").forEach(function(b){b.classList.toggle("active",b.dataset.tplCat===(t.category||"MARKETING"))});document.getElementById("template-form").dataset.edit=existing&&existing.id||"";document.getElementById("template-modal").classList.add("open")}
 function editTemplate(id){openTemplate(state.templates.find(function(t){return t.id===id}))}
 document.getElementById("tpl-body").addEventListener("input",function(){document.getElementById("tpl-preview").textContent=this.value||"Your message preview will appear here..."});document.querySelectorAll("[data-tpl-cat]").forEach(function(b){b.onclick=function(){document.querySelectorAll("[data-tpl-cat]").forEach(function(x){x.classList.remove("active")});b.classList.add("active");document.getElementById("tpl-category").value=b.dataset.tplCat}});
+async function loadBackendTemplates(){
+ const remote=await apiRequest("/api/templates");
+ if(!remote?.templates)return false;
+ state.templates=remote.templates.map(t=>({id:t.id,name:t.name,category:t.category||"MARKETING",body:t.body||"",channel:"WhatsApp",source:"ColdCloud",use:t.use||"custom",useLabel:t.useLabel||"Follow-up",providerId:t.providerId||"",providerStatus:t.providerStatus||"not_submitted",rejectionReason:t.rejectionReason||""}));
+ localStorage.setItem(KEY,JSON.stringify(state));renderTemplates();return true;
+}
 async function loadBackendAutomations(){
  
  const remote=await apiRequest("/api/automations");
@@ -712,6 +718,7 @@ document.addEventListener("DOMContentLoaded",function(){
   loadBusinessInfo().catch(err=>console.warn("ColdCloud business sync failed:",err));
   loadBackendSequences().catch(err=>console.warn("ColdCloud sequence sync failed:",err));
   loadBackendAutomations().catch(err=>console.warn("ColdCloud automation sync failed:",err));
+  loadBackendTemplates().catch(err=>console.warn("ColdCloud template sync failed:",err));
   loadWhatsAppStatus().catch(err=>console.warn("ColdCloud WhatsApp status sync failed:",err));
  }catch(err){console.error("ColdCloud init error:",err);}
 });
