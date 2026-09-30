@@ -611,7 +611,7 @@ document.addEventListener("DOMContentLoaded",function(){
   loadBackendLeads().catch(err=>console.warn("ColdCloud backend sync failed:",err));
  }catch(err){console.error("ColdCloud init error:",err);}
 });
-document.addEventListener("click",e=>{
+document.addEventListener("click",async e=>{
  const a=e.target.closest("[data-action]");if(!a)return;const action=a.dataset.action;
  if(action==="add-lead"){openAdd();return}
  if(action==="focus-lead-filter"){document.getElementById("lead-filters")?.scrollIntoView({behavior:"smooth",block:"nearest"});return}
