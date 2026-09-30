@@ -305,7 +305,7 @@ function refreshUI(){
  uiSyncing=false;
 }
 async function loadBackendLeads(){
- if(!getApiToken())return false;
+ 
  const remote=await apiRequest("/api/leads");
  if(!remote?.leads)return false;
  state.leads=remote.leads.map(l=>{
@@ -546,7 +546,7 @@ async function handleLeadSubmit(e){
  save();closeAll();renderLeads();renderDashboard();renderAnalytics();openLead(lead.id);
 }
 async function loadBackendSequences(){
- if(!getApiToken())return false;
+ 
  const remote=await apiRequest("/api/sequences");
  if(!remote?.sequences)return false;
  state.sequences=remote.sequences.map(s=>({
@@ -584,7 +584,7 @@ function openTemplate(existing){var t=existing||{};document.getElementById("tpl-
 function editTemplate(id){openTemplate(state.templates.find(function(t){return t.id===id}))}
 document.getElementById("tpl-channel").addEventListener("change",function(){var wa=this.value==="WhatsApp";document.getElementById("tpl-status-wrap").style.display=wa?"":"none";document.getElementById("tpl-provider-wrap").style.display=wa?"":"none";});
 async function loadBackendAutomations(){
- if(!getApiToken())return false;
+ 
  const remote=await apiRequest("/api/automations");
  if(!remote?.automations)return false;
  state.automations=remote.automations.map(a=>({id:a.id,name:a.name||((a.trigger||"")+" → "+(a.action||"")),trigger:a.trigger||a.trigger_text||"",action:a.action||a.action_text||"",sequenceId:a.sequence_id||"",active:a.enabled===undefined?true:!!a.enabled,builtIn:!!a.is_builtin,key:a.key||""}));
@@ -653,7 +653,7 @@ function renderBusinessInfo(){
  if(status)status.textContent=businessInfoComplete()?"✓ Business information saved":"Required information is incomplete";
 }
 async function loadBusinessInfo(){
- if(!getApiToken())return false;
+ 
  const remote=await apiRequest("/api/business");
  if(!remote||remote.businessInfo===undefined)return false;
  if(remote.businessInfo){
