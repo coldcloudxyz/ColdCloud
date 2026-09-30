@@ -237,7 +237,7 @@
   <div class="modal-head"><div><h2>AI Reply</h2><div class="muted">ColdCloud reads the lead, business profile, and recent conversation.</div></div><button class="close" data-action="close-ai">×</button></div>
   <div class="field"><label>Optional instruction</label><input id="ai-instruction" placeholder="e.g. Keep it short and focus on the customer's question"></div>
   <div class="field" style="margin-top:14px"><label>AI message</label><textarea id="ai-preview" rows="7" placeholder="Generate a reply for this lead..."></textarea></div>
-  <div class="modal-actions"><button class="ghost" data-action="close-ai">Cancel</button><button class="ghost" id="ai-generate">Generate with AI</button><button class="primary" id="ai-use">Use in Composer</button></div>
+  <div class="modal-actions"><button class="ghost" data-action="close-ai">Cancel</button><button class="ghost" id="ai-generate">Generate with AI</button><button class="ghost" id="ai-send">Send on WhatsApp</button><button class="primary" id="ai-use">Use in Composer</button></div>
 </div></div>
 
 <input type="file" id="csv-input" accept=".csv,text/csv" hidden>
@@ -986,6 +986,21 @@ async function generateAIReply(){
  document.getElementById("ai-preview").value=remote.reply;
 }
 document.getElementById("ai-generate").onclick=generateAIReply;
+document.getElementById("ai-send").onclick=async function(){
+ const l=state.leads.find(x=>x.id===currentLeadId);
+ const text=document.getElementById("ai-preview").value.trim();
+ if(!l||!text){ccAlert("No AI reply yet","Generate a reply first.");return}
+ if(!(await ccConfirm("Send AI reply","Send this AI-generated message to "+(l.name||"this lead")+" on WhatsApp?","Send message")))return;
+ const btn=document.getElementById("ai-send");btn.disabled=true;btn.textContent="Sending…";
+ try{
+  const remote=await apiRequest("/api/whatsapp/send",{method:"POST",body:JSON.stringify({leadId:l.id,type:"text",text})});
+  if(!remote){ccAlert("Message not sent",apiLastError||"WhatsApp could not send this message.");return}
+  l.messages=l.messages||[];
+  l.messages.push({id:remote.messageId||uid(),direction:"out",channel:"WhatsApp",text,time:new Date().toISOString(),status:"sent",aiGenerated:true});
+  l.status="contacted";l.updatedAt=new Date().toISOString();
+  log("AI WhatsApp reply sent: "+l.name,l.id);save();closeAll();openLead(l.id);switchTab("conversation");
+ }finally{btn.disabled=false;btn.textContent="Send on WhatsApp"}
+};
 document.getElementById("ai-use").onclick=function(){
  const text=document.getElementById("ai-preview").value.trim();
  if(!text){ccAlert("No AI reply yet","Generate a reply first.");return}
