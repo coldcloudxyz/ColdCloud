@@ -305,6 +305,16 @@ async function loadBackendLeads(){
  save();
  return true;
 }
+async function syncLeadBackend(lead){
+ if(!lead||!getApiToken())return true;
+ const remote=await apiRequest("/api/leads/"+encodeURIComponent(lead.id),{method:"PATCH",body:JSON.stringify({
+  sequenceId:lead.sequenceId||null,
+  sequenceProgress:Number(lead.sequenceProgress||0),
+  sequencePlan:lead.sequencePlan||[],
+  sequencePaused:!!lead.paused
+ })});
+ return !!remote;
+}
 function save(){
  localStorage.setItem(KEY,JSON.stringify(state));
  try{localStorage.setItem(KEY+"_updatedAt",Date.now().toString())}catch{}
@@ -506,7 +516,7 @@ async function handleLeadSubmit(e){
    return
  }
  const serverLead=remote.lead||remote;
- const lead={...data,id:serverLead.id||uid(),status:sequenceId?"followup":"new",createdAt:serverLead.createdAt||new Date().toISOString(),messages:[],sequenceProgress:0,paused:false,sequencePlan:sequenceId?makeLeadPlan(sequenceId):[]};
+ const lead={...data,...serverLead,id:serverLead.id||uid(),status:serverLead.status||"new",createdAt:serverLead.createdAt||new Date().toISOString(),messages:[],sequenceProgress:Number(serverLead.sequenceProgress||0),paused:!!serverLead.sequencePaused,sequenceId:serverLead.sequenceId||sequenceId||"",sequencePlan:serverLead.sequencePlan?.length?serverLead.sequencePlan:(sequenceId?makeLeadPlan(sequenceId):[])};
  state.leads.unshift(lead);
  log("Lead added: "+lead.name,lead.id);
  if(sequenceId)log("Sequence assigned: "+(state.sequences.find(s=>s.id===sequenceId)?.name||""),lead.id);
@@ -698,11 +708,11 @@ document.addEventListener("click",async e=>{
  if(action==="new-automation"){openAutomation();return}if(action==="close-automation"){closeAll();return}if(action==="new-template"){openTemplate();return}if(action==="close-template"){closeAll();return}
  if(action==="back-leads"){currentLeadId=null;document.getElementById("lead-detail").className="detail";document.getElementById("lead-list-view").style.display="block";renderLeads();return}
  if(action==="edit-lead"){editLead();return}
- if(action==="pause-lead"){let l=state.leads.find(x=>x.id===currentLeadId);l.paused=!l.paused;log((l.paused?"Automation paused: ":"Automation resumed: ")+l.name,l.id);save();openLead(l.id);return}
+ if(action==="pause-lead"){let l=state.leads.find(x=>x.id===currentLeadId);l.paused=!l.paused;log((l.paused?"Automation paused: ":"Automation resumed: ")+l.name,l.id);if(!(await syncLeadBackend(l))){alert("Could not save sequence state.");return}save();openLead(l.id);return}
  if(action==="ai-lead"){openAI();return}
  if(action==="send-message"){switchTab("conversation");return}
  if(action==="send-composer"){const l=state.leads.find(x=>x.id===currentLeadId),t=document.getElementById("composer-text")?.value.trim();if(!l||!t)return;l.messages=l.messages||[];l.messages.push({id:uid(),direction:"out",channel:state.settings.channel,text:t,time:new Date().toISOString()});l.status="contacted";l.updatedAt=new Date().toISOString();log("Message sent: "+l.name,l.id);save();openLead(l.id);switchTab("conversation");return}
- if(action==="change-sequence"){const l=state.leads.find(x=>x.id===currentLeadId);const opts=state.sequences.map((s,i)=>(i+1)+". "+s.name).join("\n");if(!opts){openSequence();return}const n=prompt("Choose sequence number:\n"+opts);const idx=Number(n)-1;if(!Number.isNaN(idx)&&state.sequences[idx]){assignSequenceToLead(l,state.sequences[idx].id);log("Sequence changed for "+l.name,l.id);save();openLead(l.id)}}return;
+ if(action==="change-sequence"){const l=state.leads.find(x=>x.id===currentLeadId);const opts=state.sequences.map((s,i)=>(i+1)+". "+s.name).join("\n");if(!opts){openSequence();return}const n=prompt("Choose sequence number:\n"+opts);const idx=Number(n)-1;if(!Number.isNaN(idx)&&state.sequences[idx]){assignSequenceToLead(l,state.sequences[idx].id);log("Sequence changed for "+l.name,l.id);if(!(await syncLeadBackend(l))){alert("Could not save sequence assignment.");return}save();openLead(l.id)}}return;
  if(action==="lead-add-step"){const l=state.leads.find(x=>x.id===currentLeadId);if(!l)return;const p=ensureLeadPlan(l),last=p[p.length-1];p.push({id:uid(),day:last?Number(last.day)+2:0,channel:state.settings.channel||"WhatsApp",enabled:true,aiInstructions:"",status:"waiting"});l.updatedAt=new Date().toISOString();save();openLead(l.id);switchTab("sequence");return}
  if(action==="lead-skip-step"){const l=state.leads.find(x=>x.id===currentLeadId),p=ensureLeadPlan(l);const i=p.findIndex(x=>x.enabled&&x.status!=="sent");if(i<0)return;p[i].status="skipped";p[i].enabled=false;l.sequenceProgress=Math.min(i+1,p.length);l.updatedAt=new Date().toISOString();log("Skipped sequence step for "+l.name,l.id);save();openLead(l.id);switchTab("sequence");return}
  if(action==="lead-send-next"){const l=state.leads.find(x=>x.id===currentLeadId),p=ensureLeadPlan(l);const i=p.findIndex(x=>x.enabled&&x.status!=="sent"&&x.status!=="skipped");if(i<0)return;const s=p[i];const text=prompt("Message to send now (AI can replace this later):","");if(text===null||!text.trim())return;l.messages=l.messages||[];l.messages.push({id:uid(),direction:"out",channel:s.channel,text:text.trim(),time:new Date().toISOString(),sequenceStep:i});s.status="sent";l.sequenceProgress=Math.min(i+1,p.length);l.status="contacted";l.updatedAt=new Date().toISOString();log("Sequence step sent: "+l.name,l.id);save();openLead(l.id);switchTab("sequence");return}
