@@ -233,9 +233,10 @@ function ensureStarterSequence(){
 let uiSyncing=false;
 let currentViewId="dashboard";
 let currentLeadId=null;
+let chartRange=7;
+let sequenceReturnToLeadForm=false;
 ensureStarterSequence(); save();
 state.leads.forEach(ensureLeadPlan);
-let chartRange=7;let sequenceReturnToLeadForm=false;
 
 function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&x.leads?x:JSON.parse(JSON.stringify(emptyState))}catch{return JSON.parse(JSON.stringify(emptyState))}}
 function makeLeadPlan(sequenceId){
