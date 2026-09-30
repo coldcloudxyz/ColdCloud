@@ -242,6 +242,17 @@
 
 <input type="file" id="csv-input" accept=".csv,text/csv" hidden>
 
+<div class="confirm-modal" id="cc-confirm-modal">
+ <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="cc-confirm-title">
+  <div class="confirm-icon">!</div>
+  <div class="confirm-title" id="cc-confirm-title">Are you sure?</div>
+  <div class="confirm-text" id="cc-confirm-text"></div>
+  <div class="confirm-actions">
+   <button class="confirm-cancel" id="cc-confirm-cancel">Cancel</button>
+   <button class="confirm-danger" id="cc-confirm-ok">Delete</button>
+  </div>
+ </div>
+</div>
 <script>
 const KEY="coldcloud_state_v4";
 const starterTemplates=[{name:"Initial Follow-up",category:"Marketing",body:"Hi {{name}}, just following up regarding {{interest}}. Would you like to continue the conversation?"},{name:"Follow-up #1",category:"Marketing",body:"Hi {{name}}, checking in regarding {{interest}}. Is this still something you're interested in exploring?"},{name:"Final Follow-up",category:"Marketing",body:"Hi {{name}}, this is my final follow-up regarding {{interest}}. If you'd like to continue, just reply here."}];
@@ -1167,14 +1178,4 @@ document.getElementById("seq-steps").addEventListener("input",function(e){if(e.t
 document.getElementById("add-modal").onclick=e=>{if(e.target.id==="add-modal")closeAll()};document.getElementById("form-modal").onclick=e=>{if(e.target.id==="form-modal")closeAll()};document.getElementById("sequence-modal").onclick=e=>{if(e.target.id==="sequence-modal")closeAll()};document.getElementById("automation-modal").onclick=e=>{if(e.target.id==="automation-modal")closeAll()};document.getElementById("template-modal").onclick=e=>{if(e.target.id==="template-modal")closeAll()};document.getElementById("followup-workspace-modal").onclick=e=>{if(e.target.id==="followup-workspace-modal")closeFollowupWorkspace()};document.getElementById("ai-modal").onclick=e=>{if(e.target.id==="ai-modal")closeAll()};
 function exportCSV(){const rows=[["Name","Company","Phone","Email","Status","Sequence","Created"],...state.leads.map(l=>[l.name,l.company,l.phone,l.email,statusLabel(l.status),state.sequences.find(s=>s.id===l.sequenceId)?.name||"",l.createdAt])];const csv=rows.map(r=>r.map(v=>'"'+String(v??"").replace(/"/g,'""')+'"').join(",")).join("\n");const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));a.download="coldcloud-analytics.csv";a.click();URL.revokeObjectURL(a.href)}
 </script>
-<div class="confirm-modal" id="cc-confirm-modal">
- <div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="cc-confirm-title">
-  <div class="confirm-icon">!</div>
-  <div class="confirm-title" id="cc-confirm-title">Are you sure?</div>
-  <div class="confirm-text" id="cc-confirm-text"></div>
-  <div class="confirm-actions">
-   <button class="confirm-cancel" id="cc-confirm-cancel">Cancel</button>
-   <button class="confirm-danger" id="cc-confirm-ok">Delete</button>
-  </div>
- </div>
-</div></body></html>
+</body></html>
