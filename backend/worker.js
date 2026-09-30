@@ -102,6 +102,16 @@ async function encryptSecret(value, secret) {
   return enc(iv) + "." + enc(ciphertext);
 }
 
+async function decryptSecret(value, secret) {
+  const [ivB64, dataB64] = String(value || "").split(".");
+  if (!ivB64 || !dataB64) throw new Error("Invalid encrypted secret");
+  const dec = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const keyBytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(secret || "")));
+  const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["decrypt"]);
+  const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: dec(ivB64) }, key, dec(dataB64));
+  return new TextDecoder().decode(plain);
+}
+
 async function passwordVerify(password, salt, expectedHash) {
   try {
     const saltBytes = Uint8Array.from(atob(salt), c => c.charCodeAt(0));
@@ -668,6 +678,105 @@ export default {
             verifiedName: data.verified_name
           }
         });
+      }
+
+      if (path[0] === "templates" && req.method === "GET") {
+        if (!(await tableExists(env, "whatsapp_templates"))) return json({ ok: true, templates: [] });
+        const rows = (await env.DB.prepare(
+          "SELECT * FROM whatsapp_templates WHERE workspace_id=? ORDER BY created_at DESC"
+        ).bind(workspace.id).all()).results || [];
+        return json({ ok: true, templates: rows.map(t => ({
+          id:t.id,name:t.name,category:t.category,language:t.language,body:t.body_text,
+          use:t.use_type||"custom",useLabel:t.use_label||"Follow-up",
+          providerId:t.provider_template_id||"",providerStatus:t.provider_status||"not_submitted",
+          rejectionReason:t.rejection_reason||""
+        }))});
+      }
+
+      if (path[0] === "templates" && req.method === "POST") {
+        if (!(await tableExists(env, "whatsapp_templates"))) return json({ ok:false,error:"Template storage is not installed yet" },500);
+        const body = await read(req);
+        const name = String(body.name || "").trim();
+        const message = String(body.body || "").trim();
+        const category = String(body.category || "MARKETING").toUpperCase();
+        const useType = String(body.use || "custom");
+        const useLabel = String(body.useLabel || "Follow-up");
+        if (!name || !message) return json({ ok:false,error:"Template name and message are required" },400);
+
+        const connection = await env.DB.prepare(
+          "SELECT * FROM whatsapp_connections WHERE workspace_id=? AND status='connected' LIMIT 1"
+        ).bind(workspace.id).first();
+        if (!connection?.access_token_encrypted) {
+          return json({ ok:false,error:"Connect WhatsApp first. ColdCloud needs the connected business number to submit this follow-up." },400);
+        }
+
+        const graphVersion = env.META_GRAPH_VERSION || "v25.0";
+        const token = await decryptSecret(connection.access_token_encrypted, env.JWT_SECRET || env.META_APP_SECRET);
+        const providerName = name.toLowerCase().replace(/[^a-z0-9_]+/g,"_").replace(/^_+|_+$/g,"").slice(0,60) || ("coldcloud_followup_"+Date.now());
+
+        const existingName = await env.DB.prepare(
+          "SELECT id FROM whatsapp_templates WHERE workspace_id=? AND provider_template_name=? LIMIT 1"
+        ).bind(workspace.id, providerName).first();
+        if (existingName) return json({ok:false,error:"A WhatsApp template with this name already exists. Choose a different follow-up name."},409);
+
+        const variableMap = {};
+        let n = 0;
+        const metaBody = message.replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g, (_, key) => {
+          if (!variableMap[key]) variableMap[key] = String(++n);
+          return "{{"+variableMap[key]+"}}";
+        });
+
+        const payload = {
+          name: providerName,
+          language: "en_US",
+          category: category === "UTILITY" ? "UTILITY" : "MARKETING",
+          parameter_format: "POSITIONAL",
+          components: [{ type:"BODY", text:metaBody }]
+        };
+
+        const metaRes = await fetch(
+          "https://graph.facebook.com/" + graphVersion + "/" + encodeURIComponent(connection.waba_id) + "/message_templates",
+          {
+            method:"POST",
+            headers:{"content-type":"application/json",Authorization:"Bearer "+token},
+            body:JSON.stringify(payload)
+          }
+        );
+        const metaJson = await metaRes.json().catch(()=>({}));
+        if (!metaRes.ok || !metaJson.id) {
+          return json({ok:false,error:metaJson?.error?.message || "WhatsApp could not accept this template yet."},400);
+        }
+
+        const id=uid();
+        await insertDynamic(env,"whatsapp_templates",{
+          id,workspace_id:workspace.id,name,category:payload.category,language:"en_US",body_text:message,
+          use_type:useType,use_label:useLabel,provider_template_id:String(metaJson.id),
+          provider_template_name:providerName,provider_status:String(metaJson.status||"PENDING").toLowerCase(),
+          rejection_reason:null,created_at:now(),updated_at:now()
+        });
+        return json({ok:true,template:{id,name,category,language:"en_US",body:message,use:useType,useLabel,
+          providerId:String(metaJson.id),providerStatus:String(metaJson.status||"PENDING").toLowerCase(),rejectionReason:""}},201);
+      }
+
+      if (path[0] === "templates" && path[1] && req.method === "PATCH") {
+        if (!(await tableExists(env, "whatsapp_templates"))) return json({ok:false,error:"Template storage is not installed yet"},500);
+        const existing = await env.DB.prepare(
+          "SELECT * FROM whatsapp_templates WHERE id=? AND workspace_id=? LIMIT 1"
+        ).bind(path[1],workspace.id).first();
+        if (!existing) return json({ok:false,error:"Template not found"},404);
+        if (existing.provider_template_id && String(existing.provider_status).toLowerCase()==="approved") {
+          return json({ok:false,error:"This follow-up is already approved by WhatsApp. Create a new follow-up instead of editing it."},400);
+        }
+        const body=await read(req);
+        const name=String(body.name||existing.name).trim();
+        const message=String(body.body||existing.body_text).trim();
+        await updateDynamic(env,"whatsapp_templates",{
+          name,body_text:message,category:String(body.category||existing.category).toUpperCase(),
+          use_type:String(body.use||existing.use_type||"custom"),use_label:String(body.useLabel||existing.use_label||"Follow-up"),
+          updated_at:now()
+        },"id=? AND workspace_id=?",[path[1],workspace.id]);
+        const row=await env.DB.prepare("SELECT * FROM whatsapp_templates WHERE id=?").bind(path[1]).first();
+        return json({ok:true,template:{id:row.id,name:row.name,category:row.category,language:row.language,body:row.body_text,use:row.use_type,useLabel:row.use_label,providerId:row.provider_template_id||"",providerStatus:row.provider_status,rejectionReason:row.rejection_reason||""}});
       }
 
       if (path[0] === "me" || (path[0] === "auth" && path[1] === "me")) {
