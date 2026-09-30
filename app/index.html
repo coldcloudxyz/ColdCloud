@@ -576,14 +576,45 @@ function renderBusinessInfo(){
  const status=document.getElementById("business-info-status");
  if(status)status.textContent=businessInfoComplete()?"✓ Business information saved":"Required information is incomplete";
 }
-document.getElementById("business-info-form").onsubmit=e=>{
+async function loadBusinessInfo(){
+ if(!getApiToken())return false;
+ const remote=await apiRequest("/api/business");
+ if(!remote||remote.businessInfo===undefined)return false;
+ if(remote.businessInfo){
+  const r=remote.businessInfo;
+  state.businessInfo={
+   name:r.name||"",type:r.type||"",description:r.description||"",offer:r.offer||"",
+   target:r.target||"",market:r.market||"",problem:r.problem||"",difference:r.difference||"",
+   goal:r.goal||"",tone:r.tone||"",rules:r.rules||"",extra:r.extra||""
+  };
+ }else{
+  state.businessInfo={name:"",type:"",description:"",offer:"",target:"",market:"",problem:"",difference:"",goal:"",tone:"",rules:"",extra:""};
+ }
+ localStorage.setItem(KEY,JSON.stringify(state));
+ renderBusinessInfo();
+ return true;
+}
+document.getElementById("business-info-form").onsubmit=async e=>{
  e.preventDefault();
  const ids=["name","type","description","offer","target","market","problem","difference","goal","tone","rules"];
  const data={};ids.forEach(k=>data[k]=document.getElementById("bi-"+k).value.trim());data.extra=document.getElementById("bi-extra").value.trim();
  const missing=ids.filter(k=>!data[k]);
  const err=document.getElementById("business-info-error");
  if(missing.length){err.textContent="Please complete all required business information before saving.";err.classList.add("open");return}
- err.classList.remove("open");state.businessInfo=data;save();log("Business information updated");renderBusinessInfo();
+ err.classList.remove("open");
+ const previous={...(state.businessInfo||{})};
+ state.businessInfo=data;
+ if(getApiToken()){
+  const remote=await apiRequest("/api/business",{method:"PUT",body:JSON.stringify(data)});
+  if(!remote){
+   state.businessInfo=previous;
+   renderBusinessInfo();
+   err.textContent="Couldn't save business information. Please check your connection or sign in again.";
+   err.classList.add("open");
+   return;
+  }
+ }
+ save();log("Business information updated");renderBusinessInfo();
 };
 function renderSettings(){ return; }
 function openAI(){document.getElementById("ai-modal").classList.add("open");document.getElementById("ai-preview").value="";document.getElementById("ai-preview").placeholder="AI output will appear here when a provider is connected."}
@@ -609,6 +640,7 @@ document.addEventListener("DOMContentLoaded",function(){
  try{
   renderDashboard();renderLeads();renderSequences();renderAutomations();renderTemplates();renderActivity();renderAnalytics();renderSettings();renderBusinessInfo();
   loadBackendLeads().catch(err=>console.warn("ColdCloud backend sync failed:",err));
+  loadBusinessInfo().catch(err=>console.warn("ColdCloud business sync failed:",err));
  }catch(err){console.error("ColdCloud init error:",err);}
 });
 document.addEventListener("click",async e=>{
