@@ -275,14 +275,47 @@ async function apiRequest(path,options={}){
   return null;
  }
 }
-function save(){localStorage.setItem(KEY,JSON.stringify(state))}
+let uiSyncing=false;
+let currentViewId="dashboard";
+function refreshUI(){
+ if(uiSyncing)return;
+ uiSyncing=true;
+ try{
+  if(currentViewId==="dashboard")renderDashboard();
+  if(currentViewId==="leads")renderLeads();
+  if(currentViewId==="automations")renderAutomations();
+  if(currentViewId==="templates")renderTemplates();
+  if(currentViewId==="sequences")renderSequences();
+  if(currentViewId==="activity")renderActivity();
+  if(currentViewId==="analytics")renderAnalytics();
+  if(currentViewId==="integrations")renderBusinessInfo();
+  if(currentLeadId && document.getElementById("lead-detail")?.classList.contains("open"))openLead(currentLeadId);
+ }catch(err){console.error("ColdCloud UI sync error:",err)}
+ uiSyncing=false;
+}
+function save(){
+ localStorage.setItem(KEY,JSON.stringify(state));
+ try{localStorage.setItem(KEY+"_updatedAt",Date.now().toString())}catch{}
+ refreshUI();
+}
+window.addEventListener("storage",function(e){
+ if(e.key!==KEY)return;
+ try{
+  const incoming=JSON.parse(e.newValue||"null");
+  if(!incoming)return;
+  state=incoming;
+  state.leads.forEach(ensureLeadPlan);
+  refreshUI();
+ }catch(err){console.warn("ColdCloud sync error:",err)}
+});
+
 function uid(){return crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)}
 function esc(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]))}
 function log(text,leadId=""){state.activity.unshift({id:uid(),text,leadId,time:new Date().toISOString()});state.activity=state.activity.slice(0,300);save()}
 function leadStatus(l){return l.status||"new"}
 function initials(name){return String(name||"?").split(/\s+/).slice(0,2).map(x=>x[0]||"").join("").toUpperCase()}
 function statusLabel(s){return ({new:"New",contacted:"Contacted",replied:"Replied",followup:"Follow-up",won:"Won",lost:"Lost"})[s]||s}
-function showView(id){document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));document.getElementById("top-title").textContent=id[0].toUpperCase()+id.slice(1);if(id==="dashboard")renderDashboard();if(id==="leads")renderLeads();if(id==="automations")renderAutomations();if(id==="templates")renderTemplates();if(id==="sequences")renderSequences();if(id==="activity")renderActivity();if(id==="analytics")renderAnalytics();if(id==="settings")renderSettings();if(id==="integrations")renderBusinessInfo()}
+function showView(id){currentViewId=id;document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id===id));document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===id));document.getElementById("top-title").textContent=id[0].toUpperCase()+id.slice(1);if(id==="dashboard")renderDashboard();if(id==="leads")renderLeads();if(id==="automations")renderAutomations();if(id==="templates")renderTemplates();if(id==="sequences")renderSequences();if(id==="activity")renderActivity();if(id==="analytics")renderAnalytics();if(id==="settings")renderSettings();if(id==="integrations")renderBusinessInfo()}
 document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>showView(b.dataset.view));
 
 function f(k){const el=document.getElementById("f-"+k);return el?el.value.trim():""}
@@ -536,8 +569,21 @@ function editProfile(){const name=prompt("Name",state.settings.name||"");if(name
 function csvParse(text){const rows=[];let row=[],cell="",q=false;for(let i=0;i<text.length;i++){let c=text[i],n=text[i+1];if(c==='"'&&q&&n==='"'){cell+='"';i++;continue}if(c==='"'){q=!q;continue}if(c===','&&!q){row.push(cell);cell="";continue}if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);cell="";if(row.some(x=>x.trim()!==''))rows.push(row);row=[];continue}cell+=c}if(cell||row.length){row.push(cell);rows.push(row)}return rows}
 function importCSV(file){const r=new FileReader();r.onload=()=>{const rows=csvParse(r.result),headers=(rows.shift()||[]).map(x=>x.trim().toLowerCase());let added=0;rows.forEach(row=>{const o={};headers.forEach((h,i)=>o[h]=row[i]||"");if(!o.name)return;state.leads.unshift({id:uid(),name:o.name,company:o.company||"",title:o.title||o.job_title||"",businessType:o.business_type||"",email:o.email||"",phone:o.phone||"",website:o.website||"",industry:o.industry||"",location:o.location||"",source:o.source||"CSV import",interest:o.interest||"",notes:o.notes||o.context||"",sequenceId:o.sequence_id||state.settings.defaultSequence||"",status:(o.sequence_id||state.settings.defaultSequence)?"followup":"new",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),messages:[],sequenceProgress:0,paused:false,sequencePlan:(o.sequence_id||state.settings.defaultSequence)?makeLeadPlan(o.sequence_id||state.settings.defaultSequence):[]});added++});log("Imported "+added+" leads from CSV");save();closeAll();renderLeads();renderDashboard()};r.readAsText(file)}
 
+// Keep the app interactive and synchronized across the workspace.
+setInterval(function(){
+ try{
+  const raw=localStorage.getItem(KEY);
+  if(!raw)return;
+  const incoming=JSON.parse(raw);
+  if(!incoming)return;
+  const current=JSON.stringify(state),next=JSON.stringify(incoming);
+  if(current!==next){state=incoming;state.leads.forEach(ensureLeadPlan);refreshUI();}
+ }catch(err){}
+},1500);
+
 // Keep the app interactive even when dynamic UI is rendered later.
 document.addEventListener("DOMContentLoaded",function(){
+ currentViewId="dashboard";
  try{
   renderDashboard();renderLeads();renderSequences();renderAutomations();renderTemplates();renderActivity();renderAnalytics();renderSettings();renderBusinessInfo();
  }catch(err){console.error("ColdCloud init error:",err);}
