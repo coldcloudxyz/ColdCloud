@@ -253,6 +253,18 @@
   </div>
  </div>
 </div>
+<div class="cc-dialog" id="cc-dialog">
+ <div class="cc-dialog-card">
+  <div class="cc-dialog-kicker" id="cc-dialog-kicker">ColdCloud</div>
+  <div class="cc-dialog-title" id="cc-dialog-title">Are you sure?</div>
+  <div class="cc-dialog-text" id="cc-dialog-text"></div>
+  <div id="cc-dialog-fields"></div>
+  <div class="cc-dialog-actions">
+   <button class="cc-dialog-cancel" id="cc-dialog-cancel">Cancel</button>
+   <button class="cc-dialog-ok" id="cc-dialog-ok">Continue</button>
+  </div>
+ </div>
+</div>
 <script>
 const KEY="coldcloud_state_v4";
 const starterTemplates=[{name:"Initial Follow-up",category:"Marketing",body:"Hi {{name}}, just following up regarding {{interest}}. Would you like to continue the conversation?"},{name:"Follow-up #1",category:"Marketing",body:"Hi {{name}}, checking in regarding {{interest}}. Is this still something you're interested in exploring?"},{name:"Final Follow-up",category:"Marketing",body:"Hi {{name}}, this is my final follow-up regarding {{interest}}. If you'd like to continue, just reply here."}];
@@ -1225,15 +1237,4 @@ document.getElementById("cc-dialog-cancel").onclick=()=>ccDialogClose(null);
 document.getElementById("cc-dialog").onclick=e=>{if(e.target.id==="cc-dialog")ccDialogClose(null)};
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.getElementById("cc-dialog")?.classList.contains("open"))ccDialogClose(null)});
 </script>
-<div class="cc-dialog" id="cc-dialog">
- <div class="cc-dialog-card">
-  <div class="cc-dialog-kicker" id="cc-dialog-kicker">ColdCloud</div>
-  <div class="cc-dialog-title" id="cc-dialog-title">Are you sure?</div>
-  <div class="cc-dialog-text" id="cc-dialog-text"></div>
-  <div id="cc-dialog-fields"></div>
-  <div class="cc-dialog-actions">
-   <button class="cc-dialog-cancel" id="cc-dialog-cancel">Cancel</button>
-   <button class="cc-dialog-ok" id="cc-dialog-ok">Continue</button>
-  </div>
- </div>
-</div></body></html>
+</body></html>
