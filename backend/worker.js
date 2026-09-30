@@ -30,7 +30,7 @@ async function defaults(env,userId){
 export default{async fetch(req,env){
  if(req.method==="OPTIONS")return new Response(null,{status:204,headers:CORS});
  try{
-  const u=new URL(req.url),p=u.pathname.replace(/^\\/api\\/?/,"").split("/").filter(Boolean);
+  const u=new URL(req.url),p=u.pathname.replace(/^\/api\/?/,"").split("/").filter(Boolean);
   if(p.join("/")==="health")return json({ok:true,service:"coldcloud-api",database:true});
   if(p[0]==="auth"&&p[1]==="signup"&&req.method==="POST"){const b=await read(req),email=String(b.email||"").trim().toLowerCase();if(!b.name||!email||String(b.password||"").length<8)return json({ok:false,error:"Name, email and 8+ character password are required"},400);if(await env.DB.prepare("SELECT id FROM users WHERE email=?").bind(email).first())return json({ok:false,error:"Email already exists"},409);const id=uid(),t=now();await env.DB.prepare("INSERT INTO users VALUES(?,?,?,?,?,?,?)").bind(id,email,await hash(b.password),String(b.name).trim(),b.company||"",t,t).run();await defaults(env,id);return json({ok:true,token:await jwt({sub:id,email,exp:Date.now()/1000+604800},env.JWT_SECRET),user:{id,email,name:b.name,company:b.company||""}},201)}
   if(p[0]==="auth"&&p[1]==="login"&&req.method==="POST"){const b=await read(req),email=String(b.email||"").trim().toLowerCase(),x=await env.DB.prepare("SELECT * FROM users WHERE email=?").bind(email).first();if(!x||!(await verify(b.password||"",x.password_hash)))return json({ok:false,error:"Incorrect email or password"},401);return json({ok:true,token:await jwt({sub:x.id,email:x.email,exp:Date.now()/1000+604800},env.JWT_SECRET),user:{id:x.id,email:x.email,name:x.name,company:x.company||""}})}
