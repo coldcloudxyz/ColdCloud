@@ -680,6 +680,146 @@ export default {
         });
       }
 
+      if (path[0] === "ai" && path[1] === "followups" && req.method === "POST") {
+        if (!env.OPENAI_API_KEY) {
+          return json({ ok:false, error:"AI is not configured yet. Add OPENAI_API_KEY to the ColdCloud Worker." },503);
+        }
+        const body = await read(req);
+        const b = body.businessInfo || {};
+        const required = ["name","type","description","offer","target","market","problem","difference","goal","tone","rules"];
+        const missing = required.filter(k => !String(b[k] || "").trim());
+        if (missing.length) {
+          return json({ ok:false, error:"Complete Business Information before generating follow-ups.", missing },400);
+        }
+
+        const model = env.OPENAI_MODEL || "gpt-5.6-luna";
+        const prompt = [
+          "Create four WhatsApp lead-recovery follow-up templates for this business.",
+          "These are reusable templates, not messages for one specific person.",
+          "Use only the supplied business facts. Do not invent prices, guarantees, results, discounts, policies, credentials, or claims.",
+          "Keep each message natural, concise, human, and suitable for WhatsApp.",
+          "Respect the requested tone and rules.",
+          "Use only these placeholders when useful: {{name}}, {{interest}}, {{company}}.",
+          "Do not use markdown, emojis, numbered lists, or quotation marks around the messages.",
+          "The final follow-up should close the loop without sounding aggressive.",
+          "",
+          "BUSINESS INFORMATION:",
+          JSON.stringify({
+            name:b.name,type:b.type,description:b.description,offer:b.offer,target:b.target,
+            market:b.market,problem:b.problem,difference:b.difference,goal:b.goal,
+            tone:b.tone,rules:b.rules,extra:b.extra || ""
+          })
+        ].join("\n");
+
+        const aiRes = await fetch("https://api.openai.com/v1/responses", {
+          method:"POST",
+          headers:{
+            "content-type":"application/json",
+            "authorization":"Bearer "+env.OPENAI_API_KEY
+          },
+          body:JSON.stringify({
+            model,
+            input:[
+              {
+                role:"system",
+                content:"You are ColdCloud's lead-recovery copywriter. Generate practical, truthful WhatsApp follow-ups for small businesses."
+              },
+              { role:"user", content:prompt }
+            ],
+            text:{
+              format:{
+                type:"json_schema",
+                name:"coldcloud_followups",
+                strict:true,
+                schema:{
+                  type:"object",
+                  additionalProperties:false,
+                  properties:{
+                    followups:{
+                      type:"array",
+                      minItems:4,
+                      maxItems:4,
+                      items:{
+                        type:"object",
+                        additionalProperties:false,
+                        properties:{
+                          name:{type:"string"},
+                          use:{type:"string",enum:["first","second","custom","final"]},
+                          body:{type:"string"}
+                        },
+                        required:["name","use","body"]
+                      }
+                    }
+                  },
+                  required:["followups"]
+                }
+              }
+            },
+            max_output_tokens:1200,
+            store:false
+          })
+        });
+
+        const aiJson = await aiRes.json().catch(() => ({}));
+        if (!aiRes.ok) {
+          return json({
+            ok:false,
+            error:aiJson?.error?.message || "AI generation failed. Please try again."
+          },502);
+        }
+
+        let generated = null;
+        if (typeof aiJson.output_text === "string" && aiJson.output_text.trim()) {
+          try { generated = JSON.parse(aiJson.output_text); } catch {}
+        }
+        if (!generated) {
+          const textPart = (aiJson.output || [])
+            .flatMap(x => x.content || [])
+            .find(x => x.type === "output_text")?.text || "";
+          try { generated = JSON.parse(textPart); } catch {}
+        }
+
+        if (!Array.isArray(generated?.followups) || generated.followups.length !== 4) {
+          return json({ok:false,error:"AI returned an invalid follow-up set. Please try again."},502);
+        }
+
+        if (!(await tableExists(env,"whatsapp_templates"))) {
+          return json({ok:false,error:"Template storage is not installed yet."},500);
+        }
+
+        const created=[];
+        const existingRows=(await env.DB.prepare(
+          "SELECT id,name FROM whatsapp_templates WHERE workspace_id=?"
+        ).bind(workspace.id).all()).results || [];
+        const existingNames=new Set(existingRows.map(x=>String(x.name||"").toLowerCase()));
+
+        for (const item of generated.followups) {
+          const name=String(item.name||"").trim();
+          const message=String(item.body||"").trim();
+          if (!name || !message || existingNames.has(name.toLowerCase())) continue;
+
+          const id=uid();
+          const use=String(item.use||"custom");
+          const useLabel=({first:"First follow-up",second:"Second follow-up",final:"Final follow-up",custom:"Whenever needed"})[use] || "Follow-up";
+
+          await insertDynamic(env,"whatsapp_templates",{
+            id,workspace_id:workspace.id,name,category:"MARKETING",language:"en_US",
+            body_text:message,use_type:use,use_label:useLabel,
+            provider_template_id:null,provider_template_name:null,
+            provider_status:"not_submitted",rejection_reason:null,
+            created_at:now(),updated_at:now()
+          });
+
+          created.push({
+            id,name,category:"MARKETING",language:"en_US",body:message,
+            use,useLabel,providerId:"",providerStatus:"not_submitted",rejectionReason:""
+          });
+          existingNames.add(name.toLowerCase());
+        }
+
+        return json({ok:true,model,templates:created});
+      }
+
       if (path[0] === "templates" && req.method === "GET") {
         if (!(await tableExists(env, "whatsapp_templates"))) return json({ ok: true, templates: [] });
         const rows = (await env.DB.prepare(
