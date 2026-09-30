@@ -98,7 +98,6 @@ async function encryptSecret(value, secret) {
     key,
     new TextEncoder().encode(String(value))
   );
-  const b64 = bytes => btoa(String.fromCharCode(...new Uint8Array(b64bytes)));
   const enc = bytes => btoa(String.fromCharCode(...new Uint8Array(bytes)));
   return enc(iv) + "." + enc(ciphertext);
 }
