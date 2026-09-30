@@ -278,8 +278,9 @@ async function ensureDefaults(env, workspaceId) {
         ["Interested Lead → Mark Hot", "Lead shows positive intent", "Mark lead as hot"]
       ];
 
+      const automationCols = await tableColumns(env, "automations");
       for (const [name, trigger, action] of defaults) {
-        await insertDynamic(env, "automations", {
+        const data = {
           id: uid(),
           workspace_id: workspaceId,
           name,
@@ -287,11 +288,20 @@ async function ensureDefaults(env, workspaceId) {
           action_text: action,
           trigger,
           action,
+          trigger_type: trigger,
+          action_type: action,
+          config_json: JSON.stringify({ trigger, action }),
           enabled: 1,
+          active: 1,
           is_builtin: 1,
           created_at: now(),
           updated_at: now()
-        });
+        };
+
+        // The current D1 schema uses trigger_type/action_type/active,
+        // while older builds used trigger/action/enabled. insertDynamic
+        // keeps only columns that actually exist.
+        await insertDynamic(env, "automations", data);
       }
     }
   }
