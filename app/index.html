@@ -465,13 +465,25 @@ function openTemplate(existing){var t=existing||{};document.getElementById("tpl-
 function editTemplate(id){openTemplate(state.templates.find(function(t){return t.id===id}))}
 document.getElementById("tpl-channel").addEventListener("change",function(){var wa=this.value==="WhatsApp";document.getElementById("tpl-status-wrap").style.display=wa?"":"none";document.getElementById("tpl-provider-wrap").style.display=wa?"":"none";});
 function renderAutomations(){
- const box=document.getElementById("automation-list");if(!state.automations.length){box.innerHTML='<div class="empty">No automations yet.<br><br>Create simple reusable rules such as New Lead → Start Sequence or Lead Replies → Pause + Notify.</div>';return}
- box.innerHTML=state.automations.map(a=>'<div class="automation-row"><div><div class="name">'+esc(a.trigger)+' → '+esc(a.action)+'</div><div class="muted">'+(a.sequenceId?esc(state.sequences.find(s=>s.id===a.sequenceId)?.name||""):"Global rule")+'</div></div><button class="switch '+(a.active?"on":"")+'" data-auto="'+a.id+'"><i></i></button></div>').join("");
- box.querySelectorAll("[data-auto]").forEach(b=>b.onclick=()=>{let a=state.automations.find(x=>x.id===b.dataset.auto);a.active=!a.active;save();renderAutomations()})
+ const box=document.getElementById("automation-list");
+ const defaults=[
+  {key:"new-lead",name:"New Lead → Start Sequence",trigger:"New lead added",action:"Start sequence"},
+  {key:"reply",name:"Lead Replies → Pause Sequence",trigger:"Lead replies on WhatsApp",action:"Pause sequence"},
+  {key:"no-reply",name:"No Reply → Continue Sequence",trigger:"Lead does not reply",action:"Continue sequence"},
+  {key:"opt-out",name:"Opt-out → Stop Automation",trigger:"Lead says stop / opts out",action:"Stop all follow-ups"},
+  {key:"hot",name:"Interested Lead → Mark Hot",trigger:"Lead shows positive intent",action:"Mark lead as hot"}
+ ];
+ if(!state.automations.length){
+  state.automations=defaults.map(d=>({id:uid(),name:d.name,trigger:d.trigger,action:d.action,sequenceId:state.settings.defaultSequence||"",active:true,builtIn:true,key:d.key}));
+  save();
+ }
+ box.innerHTML=state.automations.map(a=>'<div class="automation-row" style="align-items:center"><div style="min-width:0;flex:1"><div style="display:flex;gap:8px;align-items:center"><div class="name">'+esc(a.name||((a.trigger||"")+" → "+(a.action||"")) )+'</div>'+(a.builtIn?'<span class="pill active">Built-in</span>':'')+'</div><div class="muted" style="margin-top:4px"><b>When:</b> '+esc(a.trigger)+' &nbsp; <b>Then:</b> '+esc(a.action)+'</div><div class="muted" style="margin-top:3px">'+(a.sequenceId?esc(state.sequences.find(s=>s.id===a.sequenceId)?.name||"Sequence selected"):"No sequence required")+'</div></div><div style="display:flex;gap:7px;align-items:center"><button class="ghost" data-auto-edit="'+a.id+'">Edit</button><button class="switch '+(a.active?"on":"")+'" data-auto="'+a.id+'"><i></i></button></div></div>').join("");
+ box.querySelectorAll("[data-auto]").forEach(b=>b.onclick=()=>{let a=state.automations.find(x=>x.id===b.dataset.auto);a.active=!a.active;save();renderAutomations()});
+ box.querySelectorAll("[data-auto-edit]").forEach(b=>b.onclick=()=>{let a=state.automations.find(x=>x.id===b.dataset.autoEdit);document.getElementById("auto-trigger").value=a.trigger;document.getElementById("auto-action").value=a.action;openAutomation();document.getElementById("automation-form").dataset.edit=a.id;});
 }
 function openAutomation(){document.getElementById("auto-sequence").innerHTML='<option value="">Select sequence</option>'+state.sequences.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join("");document.getElementById("automation-modal").classList.add("open")}
 document.getElementById("template-form").onsubmit=e=>{e.preventDefault();var edit=e.currentTarget.dataset.edit;var data={name:document.getElementById("tpl-name").value.trim(),category:document.getElementById("tpl-category").value,subject:document.getElementById("tpl-subject").value.trim(),body:document.getElementById("tpl-body").value.trim(),providerStatus:document.getElementById("tpl-status").value,providerId:document.getElementById("tpl-provider-id").value.trim(),channel:document.getElementById("tpl-channel").value};if(!data.name||!data.body)return;if(edit){Object.assign(state.templates.find(function(t){return t.id===edit}),data)}else{state.templates.unshift({id:uid(),source:"Manual",...data})}log((edit?"Updated":"Added")+" WhatsApp template: "+data.name);save();closeAll();renderTemplates()}
-document.getElementById("automation-form").onsubmit=e=>{e.preventDefault();const trigger=document.getElementById("auto-trigger").value,action=document.getElementById("auto-action").value,sequenceId=document.getElementById("auto-sequence").value;const a={id:uid(),trigger,action,sequenceId,active:true};state.automations.push(a);log("Automation created: "+trigger+" → "+action);save();closeAll();renderAutomations()}
+document.getElementById("automation-form").onsubmit=e=>{e.preventDefault();const trigger=document.getElementById("auto-trigger").value,action=document.getElementById("auto-action").value,sequenceId=document.getElementById("auto-sequence").value,form=e.currentTarget,edit=form.dataset.edit;const a={id:edit||uid(),name:trigger+" → "+action,trigger,action,sequenceId,active:true,builtIn:false};if(edit){const old=state.automations.find(x=>x.id===edit);if(old)Object.assign(old,a)}else{state.automations.push(a);log("Automation created: "+trigger+" → "+action)}delete form.dataset.edit;save();closeAll();renderAutomations()}
 
 function renderActivity(){document.getElementById("activity-list").innerHTML=state.activity.length?state.activity.map(a=>'<div class="activity-row"><span>•</span><div><b>'+esc(a.text)+'</b><div class="time">'+new Date(a.time).toLocaleString()+'</div></div></div>').join(""):'<div class="empty">No activity yet.</div>'}
 function renderAnalytics(){
