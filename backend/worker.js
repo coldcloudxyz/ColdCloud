@@ -89,6 +89,20 @@ async function passwordHash(password, saltBytes = crypto.getRandomValues(new Uin
   };
 }
 
+async function encryptSecret(value, secret) {
+  const keyBytes = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(secret || "")));
+  const key = await crypto.subtle.importKey("raw", keyBytes, { name: "AES-GCM" }, false, ["encrypt"]);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv },
+    key,
+    new TextEncoder().encode(String(value))
+  );
+  const b64 = bytes => btoa(String.fromCharCode(...new Uint8Array(b64bytes)));
+  const enc = bytes => btoa(String.fromCharCode(...new Uint8Array(bytes)));
+  return enc(iv) + "." + enc(ciphertext);
+}
+
 async function passwordVerify(password, salt, expectedHash) {
   try {
     const saltBytes = Uint8Array.from(atob(salt), c => c.charCodeAt(0));
@@ -498,6 +512,135 @@ export default {
 
       const workspace = await ensureWorkspace(env, authUser.sub);
       await ensureDefaults(env, workspace.id);
+
+      if (path[0] === "whatsapp" && path[1] === "config" && req.method === "GET") {
+        return json({
+          ok: true,
+          appId: env.META_APP_ID || "",
+          configId: env.META_CONFIG_ID || "",
+          graphVersion: env.META_GRAPH_VERSION || "v25.0"
+        });
+      }
+
+      if (path[0] === "whatsapp" && path[1] === "status" && req.method === "GET") {
+        if (!(await tableExists(env, "whatsapp_connections"))) {
+          return json({ ok: true, connected: false });
+        }
+        const row = await env.DB.prepare(
+          "SELECT id,waba_id,phone_number_id,business_id,display_phone_number,verified_name,status,created_at,updated_at FROM whatsapp_connections WHERE workspace_id=? LIMIT 1"
+        ).bind(workspace.id).first();
+        return json({
+          ok: true,
+          connected: !!row && row.status === "connected",
+          connection: row || null
+        });
+      }
+
+      if (path[0] === "whatsapp" && path[1] === "connect" && req.method === "POST") {
+        if (!(await tableExists(env, "whatsapp_connections"))) {
+          return json({ ok: false, error: "WhatsApp connection storage is not installed yet" }, 500);
+        }
+        if (!env.META_APP_ID || !env.META_APP_SECRET) {
+          return json({ ok: false, error: "Meta WhatsApp integration is not configured on ColdCloud" }, 503);
+        }
+
+        const body = await read(req);
+        const code = String(body.code || "").trim();
+        const suppliedToken = String(body.accessToken || "").trim();
+        const wabaId = String(body.wabaId || "").trim();
+        const phoneNumberId = String(body.phoneNumberId || "").trim();
+        const businessId = String(body.businessId || "").trim();
+
+        if ((!code && !suppliedToken) || !wabaId) {
+          return json({ ok: false, error: "WhatsApp signup did not return the required authorization data" }, 400);
+        }
+
+        const graphVersion = env.META_GRAPH_VERSION || "v25.0";
+        let accessToken = suppliedToken;
+
+        if (code) {
+          const params = new URLSearchParams({
+            client_id: env.META_APP_ID,
+            client_secret: env.META_APP_SECRET,
+            code
+          });
+          if (env.META_REDIRECT_URI) params.set("redirect_uri", env.META_REDIRECT_URI);
+
+          const tokenRes = await fetch(
+            "https://graph.facebook.com/" + graphVersion + "/oauth/access_token",
+            { method: "POST", headers: { "content-type": "application/x-www-form-urlencoded" }, body: params }
+          );
+          const tokenJson = await tokenRes.json();
+          if (!tokenRes.ok || !tokenJson.access_token) {
+            return json({
+              ok: false,
+              error: tokenJson?.error?.message || "Meta authorization exchange failed"
+            }, 400);
+          }
+          accessToken = tokenJson.access_token;
+        }
+
+        let phone = null;
+        if (phoneNumberId) {
+          const phoneRes = await fetch(
+            "https://graph.facebook.com/" + graphVersion + "/" + encodeURIComponent(phoneNumberId) +
+            "?fields=id,display_phone_number,verified_name&access_token=" + encodeURIComponent(accessToken)
+          );
+          if (phoneRes.ok) phone = await phoneRes.json();
+        }
+
+        const subscribeRes = await fetch(
+          "https://graph.facebook.com/" + graphVersion + "/" + encodeURIComponent(wabaId) + "/subscribed_apps",
+          {
+            method: "POST",
+            headers: { Authorization: "Bearer " + accessToken }
+          }
+        );
+        if (!subscribeRes.ok) {
+          const subscribeJson = await subscribeRes.json().catch(() => ({}));
+          return json({
+            ok: false,
+            error: subscribeJson?.error?.message || "Could not subscribe ColdCloud to the WhatsApp Business Account"
+          }, 400);
+        }
+
+        const encryptedToken = await encryptSecret(accessToken, env.JWT_SECRET || env.META_APP_SECRET);
+        const existing = await env.DB.prepare(
+          "SELECT id FROM whatsapp_connections WHERE workspace_id=? LIMIT 1"
+        ).bind(workspace.id).first();
+
+        const data = {
+          id: existing?.id || uid(),
+          workspace_id: workspace.id,
+          waba_id: wabaId,
+          phone_number_id: phoneNumberId || phone?.id || null,
+          business_id: businessId || null,
+          display_phone_number: phone?.display_phone_number || null,
+          verified_name: phone?.verified_name || null,
+          access_token_encrypted: encryptedToken,
+          status: "connected",
+          updated_at: now()
+        };
+
+        if (existing) {
+          await updateDynamic(env, "whatsapp_connections", data, "id=? AND workspace_id=?", [existing.id, workspace.id]);
+        } else {
+          data.created_at = now();
+          await insertDynamic(env, "whatsapp_connections", data);
+        }
+
+        await logActivity(env, workspace.id, null, "WhatsApp connected");
+        return json({
+          ok: true,
+          connected: true,
+          connection: {
+            wabaId,
+            phoneNumberId: data.phone_number_id,
+            displayPhoneNumber: data.display_phone_number,
+            verifiedName: data.verified_name
+          }
+        });
+      }
 
       if (path[0] === "me" || (path[0] === "auth" && path[1] === "me")) {
         const user = await env.DB.prepare(
