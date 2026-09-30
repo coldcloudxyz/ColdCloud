@@ -9,3 +9,4 @@ database_id = "ffe99d15-778b-48f0-8aba-37eb223dbfad"
 
 [vars]
 FRONTEND_ORIGIN = "https://usecoldcloud.xyz"
+DEV_MODE = "true"
