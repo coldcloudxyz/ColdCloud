@@ -230,6 +230,8 @@ function ensureStarterSequence(){
  ],channels:["WhatsApp"]};
  state.sequences.unshift(s); return s;
 }
+let uiSyncing=false;
+let currentViewId="dashboard";
 ensureStarterSequence(); save();
 let currentLeadId=null;
 state.leads.forEach(ensureLeadPlan);
@@ -275,8 +277,6 @@ async function apiRequest(path,options={}){
   return null;
  }
 }
-let uiSyncing=false;
-let currentViewId="dashboard";
 function refreshUI(){
  if(uiSyncing)return;
  uiSyncing=true;
