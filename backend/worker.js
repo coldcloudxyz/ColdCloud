@@ -703,6 +703,18 @@ export default {
         const useLabel = String(body.useLabel || "Follow-up");
         if (!name || !message) return json({ ok:false,error:"Template name and message are required" },400);
 
+        if (body.draft === true) {
+          const id = uid();
+          await insertDynamic(env,"whatsapp_templates",{
+            id,workspace_id:workspace.id,name,category,language:"en_US",body_text:message,
+            use_type:useType,use_label:useLabel,provider_template_id:null,
+            provider_template_name:null,provider_status:"not_submitted",
+            rejection_reason:null,created_at:now(),updated_at:now()
+          });
+          return json({ok:true,template:{id,name,category,language:"en_US",body:message,use:useType,useLabel,
+            providerId:"",providerStatus:"not_submitted",rejectionReason:""}},201);
+        }
+
         const connection = await env.DB.prepare(
           "SELECT * FROM whatsapp_connections WHERE workspace_id=? AND status='connected' LIMIT 1"
         ).bind(workspace.id).first();
