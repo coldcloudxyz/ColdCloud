@@ -550,8 +550,8 @@ export default {
         const phoneNumberId = String(body.phoneNumberId || "").trim();
         const businessId = String(body.businessId || "").trim();
 
-        if ((!code && !suppliedToken) || !wabaId) {
-          return json({ ok: false, error: "WhatsApp signup did not return the required authorization data" }, 400);
+        if (!code && !suppliedToken) {
+          return json({ ok: false, error: "WhatsApp signup did not return an authorization code or access token" }, 400);
         }
 
         const graphVersion = env.META_GRAPH_VERSION || "v25.0";
@@ -579,17 +579,46 @@ export default {
           accessToken = tokenJson.access_token;
         }
 
+        // Meta's Embedded Signup session message normally provides the WABA ID.
+        // If the browser message is missed, recover it from the returned user token.
+        let resolvedWabaId = wabaId;
+        if (!resolvedWabaId && accessToken) {
+          const appAccessToken = env.META_APP_ID + "|" + env.META_APP_SECRET;
+          const debugRes = await fetch(
+            "https://graph.facebook.com/" + graphVersion + "/debug_token?input_token=" + encodeURIComponent(accessToken),
+            { headers: { Authorization: "Bearer " + appAccessToken } }
+          );
+          const debugJson = await debugRes.json().catch(() => ({}));
+          const granular = Array.isArray(debugJson?.data?.granular_scopes) ? debugJson.data.granular_scopes : [];
+          const waScope = granular.find(x => x.scope === "whatsapp_business_management");
+          resolvedWabaId = String(waScope?.target_ids?.[0] || "").trim();
+        }
+
+        if (!resolvedWabaId) {
+          return json({ ok: false, error: "Meta authorized ColdCloud, but no WhatsApp Business Account was returned. Please reconnect and finish the WhatsApp setup." }, 400);
+        }
+
+        let resolvedPhoneNumberId = phoneNumberId;
+        if (!resolvedPhoneNumberId) {
+          const phonesRes = await fetch(
+            "https://graph.facebook.com/" + graphVersion + "/" + encodeURIComponent(resolvedWabaId) +
+            "/phone_numbers?fields=id,display_phone_number,verified_name&access_token=" + encodeURIComponent(accessToken)
+          );
+          const phonesJson = await phonesRes.json().catch(() => ({}));
+          resolvedPhoneNumberId = String(phonesJson?.data?.[0]?.id || "").trim();
+        }
+
         let phone = null;
-        if (phoneNumberId) {
+        if (resolvedPhoneNumberId) {
           const phoneRes = await fetch(
-            "https://graph.facebook.com/" + graphVersion + "/" + encodeURIComponent(phoneNumberId) +
+            "https://graph.facebook.com/" + graphVersion + "/" + encodeURIComponent(resolvedPhoneNumberId) +
             "?fields=id,display_phone_number,verified_name&access_token=" + encodeURIComponent(accessToken)
           );
           if (phoneRes.ok) phone = await phoneRes.json();
         }
 
         const subscribeRes = await fetch(
-          "https://graph.facebook.com/" + graphVersion + "/" + encodeURIComponent(wabaId) + "/subscribed_apps",
+          "https://graph.facebook.com/" + graphVersion + "/" + encodeURIComponent(resolvedWabaId) + "/subscribed_apps",
           {
             method: "POST",
             headers: { Authorization: "Bearer " + accessToken }
@@ -611,8 +640,8 @@ export default {
         const data = {
           id: existing?.id || uid(),
           workspace_id: workspace.id,
-          waba_id: wabaId,
-          phone_number_id: phoneNumberId || phone?.id || null,
+          waba_id: resolvedWabaId,
+          phone_number_id: resolvedPhoneNumberId || phone?.id || null,
           business_id: businessId || null,
           display_phone_number: phone?.display_phone_number || null,
           verified_name: phone?.verified_name || null,
@@ -633,7 +662,7 @@ export default {
           ok: true,
           connected: true,
           connection: {
-            wabaId,
+            wabaId: resolvedWabaId,
             phoneNumberId: data.phone_number_id,
             displayPhoneNumber: data.display_phone_number,
             verifiedName: data.verified_name
