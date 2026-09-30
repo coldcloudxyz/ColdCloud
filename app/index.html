@@ -234,10 +234,10 @@
  </div>
 </div><div class="modal-bg" id="template-modal"><div class="modal" style="max-width:920px"><div class="modal-head"><div><h2 id="template-modal-title">Create Follow-up</h2><div class="muted">ColdCloud will handle WhatsApp approval and delivery rules for you.</div></div><button class="close" data-action="close-template">×</button></div><div class="template-create-grid"><form id="template-form"><div class="field"><label>What is this follow-up for?</label><input id="tpl-name" placeholder="e.g. First follow-up" required></div><div class="field"><label>When should ColdCloud use it?</label><select id="tpl-use"><option value="first">First follow-up</option><option value="second">Second follow-up</option><option value="final">Final follow-up</option><option value="custom">Whenever needed</option></select></div><div class="field"><label>Message type</label><div class="template-category-grid"><button type="button" class="template-category-btn active" data-tpl-cat="MARKETING">Follow-up</button><button type="button" class="template-category-btn" data-tpl-cat="UTILITY">Utility</button></div><input id="tpl-category" type="hidden" value="MARKETING"></div><div class="field"><label>What should ColdCloud say?</label><textarea id="tpl-body" rows="9" placeholder="Hi {{name}}, just checking if you'd still like help with {{interest}}..." required></textarea></div><div class="smart-help">Use simple placeholders like <b>{{name}}</b>, <b>{{interest}}</b>, and <b>{{company}}</b>. ColdCloud fills them automatically for each lead.</div><div id="tpl-error" class="form-error" style="margin-top:10px"></div><div class="modal-actions"><button type="button" class="ghost" data-action="close-template">Cancel</button><button class="primary" id="tpl-submit">Save & Send for Approval</button></div></form><div><div class="whatsapp-preview"><div class="wa-phone"><div class="wa-phone-head">WhatsApp</div><div class="wa-bubble" id="tpl-preview">Hi {{name}}, just checking if you'd still like help with {{interest}}...</div></div></div><div class="smart-help"><b>What happens next?</b><br>ColdCloud submits the message to WhatsApp. Once approved, it becomes available to your follow-up sequences automatically.</div></div></div></div></div>
 <div class="modal-bg" id="ai-modal"><div class="modal">
-  <div class="modal-head"><div><h2>AI Follow-up</h2><div class="muted">Personalized generation control.</div></div><button class="close" data-action="close-ai">×</button></div>
-  <div class="notice">AI provider is not connected. No fake message will be generated. Once the backend AI provider is configured, ColdCloud will use the lead's information and conversation context here.</div>
-  <div class="field" style="margin-top:14px"><label>Message preview</label><textarea id="ai-preview" rows="7" placeholder="AI output will appear here when a provider is connected."></textarea></div>
-  <div class="modal-actions"><button class="ghost" data-action="close-ai">Cancel</button><button class="primary" disabled>Approve & Send</button></div>
+  <div class="modal-head"><div><h2>AI Reply</h2><div class="muted">ColdCloud reads the lead, business profile, and recent conversation.</div></div><button class="close" data-action="close-ai">×</button></div>
+  <div class="field"><label>Optional instruction</label><input id="ai-instruction" placeholder="e.g. Keep it short and focus on the customer's question"></div>
+  <div class="field" style="margin-top:14px"><label>AI message</label><textarea id="ai-preview" rows="7" placeholder="Generate a reply for this lead..."></textarea></div>
+  <div class="modal-actions"><button class="ghost" data-action="close-ai">Cancel</button><button class="ghost" id="ai-generate">Generate with AI</button><button class="primary" id="ai-use">Use in Composer</button></div>
 </div></div>
 
 <input type="file" id="csv-input" accept=".csv,text/csv" hidden>
@@ -964,7 +964,34 @@ document.getElementById("business-info-form").onsubmit=async e=>{
  log("Business information updated");
 };
 function renderSettings(){ return; }
-function openAI(){document.getElementById("ai-modal").classList.add("open");document.getElementById("ai-preview").value="";document.getElementById("ai-preview").placeholder="AI output will appear here when a provider is connected."}
+function openAI(){
+ const l=state.leads.find(x=>x.id===currentLeadId);
+ if(!l)return;
+ document.getElementById("ai-modal").classList.add("open");
+ document.getElementById("ai-preview").value="";
+ document.getElementById("ai-instruction").value="";
+}
+async function generateAIReply(){
+ const l=state.leads.find(x=>x.id===currentLeadId);
+ if(!l)return;
+ const btn=document.getElementById("ai-generate");
+ btn.disabled=true;btn.textContent="Generating…";
+ const messages=(l.messages||[]).slice(-12);
+ const remote=await apiRequest("/api/ai/reply",{
+  method:"POST",
+  body:JSON.stringify({lead:l,businessInfo:state.businessInfo||{},messages,instruction:document.getElementById("ai-instruction").value.trim()})
+ });
+ btn.disabled=false;btn.textContent="Generate with AI";
+ if(!remote?.reply){ccAlert("AI reply failed",apiLastError||"Could not generate a reply.");return}
+ document.getElementById("ai-preview").value=remote.reply;
+}
+document.getElementById("ai-generate").onclick=generateAIReply;
+document.getElementById("ai-use").onclick=function(){
+ const text=document.getElementById("ai-preview").value.trim();
+ if(!text){ccAlert("No AI reply yet","Generate a reply first.");return}
+ const composer=document.getElementById("composer-text");
+ if(composer){composer.value=text;closeAll();composer.focus()}
+};
 async function editProfile(){const name=await ccPrompt("Your name",state.settings.name||"","Name");if(name!==null)state.settings.name=name;const email=await ccPrompt("Email",state.settings.email||"","Email");if(email!==null)state.settings.email=email;const company=await ccPrompt("Company name",state.settings.company||"","Company");if(company!==null)state.settings.company=company;save();renderSettings()}
 function csvParse(text){const rows=[];let row=[],cell="",q=false;for(let i=0;i<text.length;i++){let c=text[i],n=text[i+1];if(c==='"'&&q&&n==='"'){cell+='"';i++;continue}if(c==='"'){q=!q;continue}if(c===','&&!q){row.push(cell);cell="";continue}if((c==='\n'||c==='\r')&&!q){if(c==='\r'&&n==='\n')i++;row.push(cell);cell="";if(row.some(x=>x.trim()!==''))rows.push(row);row=[];continue}cell+=c}if(cell||row.length){row.push(cell);rows.push(row)}return rows}
 function importCSV(file){const r=new FileReader();r.onload=()=>{const rows=csvParse(r.result),headers=(rows.shift()||[]).map(x=>x.trim().toLowerCase());let added=0;rows.forEach(row=>{const o={};headers.forEach((h,i)=>o[h]=row[i]||"");if(!o.name)return;state.leads.unshift({id:uid(),name:o.name,company:o.company||"",title:o.title||o.job_title||"",businessType:o.business_type||"",email:o.email||"",phone:o.phone||"",website:o.website||"",industry:o.industry||"",location:o.location||"",source:o.source||"CSV import",interest:o.interest||"",notes:o.notes||o.context||"",sequenceId:o.sequence_id||state.settings.defaultSequence||"",status:(o.sequence_id||state.settings.defaultSequence)?"followup":"new",createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),messages:[],sequenceProgress:0,paused:false,sequencePlan:(o.sequence_id||state.settings.defaultSequence)?makeLeadPlan(o.sequence_id||state.settings.defaultSequence):[]});added++});log("Imported "+added+" leads from CSV");save();closeAll();renderLeads();renderDashboard()};r.readAsText(file)}
