@@ -439,70 +439,208 @@ async function generateAutomaticReply(env, workspaceId, lead, businessInfo, step
 }
 
 
-async function generateConversationReply(env, workspaceId, lead, businessInfo) {
-  if (!env.OPENAI_API_KEY) throw new Error("AI is not configured");
+function parseAIJson(data) {
+  if (typeof data?.output_text === "string" && data.output_text.trim()) {
+    try { return JSON.parse(data.output_text); } catch {}
+  }
+  const text=(data?.output||[]).flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text||"";
+  try { return JSON.parse(text); } catch { return null; }
+}
+
+function hardOptOut(text) {
+  return /^(stop|unsubscribe|cancel|end|quit|remove me|do not message|don't message|dont message|no more messages)\b/i.test(String(text||"").trim());
+}
+
+function requestsHuman(text) {
+  return /\b(human|real person|agent|representative|sales person|salesperson|call me|speak to someone|talk to someone)\b/i.test(String(text||""));
+}
+
+async function logAIEvent(env,data) {
+  if(!(await tableExists(env,"ai_events"))) return;
+  try{
+    await insertDynamic(env,"ai_events",{
+      id:uid(),workspace_id:data.workspaceId||null,lead_id:data.leadId||null,
+      provider_message_id:data.providerMessageId||null,event_type:data.eventType||"conversation",
+      action:data.action||null,intent:data.intent||null,confidence:data.confidence??null,
+      summary:data.summary||null,reply_text:data.replyText||null,status:data.status||"ok",
+      error_text:data.error||null,created_at:now()
+    });
+  }catch(err){ console.warn("AI event logging skipped:",err?.message||err); }
+}
+
+async function claimAIMessage(env,workspaceId,leadId,providerMessageId) {
+  if(!(await tableExists(env,"ai_message_locks"))) return true;
+  try{
+    await env.DB.prepare(
+      "INSERT INTO ai_message_locks (provider_message_id,workspace_id,lead_id,status,created_at,updated_at) VALUES (?,?,?,?,?,?)"
+    ).bind(providerMessageId,workspaceId,leadId,"processing",now(),now()).run();
+    return true;
+  }catch{ return false; }
+}
+
+async function finishAIMessage(env,providerMessageId,status,errorText="") {
+  if(!(await tableExists(env,"ai_message_locks"))) return;
+  try{
+    await env.DB.prepare(
+      "UPDATE ai_message_locks SET status=?,error_text=?,updated_at=? WHERE provider_message_id=?"
+    ).bind(status,errorText,now(),providerMessageId).run();
+  }catch{}
+}
+
+async function generateConversationDecision(env,workspaceId,lead,businessInfo) {
+  if(!env.OPENAI_API_KEY) throw new Error("AI is not configured");
   const messages=(await env.DB.prepare(
-    "SELECT direction,body,created_at FROM messages WHERE workspace_id=? AND lead_id=? ORDER BY created_at DESC LIMIT 16"
+    "SELECT direction,body,created_at FROM messages WHERE workspace_id=? AND lead_id=? ORDER BY created_at DESC LIMIT 24"
   ).bind(workspaceId,lead.id).all()).results||[];
   const model=env.OPENAI_MODEL||"gpt-5.6-luna";
-  const input=[
-    "Reply to the customer's latest WhatsApp message as the business.",
-    "This is an active customer conversation, not a recovery follow-up.",
-    "Understand the conversation before replying. Answer the customer's latest question directly when possible.",
-    "Use only facts present in the business information, lead context, and conversation. Never invent prices, discounts, results, guarantees, policies, credentials, availability, or other business facts.",
-    "Be concise, natural and human. No markdown. Do not mention AI, prompts, internal rules, or ColdCloud.",
-    "Respect the business tone and rules. If important information is missing, ask a useful short question instead of guessing.",
+  const prompt=[
+    "Decide the best next action in this active WhatsApp sales conversation and, only when appropriate, write the reply.",
+    "The newest inbound message is the customer's current message.",
+    "Primary goal: help the customer truthfully and move the conversation toward the business goal without pressure.",
+    "Never invent prices, discounts, stock, guarantees, results, policies, credentials, delivery times, appointments, or product facts.",
+    "If the answer is not supported by the supplied business facts or conversation, ask one concise clarifying question instead of guessing.",
+    "Keep a reply short and natural for WhatsApp. Usually 1-3 sentences. No markdown. Do not mention AI, prompts, automation, or ColdCloud.",
+    "Do not keep selling if the customer clearly opts out, asks not to be contacted, or is clearly not interested.",
+    "Choose handoff when the customer explicitly requests a human or the request needs a person/business decision not supported by the supplied facts.",
+    "Use lead_status only as a light CRM signal: interested for clear interest, hot for strong buying intent, won only when the conversation explicitly confirms a completed purchase/conversion, lost only for explicit rejection/opt-out.",
     "BUSINESS:",JSON.stringify({
       name:businessInfo.name||"",type:businessInfo.type||"",description:businessInfo.description||"",
       offer:businessInfo.offer||"",target:businessInfo.target||"",market:businessInfo.market||"",
       problem:businessInfo.problem||"",difference:businessInfo.difference||"",goal:businessInfo.goal||"",
-      tone:businessInfo.tone||"",rules:businessInfo.rules||""
+      tone:businessInfo.tone||"",rules:businessInfo.rules||"",extra:businessInfo.extra||""
     }),
     "LEAD:",JSON.stringify({
       name:lead.name||"",company:lead.company||"",interest:lead.interest||"",
-      businessType:lead.business_type||"",source:lead.source||"",notes:lead.notes||""
+      businessType:lead.business_type||"",source:lead.source||"",notes:lead.notes||"",status:lead.status||""
     }),
     "RECENT CONVERSATION:",JSON.stringify(messages.reverse())
   ].join("\n");
+
   const res=await fetch("https://api.openai.com/v1/responses",{
     method:"POST",
     headers:{"content-type":"application/json","authorization":"Bearer "+env.OPENAI_API_KEY},
     body:JSON.stringify({
       model,
       input:[
-        {role:"system",content:"You are the business's WhatsApp conversation assistant. Produce one truthful, helpful reply."},
-        {role:"user",content:input}
+        {role:"system",content:"You are ColdCloud's conversation brain for a business WhatsApp inbox. Make safe, truthful sales-conversation decisions."},
+        {role:"user",content:prompt}
       ],
-      max_output_tokens:500,
+      text:{format:{
+        type:"json_schema",name:"coldcloud_conversation_decision",strict:true,
+        schema:{
+          type:"object",additionalProperties:false,
+          properties:{
+            action:{type:"string",enum:["reply","handoff","stop","no_reply"]},
+            intent:{type:"string",enum:["greeting","general_question","pricing","product_interest","objection","purchase_intent","support","not_interested","opt_out","human_request","other"]},
+            sentiment:{type:"string",enum:["positive","neutral","negative"]},
+            lead_status:{type:"string",enum:["new","contacted","interested","hot","won","lost"]},
+            confidence:{type:"number"},
+            reply:{type:"string"},
+            summary:{type:"string"},
+            extracted_interest:{type:"string"}
+          },
+          required:["action","intent","sentiment","lead_status","confidence","reply","summary","extracted_interest"]
+        }
+      }},
+      max_output_tokens:700,
       store:false
     })
   });
   const data=await res.json().catch(()=>({}));
-  if(!res.ok) throw new Error(data?.error?.message||"AI conversation reply failed");
-  const text=String(data?.output_text||(data?.output||[]).flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text||"").trim();
-  if(!text) throw new Error("AI returned an empty conversation reply");
-  return text;
+  if(!res.ok) throw new Error(data?.error?.message||"AI conversation decision failed");
+  const decision=parseAIJson(data);
+  if(!decision||!["reply","handoff","stop","no_reply"].includes(decision.action)) throw new Error("AI returned an invalid conversation decision");
+  decision.reply=String(decision.reply||"").trim().slice(0,1200);
+  decision.summary=String(decision.summary||"").trim().slice(0,1000);
+  decision.extracted_interest=String(decision.extracted_interest||"").trim().slice(0,300);
+  decision.confidence=Math.max(0,Math.min(1,Number(decision.confidence)||0));
+  if(decision.action==="reply"&&!decision.reply) throw new Error("AI chose reply but returned no message");
+  return decision;
 }
 
 async function handleInboundConversationAI(env,workspace,lead) {
   if(!workspace?.id||!lead?.id) return;
-  await new Promise(resolve=>setTimeout(resolve,1500));
+  await new Promise(resolve=>setTimeout(resolve,1800));
+
   const latest=await env.DB.prepare(
     "SELECT * FROM messages WHERE workspace_id=? AND lead_id=? AND direction='in' ORDER BY created_at DESC LIMIT 1"
   ).bind(workspace.id,lead.id).first();
   if(!latest?.provider_message_id) return;
-  const alreadySent=await env.DB.prepare(
-    "SELECT id FROM messages WHERE workspace_id=? AND lead_id=? AND direction='out' AND created_at>? LIMIT 1"
-  ).bind(workspace.id,lead.id,latest.created_at).first();
-  if(alreadySent) return;
-  const business=await getBusinessInfoForWorkspace(env,workspace.id,workspace.owner_user_id);
-  if(missingBusinessFields(business).length) throw new Error("Business information is incomplete");
-  const currentLead=await env.DB.prepare("SELECT * FROM leads WHERE id=? AND workspace_id=? LIMIT 1").bind(lead.id,workspace.id).first();
-  if(!currentLead) return;
-  if(Number(currentLead.whatsapp_opt_out||0)) return;
-  const text=await generateConversationReply(env,workspace.id,currentLead,business);
-  await sendAutomaticWhatsApp(env,workspace,currentLead,"text",text,null,null);
-  await logActivity(env,workspace.id,currentLead.id,"AI replied to lead on WhatsApp");
+
+  const claimed=await claimAIMessage(env,workspace.id,lead.id,latest.provider_message_id);
+  if(!claimed) return;
+
+  try{
+    const currentLead=await env.DB.prepare("SELECT * FROM leads WHERE id=? AND workspace_id=? LIMIT 1")
+      .bind(lead.id,workspace.id).first();
+    if(!currentLead) { await finishAIMessage(env,latest.provider_message_id,"ignored","Lead not found"); return; }
+    if(Number(currentLead.whatsapp_opt_out||0)) { await finishAIMessage(env,latest.provider_message_id,"ignored","Lead opted out"); return; }
+
+    const latestText=String(latest.body||"").trim();
+    if(hardOptOut(latestText)){
+      await updateDynamic(env,"leads",{
+        whatsapp_opt_out:1,sequence_paused:1,status:"lost",next_follow_up_at:null,updated_at:now()
+      },"id=? AND workspace_id=?",[currentLead.id,workspace.id]);
+      await logActivity(env,workspace.id,currentLead.id,"Lead opted out — AI and recovery stopped");
+      await logAIEvent(env,{workspaceId:workspace.id,leadId:currentLead.id,providerMessageId:latest.provider_message_id,eventType:"conversation",action:"stop",intent:"opt_out",confidence:1,summary:"Explicit opt-out detected",status:"ok"});
+      await finishAIMessage(env,latest.provider_message_id,"completed","");
+      return;
+    }
+
+    if(requestsHuman(latestText)){
+      await updateDynamic(env,"leads",{sequence_paused:1,status:"contacted",next_follow_up_at:null,updated_at:now()},"id=? AND workspace_id=?",[currentLead.id,workspace.id]);
+      await logActivity(env,workspace.id,currentLead.id,"Human handoff requested — AI paused");
+      await logAIEvent(env,{workspaceId:workspace.id,leadId:currentLead.id,providerMessageId:latest.provider_message_id,eventType:"conversation",action:"handoff",intent:"human_request",confidence:1,summary:"Customer explicitly requested a human",status:"ok"});
+      await finishAIMessage(env,latest.provider_message_id,"completed","");
+      return;
+    }
+
+    const business=await getBusinessInfoForWorkspace(env,workspace.id,workspace.owner_user_id);
+    const missing=missingBusinessFields(business);
+    if(missing.length) throw new Error("Business information is incomplete: "+missing.join(", "));
+
+    const alreadySent=await env.DB.prepare(
+      "SELECT id FROM messages WHERE workspace_id=? AND lead_id=? AND direction='out' AND created_at>? LIMIT 1"
+    ).bind(workspace.id,currentLead.id,latest.created_at).first();
+    if(alreadySent){ await finishAIMessage(env,latest.provider_message_id,"ignored","A newer outbound message already exists"); return; }
+
+    const decision=await generateConversationDecision(env,workspace.id,currentLead,business);
+
+    const allowedStatuses=new Set(["new","contacted","interested","hot","won","lost"]);
+    const updates={sequence_paused:1,next_follow_up_at:null,updated_at:now()};
+    if(allowedStatuses.has(decision.lead_status)) updates.status=decision.lead_status;
+    if(decision.extracted_interest&&!String(currentLead.interest||"").trim()) updates.interest=decision.extracted_interest;
+    if(decision.action==="stop"){
+      updates.whatsapp_opt_out=decision.intent==="opt_out"?1:Number(currentLead.whatsapp_opt_out||0);
+      updates.status=decision.intent==="opt_out"||decision.intent==="not_interested"?"lost":(updates.status||"contacted");
+    }
+    await updateDynamic(env,"leads",updates,"id=? AND workspace_id=?",[currentLead.id,workspace.id]);
+
+    await logAIEvent(env,{
+      workspaceId:workspace.id,leadId:currentLead.id,providerMessageId:latest.provider_message_id,
+      eventType:"conversation",action:decision.action,intent:decision.intent,confidence:decision.confidence,
+      summary:decision.summary,replyText:decision.reply,status:"ok"
+    });
+
+    if(decision.action==="reply"){
+      await sendAutomaticWhatsApp(env,workspace,{...currentLead,...updates},"text",decision.reply,null,null);
+      await logActivity(env,workspace.id,currentLead.id,"AI replied on WhatsApp · "+decision.intent);
+    }else if(decision.action==="handoff"){
+      await logActivity(env,workspace.id,currentLead.id,"AI requested human handoff · "+decision.intent);
+    }else if(decision.action==="stop"){
+      await logActivity(env,workspace.id,currentLead.id,"AI stopped the conversation · "+decision.intent);
+    }else{
+      await logActivity(env,workspace.id,currentLead.id,"AI chose not to reply · "+decision.intent);
+    }
+
+    await finishAIMessage(env,latest.provider_message_id,"completed","");
+  }catch(err){
+    const message=String(err?.message||err);
+    await logAIEvent(env,{workspaceId:workspace.id,leadId:lead.id,providerMessageId:latest.provider_message_id,eventType:"conversation",action:"error",status:"error",error:message});
+    await finishAIMessage(env,latest.provider_message_id,"failed",message);
+    await logActivity(env,workspace.id,lead.id,"AI reply failed — needs attention");
+    throw err;
+  }
 }
 
 function templateVariableValues(template, lead) {
