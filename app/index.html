@@ -735,7 +735,14 @@ document.getElementById("fw-submit").onclick=async function(){
 document.getElementById("fw-delete").onclick=async function(){
  const id=document.getElementById("followup-workspace-modal").dataset.id;
  const t=state.templates.find(x=>String(x.id)===String(id));if(!t)return;
- if(!(await ccConfirm("Delete "+(t.name||"this follow-up")+"?","This removes it from ColdCloud"+(t.providerId?" and attempts to remove it from WhatsApp.":"."),"Delete")))return;
+ const usedIn=(state.sequences||[]).filter(s=>(s.steps||[]).some(step=>String(step.templateId)===String(id)));
+ const inUse=usedIn.length>0;
+ const title=inUse?"Template is currently in use":"Delete "+(t.name||"this follow-up")+"?";
+ const text=inUse
+  ? (t.name||"This template")+" is currently used by "+usedIn.length+" active sequence"+(usedIn.length===1?"":"s")+"."+(t.providerId?"\n\nDeleting it will remove it from ColdCloud and attempt to remove it from WhatsApp.":"\n\nDeleting it will remove it from ColdCloud. The affected sequence step will no longer use this template.")
+  : "This removes it from ColdCloud"+(t.providerId?" and attempts to remove it from WhatsApp.":".");
+ const okLabel=inUse?"Deactivate & Delete":"Delete";
+ if(!(await ccConfirm(title,text,okLabel)))return;
  this.disabled=true;
  if(getApiToken()){
   const remote=await apiRequest("/api/templates/"+encodeURIComponent(id),{method:"DELETE"});
