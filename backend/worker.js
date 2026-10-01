@@ -800,7 +800,7 @@ async function handleWhatsAppWebhook(req,env,ctx) {
 export default {
   async scheduled(event, env, ctx) { ctx.waitUntil(runRecoveryScheduler(env)); },
 
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     if (req.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS });
     }
@@ -932,7 +932,7 @@ export default {
         });
       }
 
-      if (path[0] === "whatsapp" && path[1] === "webhook") return await handleWhatsAppWebhook(req, env);
+      if (path[0] === "whatsapp" && path[1] === "webhook") return await handleWhatsAppWebhook(req, env, ctx);
 
       let authUser = await userFrom(req, env);
       if (!authUser && true) {
@@ -966,7 +966,8 @@ export default {
       const businessOpen = path[0] === "business" ||
         path[0] === "me" ||
         path[0] === "auth" ||
-        (path[0] === "whatsapp" && ["config","status","connect"].includes(path[1]));
+        (path[0] === "whatsapp" && ["config","status","connect"].includes(path[1])) ||
+        (path[0] === "ai" && path[1] === "status");
       if (!businessOpen) {
         const businessCheck = await requireBusinessInfo(env, workspace.id, authUser.sub);
         if (businessCheck.missing.length) {
@@ -1256,6 +1257,36 @@ export default {
         await logActivity(env,workspace.id,leadId,"WhatsApp message sent to "+(lead.name||"lead"));
 
         return json({ok:true,messageId:providerMessageId,to,type,text:sentText});
+      }
+
+      if (path[0] === "ai" && path[1] === "status" && req.method === "GET") {
+        const business=await requireBusinessInfo(env,workspace.id,authUser.sub);
+        const whatsapp=await env.DB.prepare(
+          "SELECT id,status,phone_number_id,display_phone_number,verified_name FROM whatsapp_connections WHERE workspace_id=? LIMIT 1"
+        ).bind(workspace.id).first();
+        const recentAI=(await tableExists(env,"ai_events"))
+          ? await env.DB.prepare("SELECT action,intent,status,error_text,created_at FROM ai_events WHERE workspace_id=? ORDER BY created_at DESC LIMIT 5").bind(workspace.id).all()
+          : {results:[]};
+        return json({
+          ok:true,
+          ai:{
+            configured:!!env.OPENAI_API_KEY,
+            model:env.OPENAI_MODEL||"gpt-5.6-luna",
+            businessReady:business.missing.length===0,
+            missingBusinessFields:business.missing,
+            whatsappConnected:!!(whatsapp&&whatsapp.status==="connected"),
+            whatsapp:whatsapp?{
+              status:whatsapp.status,
+              displayPhoneNumber:whatsapp.display_phone_number||"",
+              verifiedName:whatsapp.verified_name||""
+            }:null,
+            conversationBrain:true,
+            structuredDecisions:true,
+            duplicateProtection:await tableExists(env,"ai_message_locks"),
+            eventLogging:await tableExists(env,"ai_events"),
+            recentEvents:recentAI.results||[]
+          }
+        });
       }
 
       if (path[0] === "ai" && path[1] === "followups" && req.method === "POST") {
