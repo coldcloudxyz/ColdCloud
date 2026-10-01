@@ -58,9 +58,8 @@
 
   <div class="label">Automation</div>
   <div class="nav automation-nav">
-    <button data-view="automations">↯ <span>Automation</span></button>
+    <button data-view="sequences">↯ <span>Automation</span></button>
     <div class="nav-child">
-      <button data-view="sequences">≡ <span>Sequences</span></button>
       <button data-view="templates">▤ <span>Templates</span></button>
     </div>
   </div>
@@ -210,54 +209,7 @@
   <div class="detail" id="lead-detail"></div>
 </section>
 
-<section id="automations" class="view">
-  <div class="automation-practical-head">
-    <div>
-      <div class="eyebrow">Automation</div>
-      <h1>Set it once. ColdCloud runs it.</h1>
-      <p class="sub">Connect simple triggers to the recovery actions you want ColdCloud to take automatically.</p>
-    </div>
-    <button class="primary" data-action="new-automation">+ Create automation</button>
-  </div>
 
-  <div class="automation-control-bar">
-    <div class="automation-health"><span class="health-dot"></span><div><strong>Recovery engine active</strong><small>ColdCloud is watching your leads</small></div></div>
-    <div class="automation-shortcuts">
-      <button class="ghost" onclick="showView('sequences')">Sequences <span>→</span></button>
-      <button class="ghost" onclick="showView('templates')">Templates <span>→</span></button>
-    </div>
-  </div>
-
-  <div class="automation-practical-grid">
-    <div class="automation-main-panel">
-      <div class="automation-panel-head">
-        <div><h2>Active rules</h2><p>These rules run automatically across your leads.</p></div>
-        <span class="automation-count" id="automation-rule-count">0 active</span>
-      </div>
-      <div id="automation-list"></div>
-    </div>
-
-    <aside class="automation-side-panel">
-      <div class="automation-side-kicker">DEFAULT RECOVERY</div>
-      <h3 id="automation-default-title">No sequence selected</h3>
-      <p>New leads can automatically enter your default recovery sequence.</p>
-      <button class="ghost full-width" onclick="showView('sequences')">Configure sequence →</button>
-
-      <div class="automation-side-divider"></div>
-
-      <div class="automation-side-kicker">MESSAGE LOGIC</div>
-      <div class="automation-logic-row"><span class="logic-icon">AI</span><div><strong>24h window open</strong><small>Personalized AI message</small></div></div>
-      <div class="automation-logic-row"><span class="logic-icon template">T</span><div><strong>24h window closed</strong><small>Approved WhatsApp template</small></div></div>
-      <div class="automation-logic-row"><span class="logic-icon reply">↗</span><div><strong>Lead replies</strong><small>Pause recovery · AI takes over</small></div></div>
-    </aside>
-  </div>
-
-  <div class="automation-info-strip">
-    <strong>Need something custom?</strong>
-    <span>Create a rule for a specific event, then connect it to a sequence.</span>
-    <button class="ghost" data-action="new-automation">Create rule →</button>
-  </div>
-</section>
 
 <section id="templates" class="view"><div class="hero"><div><h1>Template Library</h1><p class="sub">ColdCloud turns your saved business information into follow-up messages.</p></div><div style="display:flex;gap:8px;align-items:center"><button class="ghost" data-action="new-template">+ Create Follow-up</button><button class="primary" id="generate-followups-btn">Generate Follow-ups</button></div></div><div class="template-hero"><div class="template-hero-copy"><h2>You write the message. ColdCloud handles the WhatsApp rules.</h2><p>When a conversation is active, AI can continue naturally. When the customer is outside the messaging window, ColdCloud automatically uses an approved follow-up message.</p></div><div class="template-flow"><strong>AI conversation</strong> → window closes → <strong>approved follow-up</strong> → customer replies → <strong>AI takes over again</strong></div></div><div class="template-metrics"><div class="template-metric"><div class="metric-label">Ready to use</div><div class="metric-value" id="tpl-approved-count">0</div></div><div class="template-metric"><div class="metric-label">Waiting for WhatsApp</div><div class="metric-value" id="tpl-pending-count">0</div></div><div class="template-metric"><div class="metric-label">Follow-ups configured</div><div class="metric-value" id="tpl-used-count">0</div></div></div><div class="panel" id="template-list"></div></section>
 
