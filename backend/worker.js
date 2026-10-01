@@ -438,6 +438,73 @@ async function generateAutomaticReply(env, workspaceId, lead, businessInfo, step
   return text;
 }
 
+
+async function generateConversationReply(env, workspaceId, lead, businessInfo) {
+  if (!env.OPENAI_API_KEY) throw new Error("AI is not configured");
+  const messages=(await env.DB.prepare(
+    "SELECT direction,body,created_at FROM messages WHERE workspace_id=? AND lead_id=? ORDER BY created_at DESC LIMIT 16"
+  ).bind(workspaceId,lead.id).all()).results||[];
+  const model=env.OPENAI_MODEL||"gpt-5.6-luna";
+  const input=[
+    "Reply to the customer's latest WhatsApp message as the business.",
+    "This is an active customer conversation, not a recovery follow-up.",
+    "Understand the conversation before replying. Answer the customer's latest question directly when possible.",
+    "Use only facts present in the business information, lead context, and conversation. Never invent prices, discounts, results, guarantees, policies, credentials, availability, or other business facts.",
+    "Be concise, natural and human. No markdown. Do not mention AI, prompts, internal rules, or ColdCloud.",
+    "Respect the business tone and rules. If important information is missing, ask a useful short question instead of guessing.",
+    "BUSINESS:",JSON.stringify({
+      name:businessInfo.name||"",type:businessInfo.type||"",description:businessInfo.description||"",
+      offer:businessInfo.offer||"",target:businessInfo.target||"",market:businessInfo.market||"",
+      problem:businessInfo.problem||"",difference:businessInfo.difference||"",goal:businessInfo.goal||"",
+      tone:businessInfo.tone||"",rules:businessInfo.rules||""
+    }),
+    "LEAD:",JSON.stringify({
+      name:lead.name||"",company:lead.company||"",interest:lead.interest||"",
+      businessType:lead.business_type||"",source:lead.source||"",notes:lead.notes||""
+    }),
+    "RECENT CONVERSATION:",JSON.stringify(messages.reverse())
+  ].join("\n");
+  const res=await fetch("https://api.openai.com/v1/responses",{
+    method:"POST",
+    headers:{"content-type":"application/json","authorization":"Bearer "+env.OPENAI_API_KEY},
+    body:JSON.stringify({
+      model,
+      input:[
+        {role:"system",content:"You are the business's WhatsApp conversation assistant. Produce one truthful, helpful reply."},
+        {role:"user",content:input}
+      ],
+      max_output_tokens:500,
+      store:false
+    })
+  });
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok) throw new Error(data?.error?.message||"AI conversation reply failed");
+  const text=String(data?.output_text||(data?.output||[]).flatMap(x=>x.content||[]).find(x=>x.type==="output_text")?.text||"").trim();
+  if(!text) throw new Error("AI returned an empty conversation reply");
+  return text;
+}
+
+async function handleInboundConversationAI(env,workspace,lead) {
+  if(!workspace?.id||!lead?.id) return;
+  await new Promise(resolve=>setTimeout(resolve,1500));
+  const latest=await env.DB.prepare(
+    "SELECT * FROM messages WHERE workspace_id=? AND lead_id=? AND direction='in' ORDER BY created_at DESC LIMIT 1"
+  ).bind(workspace.id,lead.id).first();
+  if(!latest?.provider_message_id) return;
+  const alreadySent=await env.DB.prepare(
+    "SELECT id FROM messages WHERE workspace_id=? AND lead_id=? AND direction='out' AND created_at>? LIMIT 1"
+  ).bind(workspace.id,lead.id,latest.created_at).first();
+  if(alreadySent) return;
+  const business=await getBusinessInfoForWorkspace(env,workspace.id,workspace.owner_user_id);
+  if(missingBusinessFields(business).length) throw new Error("Business information is incomplete");
+  const currentLead=await env.DB.prepare("SELECT * FROM leads WHERE id=? AND workspace_id=? LIMIT 1").bind(lead.id,workspace.id).first();
+  if(!currentLead) return;
+  if(Number(currentLead.whatsapp_opt_out||0)) return;
+  const text=await generateConversationReply(env,workspace.id,currentLead,business);
+  await sendAutomaticWhatsApp(env,workspace,currentLead,"text",text,null,null);
+  await logActivity(env,workspace.id,currentLead.id,"AI replied to lead on WhatsApp");
+}
+
 function templateVariableValues(template, lead) {
   const keys=[];
   String(template?.body_text || "").replace(/\{\{\s*([a-zA-Z0-9_]+)\s*\}\}/g,(_,key)=>{ if(!keys.includes(key)) keys.push(key); return _; });
@@ -549,7 +616,7 @@ async function runRecoveryScheduler(env) {
   }
 }
 
-async function handleWhatsAppWebhook(req,env) {
+async function handleWhatsAppWebhook(req,env,ctx) {
   const url=new URL(req.url);
   if(req.method==="GET"){
     const mode=url.searchParams.get("hub.mode"), token=url.searchParams.get("hub.verify_token"), challenge=url.searchParams.get("hub.challenge");
@@ -565,24 +632,32 @@ async function handleWhatsAppWebhook(req,env) {
       const connection=await env.DB.prepare("SELECT * FROM whatsapp_connections WHERE phone_number_id=? AND status='connected' LIMIT 1").bind(phoneNumberId).first();
       if(!connection) continue;
       for(const message of (value.messages||[])){
+        const providerMessageId=String(message.id||"");
+        if(!providerMessageId) continue;
+        const duplicate=await env.DB.prepare("SELECT id FROM messages WHERE provider_message_id=? LIMIT 1").bind(providerMessageId).first();
+        if(duplicate) continue;
         const from=String(message.from||"").replace(/[^0-9]/g,"");
         if(!from) continue;
-        const phone="+"+from;
         const leads=(await env.DB.prepare("SELECT * FROM leads WHERE workspace_id=?").bind(connection.workspace_id).all()).results||[];
         const lead=leads.find(x=>String(x.phone||"").replace(/[^0-9]/g,"")===from);
         if(!lead) continue;
-        const bodyText=message.text?.body || message.button?.text || message.interactive?.button_reply?.title || message.interactive?.list_reply?.title || "[WhatsApp message]";
+        const bodyText=message.text?.body||message.button?.text||message.interactive?.button_reply?.title||message.interactive?.list_reply?.title||"[WhatsApp message]";
         const createdAt=now();
         if(await tableExists(env,"messages")){
-          try{ await insertDynamic(env,"messages",{id:uid(),workspace_id:connection.workspace_id,user_id:connection.workspace_id,lead_id:lead.id,direction:"in",channel:"WhatsApp",body:String(bodyText),status:"received",provider_message_id:String(message.id||""),created_at:createdAt}); }catch(err){console.warn("Inbound message log skipped:",err?.message||err);}
+          try{
+            await insertDynamic(env,"messages",{id:uid(),workspace_id:connection.workspace_id,user_id:connection.workspace_id,lead_id:lead.id,direction:"in",channel:"WhatsApp",body:String(bodyText),status:"received",provider_message_id:providerMessageId,created_at:createdAt});
+          }catch(err){console.warn("Inbound message log skipped:",err?.message||err);}
         }
         await updateDynamic(env,"leads",{last_inbound_at:createdAt,sequence_paused:1,status:"contacted",next_follow_up_at:null,updated_at:createdAt},"id=? AND workspace_id=?",[lead.id,connection.workspace_id]);
         await logActivity(env,connection.workspace_id,lead.id,"Lead replied on WhatsApp — recovery sequence paused");
+        const workspace=await env.DB.prepare("SELECT * FROM workspaces WHERE id=? LIMIT 1").bind(connection.workspace_id).first();
+        if(workspace && ctx?.waitUntil) ctx.waitUntil(handleInboundConversationAI(env,workspace,lead).catch(err=>console.warn("AI conversation reply failed:",err?.message||err)));
       }
     }
   }
   return json({ok:true});
 }
+
 
 export default {
   async scheduled(event, env, ctx) { ctx.waitUntil(runRecoveryScheduler(env)); },
