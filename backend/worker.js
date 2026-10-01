@@ -369,6 +369,17 @@ async function getBusinessInfoForWorkspace(env, workspaceId, userId) {
     .bind(ownerCol === "workspace_id" ? workspaceId : userId).first() || {};
 }
 
+const REQUIRED_BUSINESS_FIELDS = ["name","type","description","offer","target","market","problem","difference","goal","tone","rules"];
+
+function missingBusinessFields(info) {
+  return REQUIRED_BUSINESS_FIELDS.filter(k => !String(info?.[k] || "").trim());
+}
+
+async function requireBusinessInfo(env, workspaceId, userId) {
+  const info = await getBusinessInfoForWorkspace(env, workspaceId, userId);
+  return { info, missing: missingBusinessFields(info) };
+}
+
 function recoveryWindowOpen(lead) {
   if (!lead?.last_inbound_at) return false;
   const t = Date.parse(lead.last_inbound_at);
@@ -738,6 +749,22 @@ export default {
 
       const workspace = await ensureWorkspace(env, authUser.sub);
       await ensureDefaults(env, workspace.id);
+
+      const businessOpen = path[0] === "business" ||
+        path[0] === "me" ||
+        path[0] === "auth" ||
+        (path[0] === "whatsapp" && ["config","status","connect"].includes(path[1]));
+      if (!businessOpen) {
+        const businessCheck = await requireBusinessInfo(env, workspace.id, authUser.sub);
+        if (businessCheck.missing.length) {
+          return json({
+            ok: false,
+            error: "Business Information is required before using ColdCloud.",
+            code: "BUSINESS_INFO_REQUIRED",
+            missing: businessCheck.missing
+          }, 428);
+        }
+      }
 
       if (path[0] === "whatsapp" && path[1] === "config" && req.method === "GET") {
         return json({
@@ -1162,7 +1189,11 @@ export default {
         if (!env.OPENAI_API_KEY) return json({ok:false,error:"AI is not configured yet. Add OPENAI_API_KEY to the ColdCloud Worker."},503);
         const body=await read(req);
         const lead=body.lead||{};
-        const business=body.businessInfo||{};
+        const businessCheck=await requireBusinessInfo(env,workspace.id,authUser.sub);
+        if(businessCheck.missing.length){
+          return json({ok:false,error:"Business Information is incomplete",code:"BUSINESS_INFO_REQUIRED",missing:businessCheck.missing},428);
+        }
+        const business=businessCheck.info;
         const messages=Array.isArray(body.messages)?body.messages.slice(-12):[];
         const instruction=String(body.instruction||"").trim();
 
