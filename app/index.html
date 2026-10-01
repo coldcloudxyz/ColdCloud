@@ -112,24 +112,38 @@
 </section>
 
 <section id="dashboard" class="view active">
-  <div class="hero"><div><h1>Dashboard</h1><p class="sub">Your lead recovery engine at a glance</p></div><button class="primary" data-action="add-lead">+ Add Lead</button></div>
-  <div class="metrics">
-    <div class="metric"><div class="metric-label">Total Leads</div><div class="metric-value" id="d-leads">0</div></div>
+  <div class="hero dashboard-hero">
+    <div><div class="eyebrow">Overview</div><h1>Dashboard</h1><p class="sub">Your recovery engine at a glance.</p></div>
+    <button class="primary" data-action="add-lead">+ Add Lead</button>
+  </div>
+
+  <div class="dashboard-stats">
+    <div class="metric"><div class="metric-label">Leads</div><div class="metric-value" id="d-leads">0</div></div>
     <div class="metric"><div class="metric-label">Conversations</div><div class="metric-value" id="d-conversations">0</div></div>
-    <div class="metric"><div class="metric-label">Messages Sent</div><div class="metric-value" id="d-messages">0</div></div>
+    <div class="metric"><div class="metric-label">Messages sent</div><div class="metric-value" id="d-messages">0</div></div>
     <div class="metric"><div class="metric-label">Replies</div><div class="metric-value" id="d-replies">0</div></div>
-    <div class="metric"><div class="metric-label">Conversions</div><div class="metric-value" id="d-conversions">0</div></div>
-    <div class="metric"><div class="metric-label">Reply Rate</div><div class="metric-value" id="d-reply-rate">—</div></div>
   </div>
-  <div class="panel" style="margin-bottom:14px"><div class="panel-head"><span class="panel-title">Lead Pipeline</span></div><div class="funnel" id="dashboard-funnel"></div></div>
-  <div class="grid">
-    <div class="panel"><div class="panel-head"><span class="panel-title">Lead Growth</span><div><div class="chart-toolbar"><button class="active" data-range="7">7D</button><button data-range="30">30D</button></div></div></div><div class="chart-wrap" id="lead-growth"></div></div>
-    <div class="panel"><div class="panel-head"><span class="panel-title">Follow-up Today</span></div><div id="followup-today"></div></div>
+
+  <div class="dashboard-grid">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Recovery pipeline</span></div>
+      <div class="dashboard-pipeline" id="dashboard-funnel"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Follow-up today</span></div>
+      <div id="followup-today"></div>
+    </div>
   </div>
-  <div class="panel" style="margin-bottom:14px"><div class="panel-head"><span class="panel-title">Response Performance</span><div class="chart-legend"><span><i class="legend-dot"></i>Messages</span><span><i class="legend-dot green"></i>Replies</span></div></div><div class="chart-wrap" id="response-chart"></div></div>
-  <div class="grid">
-    <div class="panel"><div class="panel-head"><span class="panel-title">Needs Attention</span></div><div class="attention-list" id="needs-attention"></div></div>
-    <div class="panel"><div class="panel-head"><span class="panel-title">Recent Activity</span><span class="muted">Latest 10</span></div><div id="dashboard-activity"></div></div>
+
+  <div class="dashboard-grid">
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Recent activity</span><span class="muted">Latest</span></div>
+      <div id="dashboard-activity"></div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="panel-title">Needs attention</span></div>
+      <div class="attention-list" id="needs-attention"></div>
+    </div>
   </div>
 </section>
 
