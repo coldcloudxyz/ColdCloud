@@ -846,9 +846,7 @@ function renderSequences(){
   const isDefault=state.settings.defaultSequence===s.id;
   const steps=(s.steps||[]);
   const timeline=steps.map((x,i)=>{
-    const template=x.templateId?state.templates.find(t=>String(t.id)===String(x.templateId)):null;
-    const mode=x.templateId?(template?.name||"Approved template"):"AI personalized";
-    return '<div class="recovery-timeline-step"><div class="timeline-node">'+(i+1)+'</div><div class="timeline-copy"><strong>'+(x.day===0?"Immediately":"Day "+x.day)+'</strong><span>'+esc(mode)+'</span></div><span class="timeline-channel">WhatsApp</span></div>';
+    return '<div class="recovery-timeline-step"><div class="timeline-node">'+(i+1)+'</div><div class="timeline-copy"><strong>'+(x.day===0?"Immediately":"Day "+x.day)+'</strong><span>ColdCloud decides the message</span></div></div>';
   }).join("");
   return '<div class="sequence-master-card '+(isDefault?"is-default":"")+'">'+
    '<div class="sequence-master-head"><div><div class="sequence-title-row"><h3>'+esc(s.name)+'</h3>'+(isDefault?'<span class="default-badge">Default</span>':'')+(s.builtIn?'<span class="built-in-badge">ColdCloud</span>':'')+'</div><p>'+esc(s.goal||"Recover leads who stop responding.")+'</p></div><button class="switch '+(s.active?"on":"")+'" data-seq-toggle="'+s.id+'" aria-label="Toggle sequence"><i></i></button></div>'+
