@@ -1637,6 +1637,8 @@ async function generateAIReply(){
  if(!remote?.reply){ccAlert("AI reply failed",apiLastError||"Could not generate a reply.");return}
  document.getElementById("ai-preview").value=remote.reply;
 }
+document.querySelectorAll('[data-action="close-change-password"]').forEach(el=>el.onclick=(e)=>{e.preventDefault();closeChangePassword()});
+document.querySelectorAll('[data-action="close-delete-account"]').forEach(el=>el.onclick=(e)=>{e.preventDefault();closeDeleteAccount()});
 document.getElementById("change-password-submit").onclick=async()=>{
  const err=document.getElementById("change-password-error");
  const current=document.getElementById("change-current-password").value;
