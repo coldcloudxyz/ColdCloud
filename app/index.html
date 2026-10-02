@@ -655,14 +655,12 @@ async function ccGoogleCredential(response){
    ccAuthError("auth-login-error",checkData?.error||"Google sign-in succeeded but the ColdCloud session could not be verified.");
    return;
   }
+  // Google authentication has already completed successfully.
+  // Reload through the normal auth boot path so the workspace opens exactly
+  // like password authentication and avoids leaving the Google button overlay
+  // in its temporary "Connecting to Google…" state.
   ccOpenApp();
-  try{
-   currentViewId="dashboard";
-   renderDashboard();renderLeads();renderSequences();renderAutomations();renderTemplates();renderActivity();renderAnalytics();renderSettings();renderBusinessInfo();
-   await loadBusinessInfo();
-   showView(businessInfoComplete()?"dashboard":"business-info");
-   await Promise.allSettled([loadBackendLeads(),loadBackendSequences(),loadBackendAutomations(),loadBackendTemplates(),loadWhatsAppStatus()]);
-  }catch(err){console.warn("ColdCloud workspace boot after Google sign-in failed:",err)}
+  location.reload();
  }catch(err){
   try{sessionStorage.removeItem(CC_AUTH_KEY);sessionStorage.removeItem("cc_token")}catch{}
   ccAuthError("auth-login-error","Google sign-in succeeded, but ColdCloud could not verify your session. Please try again.");
