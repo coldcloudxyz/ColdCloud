@@ -112,6 +112,36 @@ async function decryptSecret(value, secret) {
   return new TextDecoder().decode(plain);
 }
 
+async function verifyGoogleIdToken(idToken, env) {
+  const parts=String(idToken||"").split(".");
+  if(parts.length!==3) throw new Error("Invalid Google credential");
+  let header,payload;
+  try{header=JSON.parse(unb64(parts[0]));payload=JSON.parse(unb64(parts[1]));}catch{throw new Error("Invalid Google credential");}
+  const issuer=String(payload.iss||"");
+  const audience=String(payload.aud||"");
+  const clientId=String(env.GOOGLE_CLIENT_ID||"");
+  if(!clientId) throw new Error("Google Sign-In is not configured on ColdCloud");
+  if(!["https://accounts.google.com","accounts.google.com"].includes(issuer)) throw new Error("Invalid Google issuer");
+  if(audience!==clientId) throw new Error("Invalid Google audience");
+  if(payload.email_verified!==true) throw new Error("Google email is not verified");
+  if(!payload.sub||!payload.email) throw new Error("Google account information is incomplete");
+  const exp=Number(payload.exp||0), nowSec=Math.floor(Date.now()/1000);
+  if(!exp||exp<nowSec) throw new Error("Google credential has expired");
+  const cfgRes=await fetch("https://accounts.google.com/.well-known/openid-configuration");
+  if(!cfgRes.ok) throw new Error("Could not load Google signing keys");
+  const cfg=await cfgRes.json();
+  const jwksRes=await fetch(String(cfg.jwks_uri||"https://www.googleapis.com/oauth2/v3/certs"));
+  if(!jwksRes.ok) throw new Error("Could not load Google signing keys");
+  const jwks=await jwksRes.json();
+  const jwk=(jwks.keys||[]).find(k=>k.kid===header.kid);
+  if(!jwk) throw new Error("Google signing key not found");
+  const key=await crypto.subtle.importKey("jwk",jwk,{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
+  const signature=Uint8Array.from(unb64(parts[2]),c=>c.charCodeAt(0));
+  const valid=await crypto.subtle.verify("RSASSA-PKCS1-v1_5",key,signature,new TextEncoder().encode(parts[0]+"."+parts[1]));
+  if(!valid) throw new Error("Invalid Google credential signature");
+  return payload;
+}
+
 async function passwordVerify(password, salt, expectedHash) {
   try {
     const saltBytes = Uint8Array.from(atob(salt), c => c.charCodeAt(0));
@@ -812,6 +842,35 @@ export default {
       if (path.join("/") === "health") {
         const dbOk = !!(await env.DB.prepare("SELECT 1 AS ok").first());
         return json({ ok: true, service: "coldcloud-api", database: dbOk });
+      }
+
+      if (path[0] === "auth" && path[1] === "google" && path[2] === "config" && req.method === "GET") {
+        return json({ok:true,clientId:env.GOOGLE_CLIENT_ID||""});
+      }
+
+      if (path[0] === "auth" && path[1] === "google" && req.method === "POST") {
+        const body=await read(req);
+        try{
+          const claims=await verifyGoogleIdToken(body.credential,env);
+          const email=String(claims.email).trim().toLowerCase();
+          const googleSub=String(claims.sub);
+          let user=await env.DB.prepare("SELECT * FROM users WHERE google_sub=? LIMIT 1").bind(googleSub).first();
+          if(!user) user=await env.DB.prepare("SELECT * FROM users WHERE email=? LIMIT 1").bind(email).first();
+          if(user){
+            if(!user.google_sub) await updateDynamic(env,"users",{google_sub:googleSub,avatar_url:String(claims.picture||"")},"id=?",[user.id]);
+          }else{
+            const userId=uid();
+            await insertDynamic(env,"users",{
+              id:userId,email,password_hash:"",password_salt:"",name:String(claims.name||claims.given_name||email.split("@")[0]),
+              google_sub:googleSub,avatar_url:String(claims.picture||""),created_at:now(),updated_at:now()
+            });
+            user=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(userId).first();
+          }
+          const workspace=await ensureWorkspace(env,user.id);
+          await ensureDefaults(env,workspace.id);
+          const token=await jwt({sub:user.id,email:user.email,exp:Date.now()/1000+604800},env.JWT_SECRET);
+          return json({ok:true,token,user:{id:user.id,email:user.email,name:user.name,avatarUrl:user.avatar_url||""},workspace});
+        }catch(err){return json({ok:false,error:err?.message||"Google sign-in failed"},401)}
       }
 
       if (path[0] === "auth" && path[1] === "signup" && req.method === "POST") {
