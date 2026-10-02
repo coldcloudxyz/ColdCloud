@@ -653,41 +653,32 @@ async function ccLoadGoogle(){
 }
 async function ccGoogleCredential(response){
  const token=response?.credential||"";
- if(!token){ccAuthError("auth-login-error","Google sign-in did not return a credential.");return}
- const buttons=[document.getElementById("auth-google-login"),document.getElementById("auth-google-signup")].filter(Boolean);
- buttons.forEach(b=>{b.disabled=true;b.textContent="Connecting to Google…"});
- const data=await ccAuthRequest("/api/auth/google",{credential:token});
- if(!data?.ok){
-  ccAuthError(document.getElementById("auth-signup-panel")?.classList.contains("open")?"auth-signup-error":"auth-login-error",data?.error||"Google sign-in failed.");
-  buttons.forEach(b=>{b.disabled=false;b.innerHTML='<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">Continue with Google'});
+ if(!token){
+  ccAuthError("auth-login-error","Google sign-in did not return a credential.");
   return;
  }
- ccStoreSession(data);
- try{
-  const token=ccToken();
-  const check=await fetch(API_BASE+"/api/auth/me",{headers:{Authorization:"Bearer "+token}});
-  const checkData=await check.json().catch(()=>({}));
-  if(!check.ok||!checkData?.ok){
-   try{sessionStorage.removeItem(CC_AUTH_KEY);sessionStorage.removeItem("cc_token")}catch{}
-try{localStorage.removeItem("cc_token");localStorage.removeItem("coldcloud_session")}catch{}
-   ccAuthError("auth-login-error",checkData?.error||"Google sign-in succeeded but the ColdCloud session could not be verified.");
-   return;
-  }
-  // Google authentication is complete. Open the existing workspace directly;
-  // do not reload because the Google callback already has a verified session.
-  ccOpenApp();
-  currentViewId="dashboard";
-  try{
-   renderDashboard();renderLeads();renderSequences();renderAutomations();renderTemplates();renderActivity();renderAnalytics();renderSettings();renderBusinessInfo();
-   await loadBusinessInfo();
-   showView(businessInfoComplete()?"dashboard":"business-info");
-   await Promise.allSettled([loadBackendLeads(),loadBackendSequences(),loadBackendAutomations(),loadBackendTemplates(),loadWhatsAppStatus()]);
-  }catch(err){console.warn("ColdCloud workspace boot after Google sign-in failed:",err)}
- }catch(err){
-  try{sessionStorage.removeItem(CC_AUTH_KEY);sessionStorage.removeItem("cc_token")}catch{}
-  ccAuthError("auth-login-error","Google sign-in succeeded, but ColdCloud could not verify your session. Please try again.");
+
+ // Keep the Google-rendered button intact. Do not replace its DOM contents
+ // while the GIS iframe is active.
+ const data=await ccAuthRequest("/api/auth/google",{credential:token});
+
+ if(!data?.ok){
+  ccAuthError(
+   document.getElementById("auth-signup-panel")?.classList.contains("open")
+    ?"auth-signup-error"
+    :"auth-login-error",
+   data?.error||"Google sign-in failed."
+  );
+  return;
  }
+
+ // The API has already verified the Google credential and issued the
+ // ColdCloud session. Persist it, then let the normal auth boot path open
+ // the workspace. This avoids a second /me race inside the GIS callback.
+ ccStoreSession(data);
+ location.replace("/app/?google_auth=success");
 }
+
 async function ccGoogleLogin(){
  const ready=await ccLoadGoogle();
  if(!ready){ccAuthError("auth-login-error","Google Sign-In is not configured yet. Add the Google OAuth Client ID to ColdCloud.");return}
