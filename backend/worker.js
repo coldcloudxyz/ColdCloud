@@ -955,6 +955,79 @@ export default {
         });
       }
 
+      if (path[0] === "auth" && path[1] === "change-password" && req.method === "POST") {
+        const authUser = await userFrom(req, env);
+        if (!authUser?.sub) return json({ ok: false, error: "Unauthorized" }, 401);
+
+        const body = await read(req);
+        const currentPassword = String(body.currentPassword || "");
+        const newPassword = String(body.newPassword || "");
+        if (newPassword.length < 8) {
+          return json({ ok: false, error: "New password must be at least 8 characters." }, 400);
+        }
+
+        const user = await env.DB.prepare(
+          "SELECT id,password_hash,password_salt FROM users WHERE id=? LIMIT 1"
+        ).bind(authUser.sub).first();
+        if (!user) return json({ ok: false, error: "User account not found" }, 404);
+        if (!user.password_salt || !(await passwordVerify(currentPassword, user.password_salt, user.password_hash))) {
+          return json({ ok: false, error: "Current password is incorrect." }, 400);
+        }
+
+        const pw = await passwordHash(newPassword);
+        await env.DB.prepare(
+          "UPDATE users SET password_hash=?,password_salt=?,updated_at=? WHERE id=?"
+        ).bind(pw.hash,pw.salt,now(),authUser.sub).run();
+
+        return json({ ok: true, message: "Password changed successfully." });
+      }
+
+      if (path[0] === "auth" && path[1] === "delete-account" && req.method === "DELETE") {
+        const authUser = await userFrom(req, env);
+        if (!authUser?.sub) return json({ ok: false, error: "Unauthorized" }, 401);
+
+        const body = await read(req);
+        const password = String(body.password || "");
+        const user = await env.DB.prepare(
+          "SELECT id,password_hash,password_salt FROM users WHERE id=? LIMIT 1"
+        ).bind(authUser.sub).first();
+        if (!user) return json({ ok: false, error: "User account not found" }, 404);
+        if (!user.password_salt || !(await passwordVerify(password, user.password_salt, user.password_hash))) {
+          return json({ ok: false, error: "Password is incorrect." }, 400);
+        }
+
+        const workspace = await env.DB.prepare(
+          "SELECT id FROM workspaces WHERE owner_user_id=? ORDER BY created_at LIMIT 1"
+        ).bind(authUser.sub).first();
+
+        const workspaceId = workspace?.id || "";
+        const workspaceTables = [
+          "messages","conversations","activities","whatsapp_templates","whatsapp_connections",
+          "leads","sequence_steps","automations","sequences","business_profiles"
+        ];
+
+        for (const table of workspaceTables) {
+          if (!(await tableExists(env, table))) continue;
+          const cols = await tableColumns(env, table);
+          try {
+            if (cols.has("workspace_id") && workspaceId) {
+              await env.DB.prepare("DELETE FROM "+table+" WHERE workspace_id=?").bind(workspaceId).run();
+            } else if (cols.has("user_id")) {
+              await env.DB.prepare("DELETE FROM "+table+" WHERE user_id=?").bind(authUser.sub).run();
+            }
+          } catch (err) {
+            console.warn("Account cleanup skipped for "+table+":",err?.message||err);
+          }
+        }
+
+        if (workspaceId && await tableExists(env,"workspaces")) {
+          await env.DB.prepare("DELETE FROM workspaces WHERE id=?").bind(workspaceId).run();
+        }
+        await env.DB.prepare("DELETE FROM users WHERE id=?").bind(authUser.sub).run();
+
+        return json({ ok: true, deleted: true });
+      }
+
       if (path[0] === "auth" && path[1] === "me" && req.method === "GET") {
         const authUser = await userFrom(req, env);
         if (!authUser?.sub) {
