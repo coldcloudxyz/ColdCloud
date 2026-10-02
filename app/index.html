@@ -589,16 +589,26 @@ function ccOpenApp(){
  const screen=document.getElementById("coldcloud-auth");if(screen)screen.classList.remove("open");
 }
 let ccGoogleClientId="";
+let ccGoogleInitialized=false;
+let ccGoogleInitPromise=null;
 async function ccLoadGoogle(){
- try{
-  const res=await fetch(API_BASE+"/api/auth/google/config");
-  const data=await res.json().catch(()=>({}));
-  ccGoogleClientId=data?.clientId||"";
-  if(!ccGoogleClientId)return false;
-  if(!window.google?.accounts?.id)return false;
-  google.accounts.id.initialize({client_id:ccGoogleClientId,callback:ccGoogleCredential});
-  return true;
- }catch{return false}
+ if(ccGoogleInitialized)return true;
+ if(ccGoogleInitPromise)return ccGoogleInitPromise;
+ ccGoogleInitPromise=(async()=>{
+  try{
+   const res=await fetch(API_BASE+"/api/auth/google/config",{cache:"no-store"});
+   const data=await res.json().catch(()=>({}));
+   ccGoogleClientId=data?.clientId||"";
+   if(!ccGoogleClientId)return false;
+   if(!window.google?.accounts?.id)return false;
+   google.accounts.id.initialize({client_id:ccGoogleClientId,callback:ccGoogleCredential,auto_select:false,cancel_on_tap_outside:true});
+   ccGoogleInitialized=true;
+   return true;
+  }catch{return false}
+ })();
+ const ready=await ccGoogleInitPromise;
+ if(!ready)ccGoogleInitPromise=null;
+ return ready;
 }
 async function ccGoogleCredential(response){
  const token=response?.credential||"";
@@ -1504,6 +1514,7 @@ setInterval(function(){
 // Keep the app interactive even when dynamic UI is rendered later.
 document.addEventListener("DOMContentLoaded",function(){
  ccAuthBoot();
+ ccLoadGoogle().catch(()=>{});
  currentViewId="dashboard";
  try{
   renderDashboard();renderLeads();renderSequences();renderAutomations();renderTemplates();renderActivity();renderAnalytics();renderSettings();renderBusinessInfo();
