@@ -1326,6 +1326,7 @@ async function loadBackendAutomations(){
 }
 function renderAutomations(){
  const box=document.getElementById("automation-list");
+ if(!box)return;
  const defaults=[
   {key:"new-lead",name:"New Lead → Start Sequence",trigger:"New lead added",action:"Start sequence"},
   {key:"reply",name:"Lead Replies → Pause Sequence",trigger:"Lead replies on WhatsApp",action:"Pause sequence"},
