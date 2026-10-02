@@ -955,6 +955,35 @@ export default {
         });
       }
 
+      if (path[0] === "auth" && path[1] === "me" && req.method === "GET") {
+        const authUser = await userFrom(req, env);
+        if (!authUser?.sub) {
+          return json({ ok: false, error: "Unauthorized" }, 401);
+        }
+
+        const user = await env.DB.prepare(
+          "SELECT id,email,name,avatar_url,created_at,updated_at FROM users WHERE id=? LIMIT 1"
+        ).bind(authUser.sub).first();
+
+        if (!user) {
+          return json({ ok: false, error: "User account not found" }, 401);
+        }
+
+        const workspace = await ensureWorkspace(env, user.id);
+        await ensureDefaults(env, workspace.id);
+
+        return json({
+          ok: true,
+          user: {
+            id: user.id,
+            email: user.email,
+            name: user.name || "",
+            avatarUrl: user.avatar_url || ""
+          },
+          workspace
+        });
+      }
+
       if (path[0] === "dev" && path[1] === "session" && req.method === "POST") {
         const devKey = req.headers.get("X-Dev-Key") || "";
         if (!env.DEV_BOOTSTRAP_KEY || devKey !== env.DEV_BOOTSTRAP_KEY) {
