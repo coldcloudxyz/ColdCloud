@@ -713,12 +713,35 @@ async function ccAuthBoot(){
  const screen=document.getElementById("coldcloud-auth");
  const token=ccToken();
  if(!token){ccShowAuth("login");return}
+
+ // A valid session should immediately enter the workspace.
+ // The /me check then confirms the session in the background.
+ ccOpenApp();
+
  try{
   const res=await fetch(API_BASE+"/api/auth/me",{headers:{Authorization:"Bearer "+token}});
   const data=await res.json().catch(()=>({}));
-  if(res.ok&&data?.ok){ccOpenApp();return}
+  if(res.ok&&data?.ok){
+   try{
+    const p=new URLSearchParams(location.search);
+    if(p.get("google_auth")==="success"){
+      history.replaceState({},document.title,"/app/");
+    }
+   }catch{}
+   return;
+  }
  }catch{}
- try{sessionStorage.removeItem(CC_AUTH_KEY);sessionStorage.removeItem("cc_token")}catch{}
+
+ // Only return to auth when the session is actually rejected.
+ try{
+  sessionStorage.removeItem(CC_AUTH_KEY);
+  sessionStorage.removeItem("cc_token");
+  localStorage.removeItem("cc_token");
+  localStorage.removeItem("coldcloud_session");
+ }catch{}
+ if(screen){
+  screen.style.display="";
+ }
  ccShowAuth("login");
 }
 
