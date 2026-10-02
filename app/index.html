@@ -66,7 +66,7 @@
 .auth-title{font-size:30px;line-height:1.08;font-weight:550;letter-spacing:-.055em;margin-bottom:9px}.auth-sub{font-size:14px;line-height:1.65;color:#707782;margin-bottom:24px}.auth-error{display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:9px 12px;font-size:12px;color:#b91c1c;margin-bottom:14px}.auth-error.open{display:block}
 .auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.auth-field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}.auth-field.full{grid-column:1/-1}.auth-field label{font-size:12px;font-weight:600;color:#52525b}.auth-field input{background:#fff;border:1px solid #e2dfd9;border-radius:8px;padding:11px 12px;color:#18181b;font-size:13px;outline:none;width:100%}.auth-field input:focus{border-color:#1d4ed8;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
 .auth-button{width:100%;background:#1d4ed8;color:#fff;font-weight:650;font-size:14px;padding:12px;border-radius:8px;margin-top:4px}.auth-button:disabled{opacity:.55}.auth-alt{text-align:center;margin-top:17px;font-size:13px;color:#52525b}.auth-alt button{color:#1d4ed8;font-weight:650}.auth-google{width:100%;height:44px;border:1px solid #d9d9df;background:#fff;color:#1d1d1f;border-radius:9px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:13px;font-weight:650;transition:.15s}.auth-google:hover{background:#fafafa;border-color:#c8c8cf}.auth-google img{width:18px;height:18px}.auth-divider{display:flex;align-items:center;gap:10px;color:#a1a1aa;font-size:10px;margin:17px 0}.auth-divider:before,.auth-divider:after{content:"";height:1px;background:#e5e2dd;flex:1}.auth-forgot{text-align:right;margin:-4px 0 12px}.auth-forgot button{font-size:11px;color:#1d4ed8;font-weight:600}
-.auth-switch{display:none}.auth-switch.open{display:block}
+.auth-google-render{width:100%;min-height:44px;display:flex;justify-content:center;align-items:center;overflow:hidden;border-radius:10px}.auth-google-render>div{width:100%!important}.auth-switch{display:none}.auth-switch.open{display:block}
 @media(max-width:520px){.auth-card{padding:34px 22px}.auth-grid{grid-template-columns:1fr}.auth-field.full{grid-column:auto}}
 </style></head>
 <body>
@@ -81,7 +81,7 @@
       <div class="auth-field"><label for="auth-login-email">Work email</label><input id="auth-login-email" type="email" placeholder="you@company.com" autocomplete="email"></div>
       <div class="auth-field"><label for="auth-login-password">Password</label><input id="auth-login-password" type="password" placeholder="Enter your password" autocomplete="current-password"></div>
       <div class="auth-forgot"><button type="button" onclick="ccShowAuth('forgot')">Forgot password?</button></div>
-      <button id="auth-google-login" class="auth-google" type="button" onclick="ccGoogleLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">Continue with Google</button><div class="auth-divider">OR</div><button id="auth-login-btn" class="auth-button" type="button" onclick="ccLogin()">Sign in →</button>
+      <div id="auth-google-login" class="auth-google-render" aria-label="Continue with Google"></div><div class="auth-divider">OR</div><button id="auth-login-btn" class="auth-button" type="button" onclick="ccLogin()">Sign in →</button>
       <div class="auth-alt">Don't have an account? <button type="button" onclick="ccShowAuth('signup')">Create one free</button></div>
     </div>
     <div id="auth-signup-panel" class="auth-switch">
@@ -95,7 +95,7 @@
         <div class="auth-field full"><label for="auth-company">Company <span style="color:#a1a1aa;font-weight:400">(optional)</span></label><input id="auth-company" placeholder="Acme Corp" autocomplete="organization"></div>
         <div class="auth-field full"><label for="auth-signup-password">Password</label><input id="auth-signup-password" type="password" placeholder="At least 8 characters" autocomplete="new-password"></div>
       </div>
-      <button id="auth-google-signup" class="auth-google" type="button" onclick="ccGoogleLogin()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="">Sign up with Google</button><div class="auth-divider">OR</div><button id="auth-signup-btn" class="auth-button" type="button" onclick="ccSignup()">Create account →</button>
+      <div id="auth-google-signup" class="auth-google-render" aria-label="Sign up with Google"></div><div class="auth-divider">OR</div><button id="auth-signup-btn" class="auth-button" type="button" onclick="ccSignup()">Create account →</button>
       <div class="auth-alt">Already have an account? <button type="button" onclick="ccShowAuth('login')">Sign in</button></div>
     </div>
     <div id="auth-forgot-panel" class="auth-switch">
@@ -591,8 +591,24 @@ function ccOpenApp(){
 let ccGoogleClientId="";
 let ccGoogleInitialized=false;
 let ccGoogleInitPromise=null;
+function ccRenderGoogleButtons(){
+ if(!ccGoogleInitialized||!window.google?.accounts?.id)return;
+ ["auth-google-login","auth-google-signup"].forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el||el.dataset.rendered==="1")return;
+  google.accounts.id.renderButton(el,{
+   type:"standard",
+   theme:"outline",
+   size:"large",
+   text:"continue_with",
+   shape:"rectangular",
+   width:390
+  });
+  el.dataset.rendered="1";
+ });
+}
 async function ccLoadGoogle(){
- if(ccGoogleInitialized)return true;
+ if(ccGoogleInitialized){ccRenderGoogleButtons();return true}
  if(ccGoogleInitPromise)return ccGoogleInitPromise;
  ccGoogleInitPromise=(async()=>{
   try{
@@ -603,6 +619,7 @@ async function ccLoadGoogle(){
    if(!window.google?.accounts?.id)return false;
    google.accounts.id.initialize({client_id:ccGoogleClientId,callback:ccGoogleCredential,auto_select:false,cancel_on_tap_outside:true});
    ccGoogleInitialized=true;
+   ccRenderGoogleButtons();
    return true;
   }catch{return false}
  })();
@@ -626,7 +643,7 @@ async function ccGoogleCredential(response){
 async function ccGoogleLogin(){
  const ready=await ccLoadGoogle();
  if(!ready){ccAuthError("auth-login-error","Google Sign-In is not configured yet. Add the Google OAuth Client ID to ColdCloud.");return}
- google.accounts.id.prompt();
+ ccRenderGoogleButtons();
 }
 async function ccLogin(){
  const email=document.getElementById("auth-login-email").value.trim().toLowerCase(),password=document.getElementById("auth-login-password").value;
