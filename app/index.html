@@ -55,8 +55,58 @@
 .sequence-builder-note{margin-top:14px;padding:12px;border:1px solid #dbeafe;background:#eff6ff;border-radius:10px;color:#526174;font-size:10px;line-height:1.5}.sequence-builder-note b{color:#1D4ED8}
 .sequence-add-step{margin-top:10px;border:1px dashed #cbd5e1;background:#fff;color:#1D4ED8;border-radius:9px;padding:9px 12px;font-size:10px;font-weight:700;width:100%}
 @media(max-width:700px){.sequence-builder-intro{grid-template-columns:1fr}.sequence-builder-toolbar{align-items:flex-start;gap:10px;flex-direction:column}.timing-step-control{flex-wrap:wrap}}
+</style>
+<style id="coldcloud-auth">
+.auth-screen{position:fixed;inset:0;z-index:1000;display:none;align-items:center;justify-content:center;padding:24px;background:radial-gradient(circle at 12% 18%,rgba(37,99,235,.10),transparent 25rem),radial-gradient(circle at 88% 82%,rgba(34,211,238,.08),transparent 27rem),linear-gradient(135deg,#f5f9ff 0%,#fbfdff 48%,#f3f8ff 100%);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text",Inter,system-ui,sans-serif}
+.auth-screen.open{display:flex}.auth-screen:before{content:"";position:absolute;inset:0;opacity:.28;background-image:linear-gradient(rgba(15,23,42,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(15,23,42,.035) 1px,transparent 1px);background-size:54px 54px;pointer-events:none}
+.auth-card{position:relative;width:min(100%,430px);padding:42px 40px 36px;border:1px solid rgba(255,255,255,.9);border-radius:20px;background:rgba(255,255,255,.90);backdrop-filter:blur(24px) saturate(125%);box-shadow:0 38px 90px rgba(15,23,42,.12),0 10px 28px rgba(37,99,235,.055);animation:ccAuthReveal .45s cubic-bezier(.22,1,.36,1)}
+@keyframes ccAuthReveal{from{opacity:0;transform:translateY(12px) scale(.985)}to{opacity:1;transform:none}}
+.auth-brand{display:flex;align-items:center;gap:10px;margin-bottom:34px}.auth-brand img{width:38px;height:38px;object-fit:contain;border-radius:10px}.auth-brand strong{font-size:18px;font-weight:650;letter-spacing:-.035em}
+.auth-title{font-size:30px;line-height:1.08;font-weight:550;letter-spacing:-.055em;margin-bottom:9px}.auth-sub{font-size:14px;line-height:1.65;color:#707782;margin-bottom:24px}.auth-error{display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:9px 12px;font-size:12px;color:#b91c1c;margin-bottom:14px}.auth-error.open{display:block}
+.auth-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.auth-field{display:flex;flex-direction:column;gap:5px;margin-bottom:12px}.auth-field.full{grid-column:1/-1}.auth-field label{font-size:12px;font-weight:600;color:#52525b}.auth-field input{background:#fff;border:1px solid #e2dfd9;border-radius:8px;padding:11px 12px;color:#18181b;font-size:13px;outline:none;width:100%}.auth-field input:focus{border-color:#1d4ed8;box-shadow:0 0 0 3px rgba(37,99,235,.12)}
+.auth-button{width:100%;background:#1d4ed8;color:#fff;font-weight:650;font-size:14px;padding:12px;border-radius:8px;margin-top:4px}.auth-button:disabled{opacity:.55}.auth-alt{text-align:center;margin-top:17px;font-size:13px;color:#52525b}.auth-alt button{color:#1d4ed8;font-weight:650}.auth-forgot{text-align:right;margin:-4px 0 12px}.auth-forgot button{font-size:11px;color:#1d4ed8;font-weight:600}
+.auth-switch{display:none}.auth-switch.open{display:block}
+@media(max-width:520px){.auth-card{padding:34px 22px}.auth-grid{grid-template-columns:1fr}.auth-field.full{grid-column:auto}}
 </style></head>
 <body>
+
+<div id="coldcloud-auth" class="auth-screen open">
+  <div class="auth-card">
+    <div class="auth-brand"><img src="./assets/coldcloud-logo.png" alt="ColdCloud"><strong>ColdCloud</strong></div>
+    <div id="auth-login-panel" class="auth-switch open">
+      <div class="auth-title">Welcome back</div>
+      <div class="auth-sub">Sign in to continue to your ColdCloud workspace.</div>
+      <div id="auth-login-error" class="auth-error"></div>
+      <div class="auth-field"><label for="auth-login-email">Work email</label><input id="auth-login-email" type="email" placeholder="you@company.com" autocomplete="email"></div>
+      <div class="auth-field"><label for="auth-login-password">Password</label><input id="auth-login-password" type="password" placeholder="Enter your password" autocomplete="current-password"></div>
+      <div class="auth-forgot"><button type="button" onclick="ccShowAuth('forgot')">Forgot password?</button></div>
+      <button id="auth-login-btn" class="auth-button" type="button" onclick="ccLogin()">Sign in →</button>
+      <div class="auth-alt">Don't have an account? <button type="button" onclick="ccShowAuth('signup')">Create one free</button></div>
+    </div>
+    <div id="auth-signup-panel" class="auth-switch">
+      <div class="auth-title">Create your account</div>
+      <div class="auth-sub">Start recovering more leads with ColdCloud.</div>
+      <div id="auth-signup-error" class="auth-error"></div>
+      <div class="auth-grid">
+        <div class="auth-field"><label for="auth-first">First name</label><input id="auth-first" placeholder="Alex" autocomplete="given-name"></div>
+        <div class="auth-field"><label for="auth-last">Last name</label><input id="auth-last" placeholder="Rivera" autocomplete="family-name"></div>
+        <div class="auth-field full"><label for="auth-signup-email">Work email</label><input id="auth-signup-email" type="email" placeholder="you@company.com" autocomplete="email"></div>
+        <div class="auth-field full"><label for="auth-company">Company <span style="color:#a1a1aa;font-weight:400">(optional)</span></label><input id="auth-company" placeholder="Acme Corp" autocomplete="organization"></div>
+        <div class="auth-field full"><label for="auth-signup-password">Password</label><input id="auth-signup-password" type="password" placeholder="At least 8 characters" autocomplete="new-password"></div>
+      </div>
+      <button id="auth-signup-btn" class="auth-button" type="button" onclick="ccSignup()">Create account →</button>
+      <div class="auth-alt">Already have an account? <button type="button" onclick="ccShowAuth('login')">Sign in</button></div>
+    </div>
+    <div id="auth-forgot-panel" class="auth-switch">
+      <div class="auth-title">Reset your password</div>
+      <div class="auth-sub">Enter your email and we'll send you a reset link.</div>
+      <div id="auth-forgot-error" class="auth-error"></div>
+      <div class="auth-field"><label for="auth-forgot-email">Email address</label><input id="auth-forgot-email" type="email" placeholder="you@company.com" autocomplete="email"></div>
+      <button class="auth-button" type="button" onclick="ccForgot()">Send reset link</button>
+      <div class="auth-alt"><button type="button" onclick="ccShowAuth('login')">Back to sign in</button></div>
+    </div>
+  </div>
+</div>
 <div class="app">
 <aside class="sidebar">
   <div class="brand"><img src="./assets/coldcloud-logo.png" alt="ColdCloud"><span class="brand-wordmark">ColdCloud</span></div>
@@ -513,13 +563,75 @@ function assignSequenceToLead(l,sequenceId){
  l.status=sequenceId?"followup":"new";
  l.updatedAt=new Date().toISOString();
 }
+
+const CC_AUTH_KEY="coldcloud_auth";
+function ccSession(){try{return JSON.parse(sessionStorage.getItem(CC_AUTH_KEY)||"null")}catch{return null}}
+function ccToken(){try{return sessionStorage.getItem("cc_token")||""}catch{return ""}}
+function ccShowAuth(mode){
+ document.querySelectorAll(".auth-switch").forEach(x=>x.classList.remove("open"));
+ const panel=document.getElementById("auth-"+mode+"-panel");if(panel)panel.classList.add("open");
+ document.querySelectorAll(".auth-error").forEach(x=>x.classList.remove("open"));
+}
+function ccAuthError(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg||"";e.classList.toggle("open",!!msg)}}
+async function ccAuthRequest(path,body){
+ try{
+  const res=await fetch(API_BASE+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const data=await res.json().catch(()=>({}));
+  if(!res.ok)return {ok:false,error:data?.error||"Authentication failed"};
+  return data;
+ }catch(e){return {ok:false,error:"Cannot reach ColdCloud. Check your connection and try again."}}
+}
+function ccStoreSession(data){
+ try{sessionStorage.setItem(CC_AUTH_KEY,JSON.stringify(data.user||{}));sessionStorage.setItem("cc_token",data.token||"")}catch{}
+}
+function ccOpenApp(){
+ const screen=document.getElementById("coldcloud-auth");if(screen)screen.classList.remove("open");
+}
+async function ccLogin(){
+ const email=document.getElementById("auth-login-email").value.trim().toLowerCase(),password=document.getElementById("auth-login-password").value;
+ if(!email||!password){ccAuthError("auth-login-error","Please enter your email and password.");return}
+ const btn=document.getElementById("auth-login-btn");btn.disabled=true;btn.textContent="Signing in…";
+ const data=await ccAuthRequest("/api/auth/login",{email,password});
+ if(!data?.ok){ccAuthError("auth-login-error",data?.error||"Incorrect email or password");btn.disabled=false;btn.textContent="Sign in →";return}
+ ccStoreSession(data);location.reload();
+}
+async function ccSignup(){
+ const first=document.getElementById("auth-first").value.trim(),last=document.getElementById("auth-last").value.trim(),email=document.getElementById("auth-signup-email").value.trim().toLowerCase(),company=document.getElementById("auth-company").value.trim(),password=document.getElementById("auth-signup-password").value;
+ if(!first||!email||!password){ccAuthError("auth-signup-error","Please complete the required fields.");return}
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ccAuthError("auth-signup-error","Please enter a valid email address.");return}
+ if(password.length<8){ccAuthError("auth-signup-error","Password must be at least 8 characters.");return}
+ const btn=document.getElementById("auth-signup-btn");btn.disabled=true;btn.textContent="Creating account…";
+ const data=await ccAuthRequest("/api/auth/signup",{email,password,name:first+(last?" "+last:""),company});
+ if(!data?.ok){ccAuthError("auth-signup-error",data?.error||"Could not create account");btn.disabled=false;btn.textContent="Create account →";return}
+ ccStoreSession(data);location.reload();
+}
+async function ccForgot(){
+ const email=document.getElementById("auth-forgot-email").value.trim().toLowerCase();
+ if(!email){ccAuthError("auth-forgot-error","Please enter your email address.");return}
+ const data=await ccAuthRequest("/api/auth/forgot-password",{email});
+ if(!data?.ok){ccAuthError("auth-forgot-error",data?.error||"Could not send reset link");return}
+ ccAuthError("auth-forgot-error","If an account exists, a reset link has been sent.");
+}
+async function ccAuthBoot(){
+ const screen=document.getElementById("coldcloud-auth");
+ const token=ccToken();
+ if(!token){ccShowAuth("login");return}
+ try{
+  const res=await fetch(API_BASE+"/api/auth/me",{headers:{Authorization:"Bearer "+token}});
+  const data=await res.json().catch(()=>({}));
+  if(res.ok&&data?.ok){ccOpenApp();return}
+ }catch{}
+ try{sessionStorage.removeItem(CC_AUTH_KEY);sessionStorage.removeItem("cc_token")}catch{}
+ ccShowAuth("login");
+}
+
 const API_BASE="https://api.usecoldcloud.xyz";
 function getApiToken(){
  try{
-  const raw=localStorage.getItem("coldcloud_session")||localStorage.getItem("session");
+  const raw=sessionStorage.getItem("coldcloud_auth")||localStorage.getItem("coldcloud_session")||localStorage.getItem("session");
   if(!raw)return "";
   const parsed=JSON.parse(raw);
-  return parsed?.token||parsed?.session?.token||"";
+  return parsed?.token||parsed?.session?.token||sessionStorage.getItem("cc_token")||"";
  }catch{return ""}
 }
 let apiLastError="";
@@ -1360,6 +1472,7 @@ setInterval(function(){
 
 // Keep the app interactive even when dynamic UI is rendered later.
 document.addEventListener("DOMContentLoaded",function(){
+ ccAuthBoot();
  currentViewId="dashboard";
  try{
   renderDashboard();renderLeads();renderSequences();renderAutomations();renderTemplates();renderActivity();renderAnalytics();renderSettings();renderBusinessInfo();
@@ -1413,7 +1526,7 @@ document.addEventListener("click",async e=>{
  if(action==="export-pdf"){window.print();return}
  if(action==="edit-profile"){editProfile();return}if(action==="change-password"){ccAlert("Password change will be connected to authentication.");return}
  if(action==="reset-password"){ccAlert("Password reset will be connected to authentication.");return}
- if(action==="logout"){if(await ccConfirm("Confirm","Log out of ColdCloud?","Continue")){localStorage.removeItem("coldcloud_session");localStorage.removeItem("session");location.reload()}return}
+ if(action==="logout"){if(await ccConfirm("Confirm","Log out of ColdCloud?","Continue")){sessionStorage.removeItem("coldcloud_auth");sessionStorage.removeItem("cc_token");localStorage.removeItem("coldcloud_session");localStorage.removeItem("session");location.reload()}return}
  if(action==="delete-account"){if(await ccConfirm("Confirm","Delete your ColdCloud account? This action is permanent.","Continue")){ccAlert("Account deletion will be connected to the backend.");}return}
  
  if(action==="connect-first"){showView("integrations");return}
