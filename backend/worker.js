@@ -127,10 +127,16 @@ async function verifyGoogleIdToken(idToken, env) {
   if(!payload.sub||!payload.email) throw new Error("Google account information is incomplete");
   const exp=Number(payload.exp||0), nowSec=Math.floor(Date.now()/1000);
   if(!exp||exp<nowSec) throw new Error("Google credential has expired");
-  const cfgRes=await fetch("https://accounts.google.com/.well-known/openid-configuration");
-  if(!cfgRes.ok) throw new Error("Could not load Google signing keys");
-  const cfg=await cfgRes.json();
-  const jwksRes=await fetch(String(cfg.jwks_uri||"https://www.googleapis.com/oauth2/v3/certs"));
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),8000);
+  let jwksRes;
+  try{
+    jwksRes=await fetch("https://www.googleapis.com/oauth2/v3/certs",{signal:controller.signal});
+  }catch(err){
+    throw new Error(err?.name==="AbortError"?"Google signing-key request timed out":"Could not reach Google signing keys");
+  }finally{
+    clearTimeout(timer);
+  }
   if(!jwksRes.ok) throw new Error("Could not load Google signing keys");
   const jwks=await jwksRes.json();
   const jwk=(jwks.keys||[]).find(k=>k.kid===header.kid);
