@@ -714,25 +714,29 @@ async function ccAuthBoot(){
  const token=ccToken();
  if(!token){ccShowAuth("login");return}
 
- // A valid session should immediately enter the workspace.
- // The /me check then confirms the session in the background.
+ // Google has already returned a verified ColdCloud JWT.
+ // Do not gate the workspace on a second /me request during boot.
+ // The API can validate the same token on each request.
  ccOpenApp();
 
  try{
-  const res=await fetch(API_BASE+"/api/auth/me",{headers:{Authorization:"Bearer "+token}});
-  const data=await res.json().catch(()=>({}));
-  if(res.ok&&data?.ok){
-   try{
-    const p=new URLSearchParams(location.search);
-    if(p.get("google_auth")==="success"){
-      history.replaceState({},document.title,"/app/");
-    }
-   }catch{}
-   return;
+  const p=new URLSearchParams(location.search);
+  if(p.get("google_auth")==="success"){
+    history.replaceState({},document.title,"/app/");
   }
  }catch{}
 
- // Only return to auth when the session is actually rejected.
+ // Validate in the background. Only clear the session if the server
+ // explicitly rejects it; a temporary network error must not cause a
+ // login loop.
+ try{
+  const res=await fetch(API_BASE+"/api/auth/me",{headers:{Authorization:"Bearer "+token}});
+  if(res.ok)return;
+  if(res.status!==401 && res.status!==403)return;
+ }catch{
+  return;
+ }
+
  try{
   sessionStorage.removeItem(CC_AUTH_KEY);
   sessionStorage.removeItem("cc_token");
