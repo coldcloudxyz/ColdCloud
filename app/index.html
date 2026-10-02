@@ -767,11 +767,10 @@ async function ccAuthBoot(){
 const API_BASE="https://api.usecoldcloud.xyz";
 function getApiToken(){
  try{
-  const raw=sessionStorage.getItem("coldcloud_auth")||localStorage.getItem("coldcloud_session")||localStorage.getItem("session");
-  if(!raw)return "";
-  const parsed=JSON.parse(raw);
-  return parsed?.token||parsed?.session?.token||sessionStorage.getItem("cc_token")||"";
- }catch{return ""}
+  return sessionStorage.getItem("cc_token")||localStorage.getItem("cc_token")||"";
+ }catch{
+  try{return localStorage.getItem("cc_token")||""}catch{return ""}
+ }
 }
 let apiLastError="";
 async function apiRequest(path,options={}){
