@@ -90,16 +90,20 @@ html.cc-has-session .app{display:flex!important}
       <div class="auth-title">Welcome back</div>
       <div class="auth-sub">Sign in to continue to your ColdCloud workspace.</div>
       <div id="auth-login-error" class="auth-error"></div>
+      <div class="auth-google-render" id="auth-google-login" aria-label="Continue with Google"></div>
+      <div class="auth-divider">OR</div>
       <div class="auth-field"><label for="auth-login-email">Work email</label><input id="auth-login-email" type="email" placeholder="you@company.com" autocomplete="email"></div>
       <div class="auth-field"><label for="auth-login-password">Password</label><input id="auth-login-password" type="password" placeholder="Enter your password" autocomplete="current-password"></div>
       <div class="auth-forgot"><button type="button" onclick="ccShowAuth('forgot')">Forgot password?</button></div>
-      <div id="auth-google-login" class="auth-google-render" aria-label="Continue with Google"></div><div class="auth-divider">OR</div><button id="auth-login-btn" class="auth-button" type="button" onclick="ccLogin()">Sign in →</button>
+      <button id="auth-login-btn" class="auth-button" type="button" onclick="ccLogin()">Sign in →</button>
       <div class="auth-alt">Don't have an account? <button type="button" onclick="ccShowAuth('signup')">Create one free</button></div>
     </div>
     <div id="auth-signup-panel" class="auth-switch">
       <div class="auth-title">Create your account</div>
       <div class="auth-sub">Start recovering more leads with ColdCloud.</div>
       <div id="auth-signup-error" class="auth-error"></div>
+      <div class="auth-google-render" id="auth-google-signup" aria-label="Sign up with Google"></div>
+      <div class="auth-divider">OR</div>
       <div class="auth-grid">
         <div class="auth-field"><label for="auth-first">First name</label><input id="auth-first" placeholder="Alex" autocomplete="given-name"></div>
         <div class="auth-field"><label for="auth-last">Last name</label><input id="auth-last" placeholder="Rivera" autocomplete="family-name"></div>
@@ -107,7 +111,7 @@ html.cc-has-session .app{display:flex!important}
         <div class="auth-field full"><label for="auth-company">Company <span style="color:#a1a1aa;font-weight:400">(optional)</span></label><input id="auth-company" placeholder="Acme Corp" autocomplete="organization"></div>
         <div class="auth-field full"><label for="auth-signup-password">Password</label><input id="auth-signup-password" type="password" placeholder="At least 8 characters" autocomplete="new-password"></div>
       </div>
-      <div id="auth-google-signup" class="auth-google-render" aria-label="Sign up with Google"></div><div class="auth-divider">OR</div><button id="auth-signup-btn" class="auth-button" type="button" onclick="ccSignup()">Create account →</button>
+      <button id="auth-signup-btn" class="auth-button" type="button" onclick="ccSignup()">Create account →</button>
       <div class="auth-alt">Already have an account? <button type="button" onclick="ccShowAuth('login')">Sign in</button></div>
     </div>
     <div id="auth-forgot-panel" class="auth-switch">
