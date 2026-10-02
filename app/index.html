@@ -1582,6 +1582,12 @@ function renderSettings(){
   if(name)name.textContent=user?.name||"—";
   if(email)email.textContent=user?.email||"—";
  }catch{}
+ const changeBtn=document.querySelector('[data-action="change-password"]');
+ const deleteBtn=document.querySelector('[data-action="delete-account"]');
+ const logoutBtn=document.querySelector('[data-action="logout"]');
+ if(changeBtn)changeBtn.onclick=(e)=>{e.preventDefault();openChangePassword()};
+ if(deleteBtn)deleteBtn.onclick=(e)=>{e.preventDefault();openDeleteAccount()};
+ if(logoutBtn)logoutBtn.onclick=(e)=>{e.preventDefault();logoutColdCloud()};
 }
 function openChangePassword(){
  document.getElementById("change-password-modal")?.classList.add("open");
@@ -1596,6 +1602,14 @@ function openDeleteAccount(){
  document.getElementById("delete-account-modal")?.classList.add("open");
  document.getElementById("delete-account-error")?.classList.remove("open");
  setTimeout(()=>document.getElementById("delete-account-password")?.focus(),0);
+}
+function logoutColdCloud(){
+ ccConfirm("Confirm","Log out of ColdCloud?","Continue").then(ok=>{
+  if(!ok)return;
+  sessionStorage.removeItem("coldcloud_auth");sessionStorage.removeItem("cc_token");
+  localStorage.removeItem("cc_token");localStorage.removeItem("coldcloud_session");localStorage.removeItem("session");
+  location.reload();
+ });
 }
 function closeDeleteAccount(){
  document.getElementById("delete-account-modal")?.classList.remove("open");
