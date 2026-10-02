@@ -576,11 +576,18 @@ function ccShowAuth(mode){
 function ccAuthError(id,msg){const e=document.getElementById(id);if(e){e.textContent=msg||"";e.classList.toggle("open",!!msg)}}
 async function ccAuthRequest(path,body){
  try{
-  const res=await fetch(API_BASE+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),15000);
+  let res;
+  try{
+   res=await fetch(API_BASE+path,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),signal:controller.signal});
+  }finally{clearTimeout(timer)}
   const data=await res.json().catch(()=>({}));
   if(!res.ok)return {ok:false,error:data?.error||"Authentication failed"};
   return data;
- }catch(e){return {ok:false,error:"Cannot reach ColdCloud. Check your connection and try again."}}
+ }catch(e){
+  return {ok:false,error:e?.name==="AbortError"?"ColdCloud authentication timed out. Please try again.":"Cannot reach ColdCloud. Check your connection and try again."}
+ }
 }
 function ccStoreSession(data){
  try{sessionStorage.setItem(CC_AUTH_KEY,JSON.stringify(data.user||{}));sessionStorage.setItem("cc_token",data.token||"")}catch{}
