@@ -567,7 +567,12 @@ function assignSequenceToLead(l,sequenceId){
 
 const CC_AUTH_KEY="coldcloud_auth";
 function ccSession(){try{return JSON.parse(sessionStorage.getItem(CC_AUTH_KEY)||"null")}catch{return null}}
-function ccToken(){try{return sessionStorage.getItem("cc_token")||""}catch{return ""}}
+function ccToken(){
+ try{return sessionStorage.getItem("cc_token")||localStorage.getItem("cc_token")||""}
+ catch{
+  try{return localStorage.getItem("cc_token")||""}catch{return ""}
+ }
+}
 function ccShowAuth(mode){
  document.querySelectorAll(".auth-switch").forEach(x=>x.classList.remove("open"));
  const panel=document.getElementById("auth-"+mode+"-panel");if(panel)panel.classList.add("open");
@@ -590,10 +595,22 @@ async function ccAuthRequest(path,body){
  }
 }
 function ccStoreSession(data){
- try{sessionStorage.setItem(CC_AUTH_KEY,JSON.stringify(data.user||{}));sessionStorage.setItem("cc_token",data.token||"")}catch{}
+ const user=JSON.stringify(data.user||{}),token=data.token||"";
+ try{
+  sessionStorage.setItem(CC_AUTH_KEY,user);
+  sessionStorage.setItem("cc_token",token);
+ }catch{}
+ try{
+  localStorage.setItem("cc_token",token);
+  localStorage.setItem("coldcloud_session",user);
+ }catch{}
 }
 function ccOpenApp(){
- const screen=document.getElementById("coldcloud-auth");if(screen)screen.classList.remove("open");
+ const screen=document.getElementById("coldcloud-auth");
+ if(screen){
+  screen.classList.remove("open");
+  screen.style.display="none";
+ }
 }
 let ccGoogleClientId="";
 let ccGoogleInitialized=false;
@@ -652,15 +669,20 @@ async function ccGoogleCredential(response){
   const checkData=await check.json().catch(()=>({}));
   if(!check.ok||!checkData?.ok){
    try{sessionStorage.removeItem(CC_AUTH_KEY);sessionStorage.removeItem("cc_token")}catch{}
+try{localStorage.removeItem("cc_token");localStorage.removeItem("coldcloud_session")}catch{}
    ccAuthError("auth-login-error",checkData?.error||"Google sign-in succeeded but the ColdCloud session could not be verified.");
    return;
   }
-  // Google authentication has already completed successfully.
-  // Reload through the normal auth boot path so the workspace opens exactly
-  // like password authentication and avoids leaving the Google button overlay
-  // in its temporary "Connecting to Google…" state.
+  // Google authentication is complete. Open the existing workspace directly;
+  // do not reload because the Google callback already has a verified session.
   ccOpenApp();
-  location.reload();
+  currentViewId="dashboard";
+  try{
+   renderDashboard();renderLeads();renderSequences();renderAutomations();renderTemplates();renderActivity();renderAnalytics();renderSettings();renderBusinessInfo();
+   await loadBusinessInfo();
+   showView(businessInfoComplete()?"dashboard":"business-info");
+   await Promise.allSettled([loadBackendLeads(),loadBackendSequences(),loadBackendAutomations(),loadBackendTemplates(),loadWhatsAppStatus()]);
+  }catch(err){console.warn("ColdCloud workspace boot after Google sign-in failed:",err)}
  }catch(err){
   try{sessionStorage.removeItem(CC_AUTH_KEY);sessionStorage.removeItem("cc_token")}catch{}
   ccAuthError("auth-login-error","Google sign-in succeeded, but ColdCloud could not verify your session. Please try again.");
@@ -1611,7 +1633,7 @@ document.addEventListener("click",async e=>{
  if(action==="export-pdf"){window.print();return}
  if(action==="edit-profile"){editProfile();return}if(action==="change-password"){ccAlert("Password change will be connected to authentication.");return}
  if(action==="reset-password"){ccAlert("Password reset will be connected to authentication.");return}
- if(action==="logout"){if(await ccConfirm("Confirm","Log out of ColdCloud?","Continue")){sessionStorage.removeItem("coldcloud_auth");sessionStorage.removeItem("cc_token");localStorage.removeItem("coldcloud_session");localStorage.removeItem("session");location.reload()}return}
+ if(action==="logout"){if(await ccConfirm("Confirm","Log out of ColdCloud?","Continue")){sessionStorage.removeItem("coldcloud_auth");sessionStorage.removeItem("cc_token");localStorage.removeItem("cc_token");localStorage.removeItem("coldcloud_session");localStorage.removeItem("session");location.reload()}return}
  if(action==="delete-account"){if(await ccConfirm("Confirm","Delete your ColdCloud account? This action is permanent.","Continue")){ccAlert("Account deletion will be connected to the backend.");}return}
  
  if(action==="connect-first"){showView("integrations");return}
