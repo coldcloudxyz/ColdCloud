@@ -71,7 +71,7 @@
 </style></head>
 <body>
 
-<div id="coldcloud-auth" class="auth-screen open">
+<div id="coldcloud-auth" class="auth-screen">
   <div class="auth-card">
     <div class="auth-brand"><img src="./assets/coldcloud-logo.png" alt="ColdCloud"><strong>ColdCloud</strong></div>
     <div id="auth-login-panel" class="auth-switch open">
@@ -574,6 +574,11 @@ function ccToken(){
  }
 }
 function ccShowAuth(mode){
+ const screen=document.getElementById("coldcloud-auth");
+ if(screen){
+  screen.classList.add("open");
+  screen.style.display="";
+ }
  document.querySelectorAll(".auth-switch").forEach(x=>x.classList.remove("open"));
  const panel=document.getElementById("auth-"+mode+"-panel");if(panel)panel.classList.add("open");
  document.querySelectorAll(".auth-error").forEach(x=>x.classList.remove("open"));
