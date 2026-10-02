@@ -384,8 +384,9 @@ html.cc-has-session .app{display:flex!important}
   <div class="hero"><div><h1>Settings</h1><p class="sub">Manage your account settings.</p></div></div>
   <div class="panel settings-section">
     <h3>Account</h3>
-    <div class="setting-row"><div><div class="setting-label">Change password</div><div class="setting-help">Update your account password.</div></div><button class="ghost" data-action="change-password">Change</button></div>
-    <div class="setting-row"><div><div class="setting-label">Reset password</div><div class="setting-help">Reset your password if you cannot access your current one.</div></div><button class="ghost" data-action="reset-password">Reset</button></div>
+    <div class="setting-row"><div><div class="setting-label">Name</div><div class="setting-help" id="settings-account-name">—</div></div></div>
+    <div class="setting-row"><div><div class="setting-label">Login email</div><div class="setting-help" id="settings-account-email">—</div></div></div>
+    <div class="setting-row"><div><div class="setting-label">Password</div><div class="setting-help">••••••••••  Your password is securely stored and can never be viewed.</div><div class="setting-help" style="margin-top:4px">Account credentials are the email and password you used when creating this account.</div></div><button class="ghost" data-action="change-password">Change</button></div>
     <div class="setting-row"><div><div class="setting-label">Log out</div><div class="setting-help">Sign out of this ColdCloud workspace.</div></div><button class="ghost" data-action="logout">Log out</button></div>
   </div>
   <div class="panel settings-section danger">
@@ -396,6 +397,25 @@ html.cc-has-session .app{display:flex!important}
 
 </div></main></div>
 
+<div class="modal-bg" id="change-password-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head"><div><h2>Change password</h2><div class="muted">Enter your current password and choose a new one.</div></div><button class="close" data-action="close-change-password">×</button></div>
+    <div class="form-error" id="change-password-error"></div>
+    <div class="field"><label>Current password</label><input id="change-current-password" type="password" autocomplete="current-password"></div>
+    <div class="field"><label>New password</label><input id="change-new-password" type="password" autocomplete="new-password" placeholder="At least 8 characters"></div>
+    <div class="field"><label>Confirm new password</label><input id="change-confirm-password" type="password" autocomplete="new-password"></div>
+    <div class="modal-actions"><button class="ghost" data-action="close-change-password">Cancel</button><button class="primary" id="change-password-submit">Update password</button></div>
+  </div>
+</div>
+<div class="modal-bg" id="delete-account-modal">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-head"><div><h2>Delete account</h2><div class="muted">This permanently deletes your ColdCloud account and workspace data.</div></div><button class="close" data-action="close-delete-account">×</button></div>
+    <div class="form-error" id="delete-account-error"></div>
+    <div class="notice" style="margin-bottom:14px">This cannot be undone. Enter your current password to confirm account deletion.</div>
+    <div class="field"><label>Current password</label><input id="delete-account-password" type="password" autocomplete="current-password"></div>
+    <div class="modal-actions"><button class="ghost" data-action="close-delete-account">Cancel</button><button class="ghost danger-link" id="delete-account-submit">Delete account</button></div>
+  </div>
+</div>
 <div class="wa-meta-modal" id="wa-meta-modal">
   <div class="wa-meta-card">
     <div class="wa-meta-head">
@@ -1553,7 +1573,35 @@ document.getElementById("business-info-form").onsubmit=async e=>{
  log("Business information updated");
  setTimeout(()=>showView("dashboard"),250);
 };
-function renderSettings(){ return; }
+function renderSettings(){
+ try{
+  const raw=sessionStorage.getItem("coldcloud_auth")||localStorage.getItem("coldcloud_session")||"{}";
+  const user=JSON.parse(raw);
+  const name=document.getElementById("settings-account-name");
+  const email=document.getElementById("settings-account-email");
+  if(name)name.textContent=user?.name||"—";
+  if(email)email.textContent=user?.email||"—";
+ }catch{}
+}
+function openChangePassword(){
+ document.getElementById("change-password-modal")?.classList.add("open");
+ document.getElementById("change-password-error")?.classList.remove("open");
+ setTimeout(()=>document.getElementById("change-current-password")?.focus(),0);
+}
+function closeChangePassword(){
+ document.getElementById("change-password-modal")?.classList.remove("open");
+ ["change-current-password","change-new-password","change-confirm-password"].forEach(id=>{const x=document.getElementById(id);if(x)x.value=""});
+}
+function openDeleteAccount(){
+ document.getElementById("delete-account-modal")?.classList.add("open");
+ document.getElementById("delete-account-error")?.classList.remove("open");
+ setTimeout(()=>document.getElementById("delete-account-password")?.focus(),0);
+}
+function closeDeleteAccount(){
+ document.getElementById("delete-account-modal")?.classList.remove("open");
+ const x=document.getElementById("delete-account-password");if(x)x.value="";
+}
+
 function openAI(){
  const l=state.leads.find(x=>x.id===currentLeadId);
  if(!l)return;
@@ -1575,6 +1623,33 @@ async function generateAIReply(){
  if(!remote?.reply){ccAlert("AI reply failed",apiLastError||"Could not generate a reply.");return}
  document.getElementById("ai-preview").value=remote.reply;
 }
+document.getElementById("change-password-submit").onclick=async()=>{
+ const err=document.getElementById("change-password-error");
+ const current=document.getElementById("change-current-password").value;
+ const next=document.getElementById("change-new-password").value;
+ const confirm=document.getElementById("change-confirm-password").value;
+ if(!current||!next||!confirm){err.textContent="Please fill all password fields.";err.classList.add("open");return}
+ if(next.length<8){err.textContent="New password must be at least 8 characters.";err.classList.add("open");return}
+ if(next!==confirm){err.textContent="New passwords do not match.";err.classList.add("open");return}
+ const btn=document.getElementById("change-password-submit");btn.disabled=true;btn.textContent="Updating…";
+ const remote=await apiRequest("/api/auth/change-password",{method:"POST",body:JSON.stringify({currentPassword:current,newPassword:next})});
+ btn.disabled=false;btn.textContent="Update password";
+ if(!remote){err.textContent=apiLastError||"Could not change password.";err.classList.add("open");return}
+ closeChangePassword();await ccAlert("Password changed","Your password has been updated successfully.");
+};
+document.getElementById("delete-account-submit").onclick=async()=>{
+ const err=document.getElementById("delete-account-error");
+ const password=document.getElementById("delete-account-password").value;
+ if(!password){err.textContent="Enter your current password to continue.";err.classList.add("open");return}
+ const btn=document.getElementById("delete-account-submit");btn.disabled=true;btn.textContent="Deleting…";
+ const remote=await apiRequest("/api/auth/delete-account",{method:"DELETE",body:JSON.stringify({password})});
+ btn.disabled=false;btn.textContent="Delete account";
+ if(!remote){err.textContent=apiLastError||"Could not delete your account.";err.classList.add("open");return}
+ closeDeleteAccount();
+ sessionStorage.removeItem("coldcloud_auth");sessionStorage.removeItem("cc_token");
+ localStorage.removeItem("cc_token");localStorage.removeItem("coldcloud_session");localStorage.removeItem("session");
+ location.reload();
+};
 document.getElementById("ai-generate").onclick=generateAIReply;
 document.getElementById("ai-send").onclick=async function(){
  const l=state.leads.find(x=>x.id===currentLeadId);
@@ -1668,10 +1743,12 @@ document.addEventListener("click",async e=>{
  if(action==="toggle-export"){document.getElementById("export-menu").classList.toggle("open");return}
  if(action==="export-csv"){exportCSV();return}
  if(action==="export-pdf"){window.print();return}
- if(action==="edit-profile"){editProfile();return}if(action==="change-password"){ccAlert("Password change will be connected to authentication.");return}
- if(action==="reset-password"){ccAlert("Password reset will be connected to authentication.");return}
+ if(action==="edit-profile"){editProfile();return}
+ if(action==="change-password"){openChangePassword();return}
+ if(action==="close-change-password"){closeChangePassword();return}
+ if(action==="close-delete-account"){closeDeleteAccount();return}
  if(action==="logout"){if(await ccConfirm("Confirm","Log out of ColdCloud?","Continue")){sessionStorage.removeItem("coldcloud_auth");sessionStorage.removeItem("cc_token");localStorage.removeItem("cc_token");localStorage.removeItem("coldcloud_session");localStorage.removeItem("session");location.reload()}return}
- if(action==="delete-account"){if(await ccConfirm("Confirm","Delete your ColdCloud account? This action is permanent.","Continue")){ccAlert("Account deletion will be connected to the backend.");}return}
+ if(action==="delete-account"){openDeleteAccount();return}
  
  if(action==="connect-first"){showView("integrations");return}
 });
