@@ -1811,6 +1811,10 @@ async function loadWhatsAppStatus(){
 async function getWhatsAppConfig(){
  if(waConfig)return waConfig;
  const remote=await apiRequest("/api/whatsapp/config");
+ if((remote?.hasMetaAccessToken && remote?.testWabaId && remote?.testPhoneNumberId) || (remote?.appId && remote?.configId)){
+   waConfig=remote;
+   return remote;
+ }
  if(!remote?.appId||!remote?.configId){
    throw new Error("WhatsApp is not configured yet. Add META_APP_ID and META_CONFIG_ID to the Worker.");
  }
@@ -1903,6 +1907,13 @@ window.addEventListener("message",function(event){
 async function launchWhatsAppSignup(){
  try{
    const config=await getWhatsAppConfig();
+   // In DEV_MODE, use the server-side Meta test token instead of opening Meta signup.
+   // The token stays in the Cloudflare Secret and never reaches the browser.
+   if(config.hasMetaAccessToken && config.testWabaId && config.testPhoneNumberId){
+     waSessionData={waba_id:config.testWabaId,phone_number_id:config.testPhoneNumberId,event:"TEST"};
+     await finishWhatsAppSignup("", "");
+     return;
+   }
    await initFacebookSDK(config.appId,config.graphVersion);
    if(!window.FB)throw new Error("Meta login SDK is unavailable.");
    // FB.login must be called from the user click path so the popup is not blocked.
