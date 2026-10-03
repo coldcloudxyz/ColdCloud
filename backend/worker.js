@@ -1130,7 +1130,10 @@ export default {
           appId: env.META_APP_ID || "",
           configId: env.META_CONFIG_ID || "",
           graphVersion: env.META_GRAPH_VERSION || "v25.0",
-          hasMetaAccessToken: !!String(env.META_ACCESS_TOKEN || "").trim()
+          hasMetaAccessToken: !!String(env.META_ACCESS_TOKEN || "").trim(),
+          // Development-only Meta test assets. These are IDs, not secrets.
+          testWabaId: env.DEV_MODE === "true" ? "1095462349574167" : "",
+          testPhoneNumberId: env.DEV_MODE === "true" ? "1345653985287953" : ""
         });
       }
 
