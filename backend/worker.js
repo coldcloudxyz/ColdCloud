@@ -1129,7 +1129,8 @@ export default {
           ok: true,
           appId: env.META_APP_ID || "",
           configId: env.META_CONFIG_ID || "",
-          graphVersion: env.META_GRAPH_VERSION || "v25.0"
+          graphVersion: env.META_GRAPH_VERSION || "v25.0",
+          hasMetaAccessToken: !!String(env.META_ACCESS_TOKEN || "").trim()
         });
       }
 
