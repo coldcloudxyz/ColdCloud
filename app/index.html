@@ -1909,7 +1909,7 @@ async function launchWhatsAppSignup(){
    const config=await getWhatsAppConfig();
    // In DEV_MODE, use the server-side Meta test token instead of opening Meta signup.
    // The token stays in the Cloudflare Secret and never reaches the browser.
-   if(config.hasMetaAccessToken && config.testWabaId && config.testPhoneNumberId){
+   if(config.testWabaId && config.testPhoneNumberId){
      waSessionData={waba_id:config.testWabaId,phone_number_id:config.testPhoneNumberId,event:"TEST"};
      await finishWhatsAppSignup("", "");
      return;
