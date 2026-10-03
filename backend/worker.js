@@ -1151,23 +1151,27 @@ export default {
         if (!(await tableExists(env, "whatsapp_connections"))) {
           return json({ ok: false, error: "WhatsApp connection storage is not installed yet" }, 500);
         }
-        if (!env.META_APP_ID || !env.META_APP_SECRET) {
-          return json({ ok: false, error: "Meta WhatsApp integration is not configured on ColdCloud" }, 503);
-        }
 
         const body = await read(req);
         const code = String(body.code || "").trim();
         const suppliedToken = String(body.accessToken || "").trim();
+        const configuredToken = String(env.META_ACCESS_TOKEN || "").trim();
         const wabaId = String(body.wabaId || "").trim();
         const phoneNumberId = String(body.phoneNumberId || "").trim();
         const businessId = String(body.businessId || "").trim();
 
-        if (!code && !suppliedToken) {
+        // Normal Embedded Signup uses an authorization code. For Meta's
+        // test-account flow, allow a server-side access token stored as a
+        // Cloudflare Secret so the token never reaches the browser.
+        if (code && (!env.META_APP_ID || !env.META_APP_SECRET)) {
+          return json({ ok: false, error: "Meta WhatsApp OAuth is not configured on ColdCloud" }, 503);
+        }
+        if (!code && !suppliedToken && !configuredToken) {
           return json({ ok: false, error: "WhatsApp signup did not return an authorization code or access token" }, 400);
         }
 
         const graphVersion = env.META_GRAPH_VERSION || "v25.0";
-        let accessToken = suppliedToken;
+        let accessToken = suppliedToken || configuredToken;
 
         if (code) {
           const params = new URLSearchParams({
