@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>About — ColdCloud</title>
+<style>
+:root{
+  --cc-primary:#1D4ED8;
+  --cc-dark:#18181B;
+  --cc-neutral:#71717A;
+  --cc-border:#E4E4E7;
+  --cc-page:#F4F4F5;
+  --cc-white:#FFFFFF;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  color:var(--cc-dark);
+  background:var(--cc-page);
+}
+a{color:inherit}
+.cc-doc-nav{
+  height:68px;
+  border-bottom:1px solid var(--cc-border);
+  background:rgba(255,255,255,.96);
+  display:flex;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:20;
+  backdrop-filter:blur(14px);
+}
+.cc-doc-nav-inner{
+  width:min(1120px,calc(100% - 40px));
+  margin:auto;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+}
+.cc-doc-logo{
+  display:flex;
+  align-items:center;
+  text-decoration:none;
+}
+.cc-doc-logo img{
+  display:block;
+  width:105px;
+  height:auto;
+}
+.cc-doc-back{
+  color:var(--cc-neutral);
+  text-decoration:none;
+  font-size:11px;
+}
+.cc-doc-back:hover{color:var(--cc-primary)}
+.cc-doc-wrap{
+  width:min(980px,calc(100% - 32px));
+  margin:42px auto 70px;
+}
+.cc-doc-card{
+  background:var(--cc-white);
+  border:1px solid #E1E1E4;
+  border-radius:16px;
+  box-shadow:0 10px 35px rgba(24,24,27,.045);
+  padding:54px 58px 68px;
+}
+.cc-doc-head{
+  padding-bottom:37px;
+  border-bottom:1px solid #E8E8EB;
+}
+.cc-doc-eyebrow{
+  display:block;
+  color:var(--cc-primary);
+  font-size:8px;
+  font-weight:750;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  margin-bottom:15px;
+}
+.cc-doc-head h1{
+  margin:0;
+  color:#18181B;
+  font-size:clamp(34px,4vw,48px);
+  line-height:1;
+  letter-spacing:-.055em;
+  font-weight:650;
+}
+.cc-doc-meta{
+  margin-top:13px;
+  color:#8B8B93;
+  font-size:11px;
+}
+.cc-doc-intro{
+  margin:34px 0 0;
+  color:#5F6470;
+  font-size:14px;
+  line-height:1.8;
+  max-width:760px;
+}
+.cc-doc-content{padding-top:10px}
+.cc-doc-section{
+  padding:28px 0 31px;
+  border-bottom:1px solid #EEEEF0;
+}
+.cc-doc-section:last-child{border-bottom:0;padding-bottom:0}
+.cc-doc-section h2{
+  margin:0 0 13px;
+  color:#202127;
+  font-size:20px;
+  line-height:1.3;
+  letter-spacing:-.035em;
+  font-weight:650;
+}
+.cc-doc-section p,
+.cc-doc-section li{
+  margin:0;
+  color:#626672;
+  font-size:13.5px;
+  line-height:1.85;
+}
+.cc-doc-section p+p{margin-top:14px}
+.cc-doc-section ul{
+  margin:8px 0 0;
+  padding-left:22px;
+}
+.cc-doc-section li{margin:6px 0;padding-left:3px}
+.cc-doc-section a{color:var(--cc-primary);text-decoration:none}
+.cc-doc-section a:hover{text-decoration:underline}
+.cc-doc-section strong{color:#4A4D56;font-weight:650}
+.cc-doc-note{
+  margin-top:32px;
+  padding:15px 17px;
+  background:#F7F9FC;
+  border:1px solid #E2E7EF;
+  border-radius:9px;
+  color:#707785;
+  font-size:10.5px;
+  line-height:1.7;
+}
+.cc-doc-footer{
+  width:min(980px,calc(100% - 32px));
+  margin:0 auto 32px;
+  display:flex;
+  justify-content:space-between;
+  color:#9A9AA2;
+  font-size:9px;
+}
+.cc-doc-footer a{text-decoration:none;color:#777781}
+@media(max-width:700px){
+  .cc-doc-nav{height:62px}
+  .cc-doc-nav-inner{width:calc(100% - 28px)}
+  .cc-doc-logo img{width:91px}
+  .cc-doc-back{font-size:10px}
+  .cc-doc-wrap{width:calc(100% - 20px);margin:20px auto 40px}
+  .cc-doc-card{border-radius:12px;padding:35px 25px 45px}
+  .cc-doc-head{padding-bottom:27px}
+  .cc-doc-head h1{font-size:36px}
+  .cc-doc-intro{font-size:13px;margin-top:25px}
+  .cc-doc-section{padding:25px 0 27px}
+  .cc-doc-section h2{font-size:18px}
+  .cc-doc-section p,.cc-doc-section li{font-size:12.5px}
+  .cc-doc-footer{width:calc(100% - 28px);display:block;line-height:1.8}
+}
+
+/* V53 — reference typography */
+html,body{
+  font-family:"Poppins",Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+.cc-doc-nav{height:70px}
+.cc-doc-nav-inner{width:min(1160px,calc(100% - 44px))}
+.cc-doc-logo img{width:112px}
+.cc-doc-back{font-size:11px;font-weight:500;letter-spacing:-.01em}
+.cc-doc-wrap{width:min(980px,calc(100% - 34px));margin:34px auto 68px}
+.cc-doc-card{border-radius:15px;padding:55px 62px 70px;box-shadow:0 12px 38px rgba(24,24,27,.045)}
+.cc-doc-head h1{
+  font-family:"Poppins",sans-serif;
+  font-size:clamp(38px,4.2vw,52px);
+  line-height:1.04;
+  letter-spacing:-.055em;
+  font-weight:600;
+}
+.cc-doc-eyebrow{font-weight:600;letter-spacing:.13em}
+.cc-doc-meta{font-size:12px;color:#858591}
+.cc-doc-intro{font-size:14px;line-height:1.82;color:#616671;max-width:780px}
+.cc-doc-section{padding:29px 0 32px}
+.cc-doc-section h2{
+  font-family:"Poppins",sans-serif;
+  font-size:20px;
+  line-height:1.35;
+  font-weight:600;
+  letter-spacing:-.035em;
+}
+.cc-doc-section p,.cc-doc-section li{
+  font-family:"Poppins",sans-serif;
+  font-size:13px;
+  line-height:1.9;
+  color:#626672;
+  font-weight:400;
+}
+.cc-doc-section strong{font-weight:600}
+.cc-doc-note{font-family:"Poppins",sans-serif}
+
+</style>
+<link rel="icon" type="image/png" href="coldcloud-logo-64.png">
+<meta name="theme-color" content="#1D4ED8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<nav class="cc-doc-nav">
+  <div class="cc-doc-nav-inner">
+    <a class="cc-doc-logo" href="index.html"><img src="coldcloud-wordmark-blue.png" alt="ColdCloud"></a>
+    <a class="cc-doc-back" href="index.html">← Back to ColdCloud</a>
+  </div>
+</nav>
+
+<main class="cc-doc-wrap">
+  <article class="cc-doc-card">
+    <header class="cc-doc-head">
+      <span class="cc-doc-eyebrow">COMPANY</span>
+      <h1>ColdCloud.</h1>
+      <div class="cc-doc-meta">Effective 7 October 2026</div>
+      <p class="cc-doc-intro">A SaaS product focused on recovering forgotten leads and giving sales teams back the conversations that still have potential.</p>
+    </header>
+    <div class="cc-doc-content">
+      <section class="cc-doc-section"><h2>What we build</h2><p>ColdCloud is built around lead recovery, follow-up automation, conversation understanding, and timely human handoff.</p></section><section class="cc-doc-section"><h2>Business information</h2><p>ColdCloud operates as a sole proprietorship. ColdCloud operates as a sole proprietorship.</p></section>
+      
+    </div>
+  </article>
+</main>
+
+<footer class="cc-doc-footer">
+  <span>© 2026 ColdCloud</span>
+  <a href="mailto:coldcloudxyz@gmail.com">coldcloudxyz@gmail.com</a>
+</footer>
+</body>
+</html>
