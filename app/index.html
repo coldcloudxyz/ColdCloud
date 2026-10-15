@@ -1711,6 +1711,7 @@ setInterval(function(){
 // Keep the app interactive even when dynamic UI is rendered later.
 document.addEventListener("DOMContentLoaded",function(){
  ccAuthBoot();
+ try{const mode=new URLSearchParams(location.search).get("mode");if(mode==="signup"&&!ccToken()){setTimeout(()=>{if(!ccToken())ccShowAuth("signup")},0)}}catch{}
  ccLoadGoogle().catch(()=>{});
  currentViewId="dashboard";
  try{
