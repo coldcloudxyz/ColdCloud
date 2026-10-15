@@ -14,3 +14,7 @@ META_GRAPH_VERSION = "v25.0"
 
 [triggers]
 crons = ["*/5 * * * *"]
+
+[[routes]]
+pattern = "api.usecoldcloud.xyz"
+custom_domain = true
