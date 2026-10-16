@@ -148,6 +148,34 @@ async function verifyGoogleIdToken(idToken, env) {
   return payload;
 }
 
+
+async function sha256Hex(value) {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(value)));
+  return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, "0")).join("");
+}
+
+async function sendVerificationEmail(env, email, name, token) {
+  if (!env.RESEND_API_KEY) throw new Error("Email verification is not configured (missing RESEND_API_KEY)");
+  const from = String(env.RESEND_FROM_EMAIL || "").trim();
+  if (!from) throw new Error("Email verification is not configured (missing RESEND_FROM_EMAIL)");
+  const link = "https://usecoldcloud.xyz/app/index.html?mode=verify&token=" + encodeURIComponent(token);
+  const safeName = String(name || "there").replace(/[<>]/g, "");
+  const response = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + env.RESEND_API_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      from,
+      to: [email],
+      subject: "Verify your ColdCloud email",
+      html: '<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#18181b"><h2 style="color:#1D4ED8">Verify your ColdCloud email</h2><p>Hi ' + safeName + ',</p><p>Confirm your email address to finish creating your ColdCloud account.</p><p><a href="' + link + '" style="display:inline-block;background:#1D4ED8;color:white;padding:12px 18px;border-radius:8px;text-decoration:none">Verify email</a></p><p>This link expires in 30 minutes. If you did not create a ColdCloud account, you can ignore this email.</p></div>',
+      text: "Hi " + safeName + ", verify your ColdCloud email using this link: " + link + "\nThis link expires in 30 minutes."
+    })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || data?.error || "Could not send verification email");
+  return data;
+}
+
 async function passwordVerify(password, salt, expectedHash) {
   try {
     const saltBytes = Uint8Array.from(atob(salt), c => c.charCodeAt(0));
@@ -850,6 +878,35 @@ export default {
         return json({ ok: true, service: "coldcloud-api", database: dbOk });
       }
 
+      if (path[0] === "auth" && path[1] === "verify-email" && req.method === "POST") {
+        const body = await read(req);
+        const token = String(body.token || "").trim();
+        if (!token || token.length > 200) return json({ ok: false, error: "Verification link is invalid or expired." }, 400);
+        const tokenHash = await sha256Hex(token);
+        const user = await env.DB.prepare("SELECT id,email,name,email_verified,verification_expires_at FROM users WHERE verification_token_hash=? LIMIT 1").bind(tokenHash).first();
+        if (!user) return json({ ok: false, error: "Verification link is invalid or has already been used." }, 400);
+        if (!user.verification_expires_at || Date.parse(user.verification_expires_at) < Date.now()) {
+          return json({ ok: false, error: "This verification link has expired. Request a new one." }, 410);
+        }
+        await env.DB.prepare("UPDATE users SET email_verified=1,verification_token_hash=NULL,verification_expires_at=NULL,updated_at=? WHERE id=?").bind(now(), user.id).run();
+        return json({ ok: true, verified: true, message: "Email verified. You can now sign in." });
+      }
+
+      if (path[0] === "auth" && path[1] === "resend-verification" && req.method === "POST") {
+        const body = await read(req);
+        const email = String(body.email || "").trim().toLowerCase();
+        if (!email || email.length > 254) return json({ ok: false, error: "Enter a valid email address." }, 400);
+        const user = await env.DB.prepare("SELECT id,email,name,email_verified FROM users WHERE email=? LIMIT 1").bind(email).first();
+        if (!user || Number(user.email_verified || 0) === 1) return json({ ok: true, message: "If this account needs verification, an email will be sent." });
+        const verificationToken = b64u(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+        const verificationHash = await sha256Hex(verificationToken);
+        const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+        await env.DB.prepare("UPDATE users SET verification_token_hash=?,verification_expires_at=?,updated_at=? WHERE id=?").bind(verificationHash,expiresAt,now(),user.id).run();
+        try { await sendVerificationEmail(env,user.email,user.name,verificationToken); }
+        catch (err) { console.error("Verification resend failed:",err?.message||err); return json({ok:false,error:"Could not send verification email. Please try again later."},502); }
+        return json({ok:true,message:"If this account needs verification, an email will be sent."});
+      }
+
       if (path[0] === "auth" && path[1] === "google" && path[2] === "config" && req.method === "GET") {
         return json({ok:true,clientId:env.GOOGLE_CLIENT_ID||""});
       }
@@ -871,6 +928,11 @@ export default {
               google_sub:googleSub,avatar_url:String(claims.picture||""),created_at:now(),updated_at:now()
             });
             user=await env.DB.prepare("SELECT * FROM users WHERE id=?").bind(userId).first();
+          }
+          // Google has already cryptographically verified the provider's email_verified claim.
+          if (Number(user.email_verified || 0) !== 1) {
+            await env.DB.prepare("UPDATE users SET email_verified=1, verification_token_hash=NULL, verification_expires_at=NULL, updated_at=? WHERE id=?").bind(now(), user.id).run();
+            user.email_verified = 1;
           }
           const workspace=await ensureWorkspace(env,user.id);
           await ensureDefaults(env,workspace.id);
@@ -897,31 +959,23 @@ export default {
 
         const pw = await passwordHash(password);
         const userId = uid();
+        const verificationToken = b64u(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(32))));
+        const verificationHash = await sha256Hex(verificationToken);
+        const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
 
         await insertDynamic(env, "users", {
-          id: userId,
-          email,
-          password_hash: pw.hash,
-          password_salt: pw.salt,
-          name,
-          created_at: now(),
-          updated_at: now()
+          id: userId, email, password_hash: pw.hash, password_salt: pw.salt, name,
+          email_verified: 0, verification_token_hash: verificationHash, verification_expires_at: expiresAt,
+          created_at: now(), updated_at: now()
         });
 
-        const workspace = await ensureWorkspace(env, userId);
-        await ensureDefaults(env, workspace.id);
-
-        const token = await jwt(
-          { sub: userId, email, exp: Date.now() / 1000 + 604800 },
-          env.JWT_SECRET
-        );
-
-        return json({
-          ok: true,
-          token,
-          user: { id: userId, email, name },
-          workspace
-        }, 201);
+        try {
+          await sendVerificationEmail(env, email, name, verificationToken);
+        } catch (err) {
+          console.error("Verification email send failed:", err?.message || err);
+          return json({ ok: false, error: "Your account was created, but we couldn't send the verification email. Check the Resend sender configuration, then use Resend verification email." }, 502);
+        }
+        return json({ ok: true, requiresVerification: true, email, message: "Check your inbox for a verification link. It expires in 30 minutes." }, 201);
       }
 
       if (path[0] === "auth" && path[1] === "login" && req.method === "POST") {
@@ -938,6 +992,9 @@ export default {
           : false;
 
         if (!valid) return json({ ok: false, error: "Incorrect email or password" }, 401);
+        if (Number(user.email_verified || 0) !== 1) {
+          return json({ ok: false, requiresVerification: true, email: user.email, error: "Please verify your email before signing in." }, 403);
+        }
 
         const workspace = await ensureWorkspace(env, user.id);
         await ensureDefaults(env, workspace.id);
