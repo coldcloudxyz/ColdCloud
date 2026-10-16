@@ -741,8 +741,26 @@ async function ccSignup(){
  const btn=document.getElementById("auth-signup-btn");btn.disabled=true;btn.textContent="Creating account…";
  const data=await ccAuthRequest("/api/auth/signup",{email,password,name:first+(last?" "+last:""),company});
  if(!data?.ok){ccAuthError("auth-signup-error",data?.error||"Could not create account");btn.disabled=false;btn.textContent="Create account →";return}
+ if(data.requiresVerification){
+   const box=document.getElementById("auth-signup-error");
+   box.style.display="block";
+   box.style.color="#166534";
+   box.innerHTML="Account created. Check <b>"+email.replace(/[&<>"]/g,"")+"</b> for your verification link. <button type=\"button\" onclick=\"ccResendVerification()\" style=\"display:inline;color:#1D4ED8;text-decoration:underline;font-weight:700\">Resend email</button>";
+   btn.disabled=false;btn.textContent="Create account →";
+   return;
+ }
  ccStoreSession(data);location.reload();
 }
+async function ccResendVerification(){
+ const signupEmail=document.getElementById("auth-signup-email")?.value.trim().toLowerCase();
+ const loginEmail=document.getElementById("auth-login-email")?.value.trim().toLowerCase();
+ const email=signupEmail||loginEmail;
+ if(!email){ccAuthError("auth-signup-error","Enter your email address first.");return}
+ const data=await ccAuthRequest("/api/auth/resend-verification",{email});
+ const box=document.getElementById("auth-signup-error");
+ if(box){box.style.display="block";box.textContent=data?.ok?"If your account needs verification, a new email has been sent.":(data?.error||"Could not resend verification email.");}
+}
+
 async function ccForgot(){
  const email=document.getElementById("auth-forgot-email").value.trim().toLowerCase();
  if(!email){ccAuthError("auth-forgot-error","Please enter your email address.");return}
@@ -752,6 +770,17 @@ async function ccForgot(){
 }
 async function ccAuthBoot(){
  const screen=document.getElementById("coldcloud-auth");
+ const params=new URLSearchParams(location.search);
+ if(params.get("mode")==="verify"){
+   const verifyToken=params.get("token")||"";
+   const loginPanel=document.getElementById("auth-login-error");
+   ccShowAuth("login");
+   if(loginPanel){loginPanel.style.display="block";loginPanel.textContent="Verifying your email…";}
+   const result=await ccAuthRequest("/api/auth/verify-email",{token:verifyToken});
+   if(loginPanel){loginPanel.style.display="block";loginPanel.textContent=result?.ok?"Email verified successfully. You can now sign in.":(result?.error||"Could not verify email.");}
+   history.replaceState({},document.title,location.pathname);
+   return;
+ }
  const token=ccToken();
  if(!token){ccShowAuth("login");return}
 
