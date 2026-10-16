@@ -11,7 +11,7 @@ database_id = "ffe99d15-778b-48f0-8aba-37eb223dbfad"
 FRONTEND_ORIGIN = "https://usecoldcloud.xyz"
 DEV_MODE = "true"
 META_GRAPH_VERSION = "v25.0"
-
+RESEND_FROM_EMAIL = "verify@usecoldcloud.xyz"
 [triggers]
 crons = ["*/5 * * * *"]
 
