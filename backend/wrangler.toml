@@ -18,3 +18,5 @@ crons = ["*/5 * * * *"]
 [[routes]]
 pattern = "api.usecoldcloud.xyz"
 custom_domain = true
+
+[previews]
